@@ -1,0 +1,60 @@
+<view class="page" wx:if="{{poi}}">
+  <!-- 头图：有实景图就用图，没有再退化成分类色 + emoji -->
+  <view class="hero {{photo ? 'has-photo' : ''}}" style="{{heroStyle}}">
+    <image wx:if="{{photo}}" class="hero-photo" src="/assets/{{photo}}" mode="aspectFill"></image>
+    <view wx:if="{{photo}}" class="hero-mask"></view>
+    <view class="hero-inner">
+      <view class="hero-emoji">{{poi.emoji}}</view>
+      <view class="hero-title">{{poi.name}}</view>
+      <view class="hero-summary">{{poi.summary}}</view>
+      <view class="hero-tags">
+        <text class="hero-tag">{{category.name}}</text>
+        <text wx:for="{{tags}}" wx:key="*this" class="hero-tag">{{item}}</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="body">
+    <view class="facts">
+      <view class="fact">
+        <text class="fact-label">建议游玩</text>
+        <text class="fact-value">{{poi.durationMin}} 分钟</text>
+      </view>
+      <view class="fact">
+        <text class="fact-label">开放时间</text>
+        <text class="fact-value">{{poi.openTime}}</text>
+      </view>
+      <view class="fact">
+        <text class="fact-label">地址</text>
+        <text class="fact-value">{{poi.address}}</text>
+      </view>
+      <view class="fact" bindtap="onRelocate">
+        <text class="fact-label">距你</text>
+        <text class="fact-value {{canCheckin ? 'near' : ''}}">{{locationText}}</text>
+        <text class="fact-refresh">刷新</text>
+      </view>
+    </view>
+
+    <view class="checkin-banner" wx:if="{{checked}}">
+      <text class="checkin-ok">✅ 已打卡</text>
+      <text class="checkin-time">{{checkinText}}</text>
+    </view>
+
+    <view class="section">
+      <view class="section-title">关于这里</view>
+      <view class="section-text">{{poi.intro}}</view>
+    </view>
+
+    <view class="tip" wx:if="{{poi.note}}">
+      <view class="tip-title">备注或补充</view>
+      <view class="tip-text">{{poi.note}}</view>
+    </view>
+  </view>
+
+  <view class="footer">
+    <view class="btn ghost" bindtap="onNavigate">导航</view>
+    <view class="btn primary {{checked ? 'checked' : ''}}" bindtap="onCheckin">
+      {{checked ? '已打卡 ✓' : '到这里打卡'}}
+    </view>
+  </view>
+</view>

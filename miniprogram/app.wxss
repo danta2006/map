@@ -1,0 +1,47 @@
+/* 全局样式与设计变量：所有页面只用这里的变量，不散落写颜色 */
+page {
+  --red: #b0392e;
+  --teal: #2c6b63;
+  --orange: #d98324;
+  --blue: #3a6ea5;
+  --brown: #8b6f47;
+  --paper: #fbf8f2;
+  --card: #fffdf8;
+  --ink: #1d1c19;
+  --ink-2: #3f3c35;
+  --muted: #736d61;
+  --line: #e5ddce;
+
+  background: var(--paper);
+  color: var(--ink);
+  font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: 28rpx;
+  line-height: 1.7;
+}
+
+view,
+text,
+scroll-view {
+  box-sizing: border-box;
+}
+
+.btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 84rpx;
+  border-radius: 42rpx;
+  font-size: 28rpx;
+  font-weight: 600;
+}
+
+.btn.primary {
+  background: var(--red);
+  color: #fff;
+}
+
+.btn.ghost {
+  background: #fff;
+  color: var(--ink);
+  border: 1rpx solid var(--line);
+}

@@ -1,0 +1,22 @@
+# 依赖
+node_modules/
+miniprogram_npm/
+
+# 开发者工具个人配置
+project.private.config.json
+
+# 参考项目（含自己的 .git，不纳入版本管理）
+_ref/
+
+# 临时文件
+_tmp/
+*.log
+
+# 系统文件
+.DS_Store
+Thumbs.db
+
+dist/
+assets/photos-src/*
+!assets/photos-src/.gitkeep
+!assets/photos-src/README.txt

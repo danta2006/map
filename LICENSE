@@ -1,0 +1,31 @@
+MIT License
+
+Copyright (c) 2026 长株潭「标点地图」项目组
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+---
+
+注意（非代码部分不适用 MIT）：
+
+1. `miniprogram/assets/photos/` 里的点位实景图来自高德地图「地点搜索」接口，
+   仅用于课程 / 大创项目的学习演示，**不得商用**。如需公开使用或商业用途，
+   请替换为自己拍摄或已获授权的图片（把图放进 `assets/photos-src/`，
+   跑 `python scripts/make_photo_markers.py` 重新生成即可）。
+2. 点位文案、路线设计为本项目组整理，引用请注明来源。

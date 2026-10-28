@@ -1,0 +1,219 @@
+.page {
+  min-height: 100vh;
+  padding-bottom: 240rpx;
+  background: var(--paper);
+}
+
+/* ---------- 头图 ---------- */
+.hero {
+  position: relative;
+  padding: 48rpx 40rpx 40rpx;
+  color: #fff;
+  border-radius: 0 0 40rpx 40rpx;
+}
+
+.hero-emoji {
+  font-size: 88rpx;
+  line-height: 1;
+  opacity: 0.95;
+}
+
+.hero-title {
+  margin-top: 18rpx;
+  font-size: 48rpx;
+  font-weight: 700;
+  letter-spacing: 2rpx;
+}
+
+.hero-summary {
+  margin-top: 8rpx;
+  font-size: 24rpx;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.86);
+}
+
+.hero-tags {
+  margin-top: 18rpx;
+}
+
+.hero-tag {
+  display: inline-block;
+  margin-right: 12rpx;
+  padding: 4rpx 18rpx;
+  border-radius: 999rpx;
+  background: rgba(255, 255, 255, 0.22);
+  font-size: 22rpx;
+}
+
+/* ---------- 正文 ---------- */
+.body {
+  padding: 32rpx 32rpx 0;
+}
+
+.facts {
+  background: var(--card);
+  border: 1rpx solid var(--line);
+  border-radius: 20rpx;
+  padding: 8rpx 28rpx;
+}
+
+.fact {
+  display: flex;
+  padding: 18rpx 0;
+  border-bottom: 1rpx solid var(--line);
+}
+
+.fact:last-child {
+  border-bottom: none;
+}
+
+.fact-label {
+  width: 150rpx;
+  flex-shrink: 0;
+  font-size: 24rpx;
+  color: var(--muted);
+}
+
+.fact-value {
+  flex: 1;
+  font-size: 26rpx;
+  color: var(--ink-2);
+}
+
+.fact-value.near {
+  color: var(--teal);
+  font-weight: 600;
+}
+
+.fact-refresh {
+  margin-left: 12rpx;
+  font-size: 21rpx;
+  color: var(--red);
+  white-space: nowrap;
+}
+
+/* ---------- 打卡结果 ---------- */
+.checkin-banner {
+  margin-top: 32rpx;
+  padding: 20rpx 26rpx;
+  border-radius: 16rpx;
+  background: #e9f1ee;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.checkin-ok {
+  font-size: 25rpx;
+  font-weight: 600;
+  color: var(--teal);
+}
+
+.checkin-time {
+  font-size: 21rpx;
+  color: #5f7d77;
+}
+
+.section {
+  margin-top: 40rpx;
+}
+
+.section-title {
+  font-size: 22rpx;
+  letter-spacing: 4rpx;
+  color: var(--red);
+  margin-bottom: 12rpx;
+}
+
+.section-text {
+  font-size: 28rpx;
+  line-height: 1.85;
+  color: var(--ink-2);
+}
+
+.tip {
+  margin-top: 36rpx;
+  padding: 24rpx 28rpx;
+  background: #f6f1e6;
+  border-radius: 16rpx;
+}
+
+.tip-title {
+  font-size: 22rpx;
+  letter-spacing: 2rpx;
+  color: #8a6d3b;
+  font-weight: 600;
+}
+
+.tip-text {
+  margin-top: 8rpx;
+  font-size: 26rpx;
+  line-height: 1.8;
+  color: #6b6152;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+/* ---------- 底部按钮 ---------- */
+.footer {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  padding: 20rpx 32rpx calc(20rpx + env(safe-area-inset-bottom));
+  background: rgba(251, 248, 242, 0.96);
+  border-top: 1rpx solid var(--line);
+}
+
+.footer .btn {
+  flex: 1;
+}
+
+.footer .btn + .btn {
+  margin-left: 20rpx;
+  flex: 1.4;
+}
+
+.btn.primary.checked {
+  background: var(--teal);
+}
+
+/* 实景图头图 */
+.hero.has-photo {
+  padding: 0;
+  overflow: hidden;
+  min-height: 420rpx;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+
+.hero-photo {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.hero-mask {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.05) 30%, rgba(0, 0, 0, 0.62) 100%);
+}
+
+.hero-inner {
+  position: relative;
+}
+
+.hero.has-photo .hero-inner {
+  padding: 240rpx 40rpx 40rpx;
+}
+
+.hero.has-photo .hero-emoji {
+  display: none;
+}

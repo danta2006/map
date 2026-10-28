@@ -1,0 +1,25 @@
+{
+  "pages": [
+    "pages/map/index",
+    "pages/routes/index",
+    "pages/detail/index"
+  ],
+  "window": {
+    "backgroundColor": "#fbf8f2",
+    "backgroundTextStyle": "dark",
+    "navigationBarBackgroundColor": "#fbf8f2",
+    "navigationBarTitleText": "湘潭 · 标点地图",
+    "navigationBarTextStyle": "black"
+  },
+  "permission": {
+    "scope.userLocation": {
+      "desc": "用于判断你是否已经到达景点附近，完成打卡"
+    }
+  },
+  "requiredPrivateInfos": [
+    "getLocation"
+  ],
+  "style": "v2",
+  "sitemapLocation": "sitemap.json",
+  "lazyCodeLoading": "requiredComponents"
+}

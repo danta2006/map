@@ -1,0 +1,171 @@
+<view class="page">
+  <map
+    id="map"
+    class="map"
+    latitude="{{center.latitude}}"
+    longitude="{{center.longitude}}"
+    scale="{{scale}}"
+    markers="{{markers}}"
+    enable-zoom
+    enable-scroll
+    enable-rotate="{{false}}"
+    bindmarkertap="onMarkerTap"
+    bindcallouttap="onCalloutTap"
+    bindregionchange="onViewChange"
+    bindtap="onMapTap"
+  >
+    <!-- 图片气泡：放大到不重叠时，在点下方显示实景图 -->
+    <cover-view slot="callout">
+      <cover-view
+        wx:for="{{bubbles}}"
+        wx:key="id"
+        marker-id="{{item.mid}}"
+        data-mid="{{item.mid}}"
+        class="poi-bubble"
+        bindtap="onBubbleTap"
+      >
+        <cover-image class="bubble-img" src="/assets/{{item.photo}}" data-mid="{{item.mid}}" bindtap="onBubbleTap"></cover-image>
+      </cover-view>
+    </cover-view>
+  </map>
+
+  <!-- 顶部：城市切换 + 标题 + 分类筛选 -->
+  <view class="header" style="padding-top: {{statusBarHeight}}px">
+    <view class="brand-row">
+      <view class="city-pill {{showCityPicker ? 'open' : ''}}" bindtap="toggleCityPicker">
+        <text class="city-pill-name">{{cityName}}</text>
+        <text class="city-pill-caret">▾</text>
+      </view>
+      <view class="brand">
+        <text class="brand-name">标点地图</text>
+        <text class="brand-sub">{{activeName}} · {{markerCount}} 个点</text>
+      </view>
+    </view>
+
+    <!-- 城市下拉 -->
+    <view class="city-panel" wx:if="{{showCityPicker}}">
+      <view
+        wx:for="{{cities}}"
+        wx:key="id"
+        class="city-option {{item.id === activeCity ? 'active' : ''}}"
+        data-id="{{item.id}}"
+        bindtap="onCityTap"
+      >
+        <text class="city-option-name">{{item.name}}</text>
+        <text class="city-option-count">{{item.count}} 个点</text>
+        <text class="city-option-check" wx:if="{{item.id === activeCity}}">✓</text>
+      </view>
+      <view class="city-panel-tip">长沙、株洲的点位正在陆续补充</view>
+    </view>
+
+    <scroll-view class="chips" scroll-x enhanced show-scrollbar="{{false}}">
+      <view class="chips-row">
+        <view
+          class="chip {{activeCategory === '' ? 'active' : ''}}"
+          data-key=""
+          bindtap="onCategoryTap"
+        >全部</view>
+        <view
+          wx:for="{{categories}}"
+          wx:key="key"
+          class="chip {{activeCategory === item.key ? 'active' : ''}}"
+          data-key="{{item.key}}"
+          bindtap="onCategoryTap"
+        >
+          <view class="chip-dot" style="background: {{item.color}}"></view>
+          <text>{{item.name}}</text>
+        </view>
+      </view>
+    </scroll-view>
+  </view>
+
+  <!-- 城市还没点位时的占位 -->
+  <view class="empty" wx:if="{{empty}}">
+    <view class="empty-title">{{cityName}}的点位还在采集中</view>
+    <view class="empty-sub">用地图平台接口批量拉取后，这里就会有内容</view>
+    <view class="empty-btn" bindtap="onSwitchToXiangtan">先看湘潭</view>
+  </view>
+
+  <view class="locate" bindtap="onLocate">◎</view>
+
+  <!-- 精选路线入口 -->
+  <view class="route-fab" bindtap="onGoRoutes">🧭 精选路线</view>
+
+  <!-- 底部点位列表：主要入口，比点地图上的小图钉好点 -->
+  <scroll-view class="poi-strip" scroll-x enhanced show-scrollbar="{{false}}">
+    <view class="strip-row">
+      <view
+        wx:for="{{places}}"
+        wx:key="id"
+        class="strip-card {{current && current.id === item.id ? 'active' : ''}}"
+        data-index="{{index}}"
+        bindtap="onStripTap"
+      >
+        <view class="strip-emoji">{{item.emoji}}</view>
+        <view class="strip-info">
+          <view class="strip-name">{{item.name}}</view>
+          <view class="strip-meta">{{item.durationMin}} 分钟</view>
+        </view>
+      </view>
+    </view>
+  </scroll-view>
+
+  <!-- 底部详情面板：收起是一张卡片，往上滑展开看完整介绍（小红书那种） -->
+  <view
+    class="sheet {{current ? 'show' : ''}} {{dragging ? 'dragging' : ''}}"
+    style="height: {{sheetH}}px; transform: translateY({{sheetY}}px)"
+    bindtouchstart="onSheetTouchStart"
+    bindtouchmove="onSheetTouchMove"
+    bindtouchend="onSheetTouchEnd"
+  >
+    <view class="sheet-grab" bindtap="onSheetTap">
+      <view class="grab-bar"></view>
+    </view>
+
+    <view class="sheet-head" bindtap="onSheetTap">
+      <view class="sheet-emoji" style="background: {{current.color}}">{{current.emoji}}</view>
+      <view class="sheet-heading">
+        <view class="sheet-title">{{current.name}}</view>
+        <view class="sheet-meta">{{current.categoryName}} · 建议 {{current.durationMin}} 分钟</view>
+      </view>
+      <view class="sheet-close" catchtap="onCloseCard">×</view>
+    </view>
+
+    <view class="sheet-hint" wx:if="{{!expanded}}">上滑看完整介绍 · 点标题也能展开</view>
+
+    <scroll-view class="sheet-body" scroll-y="{{expanded}}">
+      <view class="sheet-summary">{{current.summary}}</view>
+
+      <view class="facts">
+        <view class="fact">
+          <text class="fact-k">地址</text>
+          <text class="fact-v">{{current.address}}</text>
+        </view>
+        <view class="fact">
+          <text class="fact-k">开放</text>
+          <text class="fact-v">{{current.openTime}}</text>
+        </view>
+        <view class="fact">
+          <text class="fact-k">距你</text>
+          <text class="fact-v {{current.canCheckin ? 'ok' : ''}}">{{current.distanceText}}</text>
+        </view>
+      </view>
+
+      <view class="hl">关于这里</view>
+      <view class="para">{{current.intro}}</view>
+
+      <block wx:if="{{current.note}}">
+        <view class="hl">备注或补充</view>
+        <view class="para">{{current.note}}</view>
+      </block>
+
+      <view class="checked-banner" wx:if="{{current.checkedAt}}">✅ 已打卡 · {{current.checkedAt}}</view>
+      <view class="body-pad"></view>
+    </scroll-view>
+
+    <view class="sheet-foot" wx:if="{{expanded}}">
+      <view class="btn ghost" catchtap="onNavigate">导航</view>
+      <view class="btn primary" catchtap="onSheetCheckin">{{current.checkedAt ? '已打卡' : '到这里打卡'}}</view>
+    </view>
+  </view>
+</view>

@@ -1,0 +1,931 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>湘潭「标点地图」文旅小程序 · 12 天冲刺方案</title>
+<style>
+  :root{
+    --paper:#fbf8f2;
+    --card:#fffdf8;
+    --ink:#1d1c19;
+    --ink-2:#3f3c35;
+    --muted:#736d61;
+    --line:#e5ddce;
+    --line-strong:#d3c8b4;
+    --red:#b0392e;
+    --red-soft:#f6e7e3;
+    --teal:#2c6b63;
+    --teal-soft:#e6efec;
+    --gold:#a97c33;
+    --gold-soft:#f6eedd;
+    --radius:10px;
+    --shadow:0 1px 2px rgba(29,28,25,.04),0 8px 24px rgba(29,28,25,.05);
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:"Microsoft YaHei","PingFang SC","Hiragino Sans GB","Source Han Sans SC",sans-serif;
+    font-size:15.5px;
+    line-height:1.85;
+    -webkit-font-smoothing:antialiased;
+    text-rendering:optimizeLegibility;
+  }
+  .wrap{max-width:900px;margin:0 auto;padding:56px 32px 96px}
+
+  /* ---------- cover ---------- */
+  .cover{padding-bottom:38px;border-bottom:1px solid var(--line-strong)}
+  .eyebrow{
+    display:flex;align-items:center;gap:12px;
+    font-size:12px;letter-spacing:.22em;color:var(--red);text-transform:uppercase;
+  }
+  .eyebrow::before{content:"";width:34px;height:1px;background:var(--red);display:block}
+  h1{
+    margin:18px 0 6px;
+    font-size:44px;line-height:1.22;letter-spacing:.01em;font-weight:700;
+  }
+  h1 .light{color:var(--red)}
+  .subtitle{margin:0;font-size:19px;color:var(--ink-2);font-weight:400;letter-spacing:.02em}
+  .meta{
+    display:flex;flex-wrap:wrap;gap:10px 28px;margin-top:26px;
+    font-size:13px;color:var(--muted);
+  }
+  .meta b{color:var(--ink);font-weight:600}
+  .meta span{white-space:nowrap}
+
+  /* ---------- toc ---------- */
+  .toc{
+    display:flex;flex-wrap:wrap;gap:8px;margin:26px 0 0;
+    padding:0;list-style:none;
+  }
+  .toc a{
+    display:inline-block;padding:4px 10px;border:1px solid var(--line);
+    border-radius:999px;color:var(--ink-2);text-decoration:none;
+    font-size:12px;letter-spacing:.01em;background:var(--card);
+    transition:.18s ease;
+  }
+  .toc a:hover{border-color:var(--red);color:var(--red);transform:translateY(-1px)}
+  .toc a i{font-style:normal;color:var(--line-strong);margin-right:5px;font-size:11px}
+
+  /* ---------- sections ---------- */
+  .sec{margin-top:58px;scroll-margin-top:24px}
+  .sec-head{display:flex;align-items:baseline;gap:14px;border-bottom:1px solid var(--line);padding-bottom:10px}
+  .sec-num{
+    font-size:12px;letter-spacing:.18em;color:var(--red);font-weight:700;
+    font-variant-numeric:tabular-nums;transform:translateY(-1px);
+  }
+  .sec-head h2{margin:0;font-size:23px;line-height:1.3;font-weight:700;letter-spacing:.01em}
+  .sec-head .tag{
+    margin-left:auto;font-size:11.5px;color:var(--muted);letter-spacing:.06em;
+    border:1px solid var(--line);border-radius:999px;padding:2px 10px;white-space:nowrap;
+  }
+  .lead{margin:14px 0 0;color:var(--ink-2)}
+  h3{margin:30px 0 10px;font-size:16.5px;font-weight:700;letter-spacing:.02em}
+  h4{margin:22px 0 8px;font-size:14.5px;font-weight:700;color:var(--ink-2)}
+  p{margin:10px 0}
+  a{color:var(--red);text-decoration:none;border-bottom:1px solid rgba(176,57,46,.35)}
+  a:hover{background:var(--red-soft);border-bottom-color:var(--red)}
+  strong{font-weight:700}
+  em{font-style:normal;background:linear-gradient(transparent 62%, #f2e2c8 62%);padding:0 1px}
+
+  /* ---------- pull quote ---------- */
+  .pull{
+    margin:22px 0 6px;padding:16px 20px;border-left:3px solid var(--red);
+    background:var(--card);border-radius:0 var(--radius) var(--radius) 0;
+    font-size:17px;line-height:1.7;color:var(--ink);
+  }
+  .pull small{display:block;margin-top:6px;font-size:12px;letter-spacing:.1em;color:var(--muted)}
+
+  /* ---------- glance grid ---------- */
+  .glance{
+    display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
+    border-top:1px solid var(--line);border-left:1px solid var(--line);
+    margin-top:18px;border-radius:var(--radius);overflow:hidden;background:var(--card);
+  }
+  .glance div{padding:14px 18px;border-right:1px solid var(--line);border-bottom:1px solid var(--line)}
+  .glance dt{font-size:11.5px;letter-spacing:.14em;color:var(--muted);margin-bottom:2px}
+  .glance dd{margin:0;font-size:14.5px;line-height:1.65}
+  .glance dd b{color:var(--red)}
+
+  /* ---------- figure ---------- */
+  .figure{display:grid;grid-template-columns:1fr 208px;gap:30px;align-items:start;margin-top:20px}
+  .phone{
+    margin:0;justify-self:end;width:190px;border-radius:18px;overflow:hidden;
+    border:1px solid var(--line-strong);box-shadow:var(--shadow);background:#000;
+  }
+  .phone img{display:block;width:100%;height:auto}
+  .figcap{grid-column:2;font-size:11.5px;color:var(--muted);line-height:1.6;text-align:right;margin-top:-18px}
+
+  /* ---------- tiers ---------- */
+  .tiers{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:18px}
+  .tier{
+    background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+    padding:16px 18px 14px;box-shadow:var(--shadow);border-top:3px solid var(--line-strong);
+    break-inside:avoid;
+  }
+  .tier.p0{border-top-color:var(--red)}
+  .tier.p1{border-top-color:var(--gold)}
+  .tier.p2{border-top-color:var(--line-strong);opacity:.9}
+  .tier h4{margin:0 0 4px;display:flex;align-items:center;gap:8px;font-size:14px}
+  .tier .hint{font-size:11.5px;color:var(--muted);margin:0 0 10px;letter-spacing:.02em}
+  .tier ul{margin:0;padding-left:0;list-style:none;font-size:13.5px;line-height:1.65}
+  .tier li{padding-left:16px;position:relative;margin:6px 0;color:var(--ink-2)}
+  .tier.p0 li::before{content:"";position:absolute;left:2px;top:9px;width:5px;height:5px;border-radius:50%;background:var(--red)}
+  .tier.p1 li::before{content:"";position:absolute;left:2px;top:9px;width:5px;height:5px;border-radius:50%;background:var(--gold)}
+  .tier.p2 li::before{content:"";position:absolute;left:2px;top:9px;width:5px;height:5px;border-radius:50%;background:var(--line-strong)}
+  .strike{color:var(--muted);text-decoration:line-through;text-decoration-color:var(--line-strong)}
+
+  /* ---------- tables ---------- */
+  table{width:100%;border-collapse:collapse;margin:16px 0 4px;font-size:13.5px;line-height:1.65}
+  thead th{
+    text-align:left;font-weight:600;color:var(--muted);font-size:11.5px;letter-spacing:.1em;
+    padding:8px 10px;border-bottom:1px solid var(--line-strong);white-space:nowrap;
+  }
+  tbody td{padding:10px;border-bottom:1px solid var(--line);vertical-align:top;color:var(--ink-2)}
+  tbody tr:last-child td{border-bottom:none}
+  tbody td:first-child{color:var(--ink)}
+  table.narrow td:first-child{width:34%}
+  table.reuse th:nth-child(1){width:24%}
+  table.reuse th:nth-child(3),table.reuse th:nth-child(4){width:11%}
+  table.reuse td:nth-child(3),table.reuse td:nth-child(4){white-space:nowrap}
+  tr{break-inside:avoid}
+
+  /* ---------- chips ---------- */
+  .chip{
+    display:inline-block;padding:1px 8px;border-radius:999px;font-size:11px;line-height:1.7;
+    letter-spacing:.03em;white-space:nowrap;border:1px solid transparent;vertical-align:1px;
+  }
+  .chip.ok{background:var(--teal-soft);color:var(--teal);border-color:#c9ded8}
+  .chip.no{background:var(--red-soft);color:var(--red);border-color:#eed3cd}
+  .chip.mid{background:var(--gold-soft);color:var(--gold);border-color:#ecdcbf}
+  .chip.plain{background:#f4f1ea;color:var(--muted);border-color:var(--line)}
+
+  /* ---------- callouts ---------- */
+  .note,.warn{
+    margin:18px 0;padding:14px 18px;border-radius:var(--radius);font-size:13.5px;
+    background:var(--card);border:1px solid var(--line);line-height:1.75;
+  }
+  .note{border-left:3px solid var(--teal)}
+  .warn{border-left:3px solid var(--red);background:#fdf6f3}
+  .note b,.warn b{letter-spacing:.02em}
+  .note .t,.warn .t{display:block;font-size:11.5px;letter-spacing:.14em;color:var(--muted);margin-bottom:2px}
+
+  /* ---------- architecture ---------- */
+  .arch{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:18px 0 6px}
+  .arch div{
+    background:var(--card);border:1px solid var(--line);border-radius:8px;
+    padding:12px 14px;font-size:12.5px;line-height:1.7;break-inside:avoid;
+  }
+  .arch div b{display:block;font-size:12px;letter-spacing:.06em;color:var(--red);margin-bottom:2px}
+  .arch div span{color:var(--muted)}
+
+  /* ---------- code ---------- */
+  pre{
+    margin:14px 0;padding:16px 18px;background:#26241f;color:#efe9dc;
+    border-radius:var(--radius);font-size:12.5px;line-height:1.75;overflow-x:auto;
+    font-family:"Cascadia Mono",Consolas,"Courier New",monospace;
+  }
+  pre .c{color:#9c9384}
+  pre .k{color:#e0b56f}
+  pre .s{color:#9cc5bd}
+  code{font-family:"Cascadia Mono",Consolas,monospace;font-size:.92em;background:#f1ece1;padding:1px 5px;border-radius:4px;color:#7a3d2f}
+  pre code{background:none;padding:0;color:inherit}
+
+  /* ---------- flow / steps ---------- */
+  ol.steps{margin:14px 0;padding-left:0;list-style:none;counter-reset:step}
+  ol.steps li{
+    position:relative;padding-left:38px;margin:14px 0;counter-increment:step;
+    break-inside:avoid;
+  }
+  ol.steps li::before{
+    content:counter(step,decimal-leading-zero);position:absolute;left:0;top:1px;
+    font-size:11px;letter-spacing:.08em;color:var(--red);font-weight:700;
+    border:1px solid var(--line-strong);border-radius:50%;width:24px;height:24px;
+    display:flex;align-items:center;justify-content:center;background:var(--card);
+  }
+  ol.steps > li > b{display:block;font-size:14px;margin-bottom:1px}
+  ol.steps span{color:var(--ink-2);font-size:13.5px}
+  ol.steps span b{display:inline;font-size:inherit;font-weight:700;color:var(--ink)}
+
+  /* ---------- milestones ---------- */
+  .miles{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:20px 0 8px}
+  .mile{
+    background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+    padding:14px;break-inside:avoid;position:relative;overflow:hidden;
+  }
+  .mile::after{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--red)}
+  .mile .d{font-size:20px;font-weight:700;letter-spacing:.02em;font-variant-numeric:tabular-nums}
+  .mile .d small{font-size:11px;font-weight:400;color:var(--muted);margin-left:3px}
+  .mile .n{font-size:13px;color:var(--ink-2);margin-top:4px;line-height:1.6}
+  .mile .s{font-size:11px;color:var(--red);letter-spacing:.08em;margin-top:6px}
+
+  /* ---------- timeline ---------- */
+  .tl{margin:18px 0 0;padding:0;list-style:none;border-left:1px solid var(--line-strong)}
+  .tl li{
+    position:relative;padding:0 0 16px 26px;break-inside:avoid;
+    display:grid;grid-template-columns:96px 1fr auto;gap:14px;align-items:baseline;
+  }
+  .tl li::before{
+    content:"";position:absolute;left:-4.5px;top:9px;width:8px;height:8px;border-radius:50%;
+    background:var(--paper);border:1.5px solid var(--line-strong);
+  }
+  .tl li.mark::before{background:var(--red);border-color:var(--red);box-shadow:0 0 0 3px var(--red-soft)}
+  .tl .date{font-size:12.5px;color:var(--muted);font-variant-numeric:tabular-nums;letter-spacing:.03em}
+  .tl li.mark .date{color:var(--red);font-weight:700}
+  .tl .body{font-size:13.5px;line-height:1.7;color:var(--ink-2)}
+  .tl .body b{color:var(--ink);font-weight:600;display:block;font-size:14px}
+  .tl .who{font-size:11px;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:1px 8px;white-space:nowrap}
+
+  /* ---------- roles ---------- */
+  .roles{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:18px}
+  .role{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:16px;break-inside:avoid}
+  .role .r{font-size:11.5px;letter-spacing:.12em;color:var(--red);margin-bottom:2px}
+  .role h4{margin:0 0 6px;font-size:14.5px}
+  .role p{margin:0;font-size:13px;color:var(--ink-2);line-height:1.7}
+  .role .out{margin-top:8px;font-size:11.5px;color:var(--muted);border-top:1px dashed var(--line);padding-top:8px}
+
+  /* ---------- checklist ---------- */
+  .dod{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px}
+  .dod-col{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px;break-inside:avoid}
+  .dod-col h4{margin:0 0 10px;font-size:13px;letter-spacing:.08em;color:var(--red)}
+  .dod ul{list-style:none;margin:0;padding:0;font-size:13.5px;line-height:1.7}
+  .dod li{padding-left:22px;position:relative;margin:7px 0;color:var(--ink-2)}
+  .dod li::before{
+    content:"";position:absolute;left:0;top:7px;width:11px;height:6px;
+    border-left:1.5px solid var(--teal);border-bottom:1.5px solid var(--teal);
+    transform:rotate(-45deg);
+  }
+
+  /* ---------- today ---------- */
+  .today{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:18px}
+  .today > div{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:16px;break-inside:avoid}
+  .today .big{font-size:28px;font-weight:700;color:var(--red);line-height:1;letter-spacing:.02em}
+  .today h4{margin:8px 0 4px;font-size:14px}
+  .today p{margin:0;font-size:12.5px;color:var(--ink-2);line-height:1.7}
+  .today .time{font-size:11px;color:var(--muted);margin-top:6px;letter-spacing:.04em}
+
+  /* ---------- names ---------- */
+  .names{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}
+  .names div{
+    background:var(--card);border:1px solid var(--line);border-radius:8px;padding:10px 14px;
+    font-size:13.5px;break-inside:avoid;
+  }
+  .names div b{display:block;font-size:14.5px;margin-bottom:1px}
+  .names div span{font-size:11.5px;color:var(--muted)}
+
+  /* ---------- footer ---------- */
+  footer{
+    margin-top:70px;padding-top:18px;border-top:1px solid var(--line-strong);
+    display:flex;justify-content:space-between;gap:20px;
+    font-size:11.5px;color:var(--muted);letter-spacing:.04em;
+  }
+
+  /* ---------- pitfalls ---------- */
+  .pitfalls{margin-top:22px}
+  .pitfalls .p-title{font-size:11.5px;letter-spacing:.14em;color:var(--red);margin-bottom:9px}
+  .pitfalls .p-row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+  .pitfalls .p-row div{
+    background:var(--card);border:1px solid var(--line);border-left:3px solid #e7c3bc;
+    border-radius:0 8px 8px 0;padding:10px 12px;font-size:12px;line-height:1.6;color:var(--ink-2);
+    break-inside:avoid;
+  }
+  .pitfalls .p-row b{display:block;font-size:12.5px;color:var(--red);margin-bottom:2px}
+
+  /* ---------- doc guide ---------- */
+  .guide{margin-top:22px;border-top:1px solid var(--line);padding-top:14px}
+  .guide .g-title{font-size:11.5px;letter-spacing:.14em;color:var(--muted);margin-bottom:9px}
+  .guide ul{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+  .guide li{font-size:12px;line-height:1.55}
+  .guide li b{display:block;font-size:12.5px;color:var(--ink);margin-bottom:1px}
+  .guide li span{color:var(--muted)}
+
+  /* ---------- print ---------- */
+  @page{size:A4;margin:13mm 12mm 14mm}
+  @media print{
+    :root{--paper:#fff;--card:#fff;--shadow:none}
+    body{font-size:9.6pt;line-height:1.62;background:#fff}
+    .wrap{max-width:none;padding:0}
+    .toc{display:none}
+    .cover{padding-bottom:18px}
+    h1{font-size:23pt;margin:12px 0 4px}
+    .subtitle{font-size:11.5pt}
+    .meta{margin-top:14px;gap:6px 20px;font-size:8.6pt}
+    .sec{margin-top:18px}
+    .sec-head{padding-bottom:6px}
+    .sec-head h2{font-size:13.5pt}
+    .sec-head .tag{border:none;padding:0;font-size:8pt}
+    .lead{margin-top:8px}
+    h3{margin:15px 0 6px;font-size:11pt}
+    h4{margin:12px 0 5px;font-size:9.6pt}
+    p{margin:6px 0}
+    .pull{margin:12px 0 4px;padding:10px 14px;font-size:11pt}
+    .pull small{font-size:8pt}
+    .glance div{padding:8px 12px}
+    .glance dt{font-size:8pt}
+    .glance dd{font-size:9.4pt}
+    .tiers{gap:10px}
+    .tier{padding:10px 12px}
+    .tier ul{font-size:9pt}
+    .tier .hint{font-size:8.2pt}
+    .mile{padding:10px}
+    .mile .d{font-size:15pt}
+    .mile .n{font-size:9pt}
+    .tl li{padding-bottom:8px;gap:10px}
+    .tl .body{font-size:9pt}
+    .tl .body b{font-size:9.6pt}
+    .roles{gap:10px;margin-top:12px}
+    .role{padding:11px}
+    .role p{font-size:9pt}
+    .today{gap:10px;margin-top:12px}
+    .today > div{padding:11px}
+    .today .big{font-size:20pt}
+    .today p{font-size:8.8pt}
+    .dod{gap:12px;margin-top:10px}
+    .dod-col{padding:11px 13px}
+    .dod ul{font-size:9pt}
+    .dod li{margin:4px 0}
+    .names{gap:8px}
+    .names div{padding:7px 10px;font-size:9pt}
+    table{font-size:8.6pt;margin:10px 0 2px}
+    thead th{font-size:8pt;padding:5px 8px}
+    tbody td{padding:6px 8px}
+    pre{font-size:8.4pt;line-height:1.5;padding:10px 12px;margin:10px 0}
+    code{font-size:.9em}
+    ol.steps li{margin:9px 0;padding-left:32px}
+    .figure{grid-template-columns:1fr 132px;gap:18px}
+    .phone{width:118px}
+    .figcap{font-size:7.6pt;margin-top:-12px}
+    .arch div{padding:8px 10px;font-size:8.8pt}
+    .guide{margin-top:12px;padding-top:8px}
+    .guide .g-title{font-size:7.6pt;margin-bottom:5px}
+    .guide ul{gap:8px;grid-template-columns:repeat(2,minmax(0,1fr))}
+    .guide li{font-size:8pt}
+    .guide li b{font-size:8.2pt}
+    .pitfalls{margin-top:12px}
+    .pitfalls .p-title{font-size:7.6pt;margin-bottom:5px}
+    .pitfalls .p-row{gap:7px}
+    .pitfalls .p-row div{padding:7px 9px;font-size:8pt;line-height:1.55}
+    .pitfalls .p-row b{font-size:8.4pt}
+    .note,.warn{padding:9px 12px;margin:10px 0;font-size:9pt}
+    footer{margin-top:26px}
+    .pull,.glance,.tier,.mile,.role,.dod-col,.today > div,.arch div,pre,.keep{break-inside:avoid}
+    h3,h4{break-after:avoid}
+    .pb{break-before:page}
+    a{color:inherit;text-decoration:none;border-bottom:none}
+  }
+  @media screen and (max-width:760px){
+    .wrap{padding:34px 20px 70px}
+    h1{font-size:31px}
+    .figure{grid-template-columns:1fr}
+    .phone{justify-self:start;width:150px}
+    .figcap{grid-column:1;text-align:left;margin-top:8px}
+    .glance,.tiers,.arch,.miles,.roles,.dod,.today{grid-template-columns:1fr}
+    .tl li{grid-template-columns:78px 1fr;gap:10px}
+    .tl .who{display:none}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<!-- ================= COVER ================= -->
+<header class="cover">
+  <div class="eyebrow">湘潭 · 数字文旅 · 大创项目</div>
+  <h1>湘潭「标点地图」<span class="light">文旅小程序</span></h1>
+  <p class="subtitle">12 天冲刺方案 —— 从一张地图，到一个能答辩的作品</p>
+
+  <div class="meta">
+    <span>版本 <b>v1.1</b></span>
+    <span>制定 <b>2026-10-28</b></span>
+    <span>交付 <b>2026-11-09</b></span>
+    <span>团队 <b>3 人</b></span>
+    <span>规模 <b>30 个点 · 3 条路线 · 5 个页面</b></span>
+  </div>
+
+  <nav>
+    <ul class="toc">
+      <li><a href="#s1"><i>01</i>一页结论</a></li>
+      <li><a href="#s2"><i>02</i>功能范围</a></li>
+      <li><a href="#s3"><i>03</i>技术方案</a></li>
+      <li><a href="#s4"><i>04</i>复用清单</a></li>
+      <li><a href="#s5"><i>05</i>数据方案</a></li>
+      <li><a href="#s6"><i>06</i>12 天排期</a></li>
+      <li><a href="#s7"><i>07</i>分工</a></li>
+      <li><a href="#s8"><i>08</i>风险预案</a></li>
+      <li><a href="#s9"><i>09</i>验收标准</a></li>
+      <li><a href="#s10"><i>10</i>今晚三件事</a></li>
+    </ul>
+  </nav>
+</header>
+
+<!-- ================= 01 ================= -->
+<section class="sec" id="s1">
+  <div class="sec-head">
+    <span class="sec-num">01</span>
+    <h2>一页结论</h2>
+    <span class="tag">给没时间看全文的人</span>
+  </div>
+
+  <blockquote class="pull">
+    把湘潭的景点、美食、老街，从"一篇文章"变成"地图上一个个能点开的点"，再串成能照着走的路线。
+    <small>—— 产品定位，也是答辩开场那句话</small>
+  </blockquote>
+
+  <div class="figure">
+    <div>
+      <dl class="glance">
+        <div><dt>做什么</dt><dd>湘潭地图 + 30 个可点开点位 + 3 条精选路线 + 到点打卡足迹</dd></div>
+        <div><dt>不做什么</dt><dd>社区/UGC、评论、支付、多城市、后台管理、个性化地图</dd></div>
+        <div><dt>技术栈</dt><dd>微信原生小程序（JS）+ 内置 map 组件，不上框架、不上构建链</dd></div>
+        <div><dt>数据</dt><dd>POI 打包成本地 <code>places.js</code>；图片走云存储；打卡记录走云数据库</dd></div>
+        <div><dt>后端</dt><dd><b>云开发，但零云函数</b>：集合权限"仅创建者可读写"，自动带 openid</dd></div>
+        <div><dt>复用基座</dt><dd>map-marker-miniprogram（Apache-2.0）为主，省 2–3 天</dd></div>
+      </dl>
+      <p style="margin-top:16px;font-size:13.5px;color:var(--muted)">
+        成功标准只有一句：<strong style="color:var(--ink)">真机打开 → 地图有 30 个点 → 筛选 / 点开 / 详情 / 导航全通 → 路线能看 → 打卡能记。</strong>
+      </p>
+      <div class="pitfalls">
+        <div class="p-title">开工前先知道三个坑</div>
+        <div class="p-row">
+          <div><b>类目</b>个人主体选不了「旅游-景区服务」，别指望上架；开发版 / 体验版 + 投屏答辩。</div>
+          <div><b>定位</b><code>wx.getLocation</code> 要在后台申请、可能不批；手动打卡降级是必做项。</div>
+          <div><b>包体</b>主包 2MB，60 张图必超；图片全部走云存储。</div>
+        </div>
+      </div>
+
+      <div class="guide">
+        <div class="g-title">怎么用这份文档</div>
+        <ul>
+          <li><b>决策</b><span>看 01–02：范围、不做清单</span></li>
+          <li><b>开发</b><span>看 03–05：技术、复用、数据</span></li>
+          <li><b>推进</b><span>看 06–08：排期、分工、风险</span></li>
+          <li><b>验收</b><span>看 09–10：标准、今晚动手</span></li>
+        </ul>
+      </div>
+    </div>
+    <figure class="phone">
+      <img src="assets/reference-screen.jpg" alt="参考效果：标点地图式界面">
+    </figure>
+    <div class="figcap">参考效果（用户提供截图，仅作对标）<br>我们做它的"简化学生版"</div>
+  </div>
+</section>
+
+<!-- ================= 02 ================= -->
+<section class="sec pb" id="s2">
+  <div class="sec-head">
+    <span class="sec-num">02</span>
+    <h2>功能范围</h2>
+    <span class="tag">严格分级，防范围蔓延</span>
+  </div>
+  <p class="lead">12 天最大的敌人不是技术，是"再加一个功能"。所以先划死线：P0 做不完，P1 直接砍。</p>
+
+  <div class="tiers">
+    <div class="tier p0">
+      <h4>P0 · 必须做 <span class="chip no">11/5 前跑通</span></h4>
+      <p class="hint">答辩就靠这 7 项，一个都不能少</p>
+      <ul>
+        <li>地图首页：湘潭全域，30+ marker，按分类换图标</li>
+        <li>六分类筛选：全部 / 景点 / 美食 / 古镇街区 / 红色 / 学府</li>
+        <li>点 marker 弹底部卡片（图 + 名 + 一句话）</li>
+        <li>详情页：图 / 简介 / 地址 / 开放时间 / 建议时长 / 本地提示 / 导航</li>
+        <li>路线页：3 条路线，polyline + 序号 marker + 点位列表</li>
+        <li>打卡：定位 500m 内可打 → 写云数据库 → 我的页足迹</li>
+        <li>我的页：打卡数 / 完成度 / 足迹列表</li>
+      </ul>
+    </div>
+
+    <div class="tier p1">
+      <h4>P1 · 有余力再做</h4>
+      <p class="hint">11/6–11/7，做不完就砍</p>
+      <ul>
+        <li>本地搜索点位</li>
+        <li>收藏</li>
+        <li>分享卡片</li>
+        <li>天气</li>
+        <li>打卡徽章规则</li>
+        <li>路线进度条</li>
+      </ul>
+    </div>
+
+    <div class="tier p2">
+      <h4>P2 · 明确不做</h4>
+      <p class="hint">别碰，碰了就延期</p>
+      <ul>
+        <li class="strike">UGC 发布 / 评论</li>
+        <li class="strike">点赞关注</li>
+        <li class="strike">支付 / 预约</li>
+        <li class="strike">后台管理系统</li>
+        <li class="strike">多城市扩展</li>
+        <li class="strike">个性化地图样式</li>
+        <li class="strike">真实登录体系</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="note">
+    <span class="t">砍功能原则</span>
+    任何一项 11 月 4 日还没开工，直接进 P2。<b>宁可 5 个页面完整，不要 9 个页面半成品</b>——答辩老师看的是完整度，不是功能数量。
+  </div>
+</section>
+
+<!-- ================= 03 ================= -->
+<section class="sec" id="s3">
+  <div class="sec-head">
+    <span class="sec-num">03</span>
+    <h2>技术方案</h2>
+    <span class="tag">怎么搭，为什么这么搭</span>
+  </div>
+
+  <div class="arch">
+    <div><b>视图层</b>WXML / WXSS<br><span>3 tab + 2 详情页<br>一套 design tokens</span></div>
+    <div><b>地图</b>内置 &lt;map&gt;<br><span>markers + 气泡<br>polyline + 导航</span></div>
+    <div><b>数据层</b>本地 JSON<br><span>places.js / routes.js<br>零延迟、免分页</span></div>
+    <div><b>云</b>云开发<br><span>checkins 集合 + 云存储<br>零云函数</span></div>
+  </div>
+
+  <h3>为什么是这套</h3>
+  <table class="narrow">
+    <thead><tr><th>选择</th><th>理由</th></tr></thead>
+    <tbody>
+      <tr><td>原生小程序，不用 Taro / uni-app</td><td>12 天不够踩框架编译坑。原生 + 内置组件是故障面最小的路径。</td></tr>
+      <tr><td>不引入 npm 构建链</td><td>少吃一类"构建失败 / 依赖版本冲突"的亏；Vant 之类按需再上。</td></tr>
+      <tr><td>不做个性化地图</td><td>subkey 2023-06 起要在后台付费购买、工具内不能调试、只能真机验证。默认样式 + 自绘 marker 已经够好看。</td></tr>
+      <tr><td>POI 不进数据库</td><td>客户端查库默认只回 20 条，60 条要分 3 页拉——纯属自找麻烦。本地 JSON 55KB，<code>require</code> 即用。</td></tr>
+      <tr><td>打卡不用云函数</td><td><code>checkins</code> 权限设"仅创建者可读写"：查询自动过滤成自己的记录，写入自动带 <code>_openid</code>。省掉云函数、登录、token。</td></tr>
+      <tr><td>不调腾讯地点搜索 API</td><td>免费额度每日仅 200 次，还要配合法域名。搜索走本地过滤，够用且零风险。</td></tr>
+      <tr><td>路线折线离线生成</td><td>跑一次脚本存进 <code>routes.js</code>，运行时零 API 调用。手绘 8–12 个拐点都够看。</td></tr>
+    </tbody>
+  </table>
+
+  <h3>三个必须做对的细节</h3>
+  <ol class="steps">
+    <li>
+      <b>气泡别全开</b>
+      <span>用 <code>&lt;cover-view slot="callout" marker-id&gt;</code>。首页只给 3–5 个重点位设 <code>ALWAYS</code>，其余 <code>BYCLICK</code>——30 个气泡同时展开会糊成一片。</span>
+    </li>
+    <li>
+      <b>打卡一定要有降级</b>
+      <span>定位权限可能申请不下来。失败时按钮变成「我到过这里（手动打卡）」，<b>答辩现场就靠这个兜底</b>，不能等到上台才发现。</span>
+    </li>
+    <li>
+      <b>所有数据都要有兜底</b>
+      <span>云开发挂了 → 打卡写 <code>wx.storage</code> 合并展示；图片 404 → 灰底占位；无网络 → 友好提示不白屏。这三种状态必须各留半天做。</span>
+    </li>
+  </ol>
+
+  <div class="keep">
+  <h3>页面结构</h3>
+<pre><code>pages/
+├─ map/          地图首页（tab1，核心，占 40% 工作量）
+├─ routes/       路线页（tab2）
+├─ mine/         我的 / 足迹（tab3）
+├─ detail/       点位详情（非 tab）
+└─ route-detail/ 单条路线详情（非 tab，地图模式）
+components/
+├─ poi-card/     POI 卡片（地图底部卡片、列表复用）
+└─ tag-bar/      分类筛选条（复用）
+data/
+├─ places.js     30–60 个点位
+└─ routes.js     3 条路线的折线坐标</code></pre>
+  </div>
+  <p style="font-size:13.5px;color:var(--muted)">只做 3 个 tab。第四个 tab（发现/攻略）砍掉——和地图内容高度重复，删了不影响演示。</p>
+</section>
+
+<!-- ================= 04 ================= -->
+<section class="sec" id="s4">
+  <div class="sec-head">
+    <span class="sec-num">04</span>
+    <h2>复用清单</h2>
+    <span class="tag">2026-10-28 实测 GitHub API + 源码</span>
+  </div>
+  <p class="lead">结论先放：<strong>有现成轮子，但只有一个能合法拿来用。</strong>其余项目只做"看着它写"。</p>
+
+  <table class="reuse">
+    <thead><tr><th>项目</th><th>技术栈</th><th>许可证</th><th>复用</th><th>说明</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><a href="https://github.com/Volcano-Yang/map-marker-miniprogram">map-marker-miniprogram</a><br><span class="chip plain">87★</span></td>
+        <td>原生 JS + 云开发</td>
+        <td><span class="chip ok">Apache-2.0</span></td>
+        <td><strong>高 · 首选基座</strong></td>
+        <td>就是"标点地图"模板：分类图标 / 列表 / 搜索 / 详情 / 导航全有，城市中心点是一个配置项。代码有瑕疵但结构对。</td>
+      </tr>
+      <tr>
+        <td><a href="https://github.com/Rin-Ling/LYWL">LYWL 洛阳文旅</a><br><span class="chip plain">2★</span></td>
+        <td>原生 TS + NestJS</td>
+        <td><span class="chip no">无 License</span></td>
+        <td>中 · 产品参考</td>
+        <td>最像我们要做的产品：四个 tab、古风手绘地图标点、POI 字段模型、需求文档齐全。但自带一整套后端 + 假登录，只能借鉴思路。</td>
+      </tr>
+      <tr>
+        <td><a href="https://github.com/Keysqiu/NFU-Guide-Map">NFU-Guide-Map</a><br><span class="chip plain">MIT</span></td>
+        <td>原生 TS + gulp</td>
+        <td><span class="chip ok">MIT</span></td>
+        <td>中 · 数据管线</td>
+        <td>配置化 marker 样式、Excel→JSON + pandas 清洗管线可抄思路。7 年未更新；<b>图片明确禁止盗用</b>。</td>
+      </tr>
+      <tr>
+        <td><a href="https://github.com/Mayandev/wetour">wetour</a><br><span class="chip plain">77★</span></td>
+        <td>Taro + 云开发</td>
+        <td><span class="chip no">无 License</span></td>
+        <td>中 · 打卡逻辑</td>
+        <td>打卡 + 行程 + 评论最完整。Taro 锁死 1.3.18，别拿它当基座。</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>基座适配清单（具体到文件）</h3>
+  <table>
+    <thead><tr><th style="width:22%">动作</th><th style="width:30%">位置</th><th>说明</th></tr></thead>
+    <tbody>
+      <tr><td>改配置</td><td><code>miniprogram/config.js</code></td><td>中心点 → 湘潭（约 112.94 / 27.85）、appName、envID、<code>default_scale</code> 调 11–12</td></tr>
+      <tr><td>换数据源</td><td><code>pages/map/map.js</code> 的 <code>getMarkerData</code></td><td>云函数 <code>getStore</code> → <code>require('../../data/places.js')</code>；三分法分类 → 六分类</td></tr>
+      <tr><td>复用详情页</td><td><code>pages/info</code></td><td>换字段绑定即可；补"导航 / 打卡 / 本地提示"</td></tr>
+      <tr><td>复用列表与搜索</td><td><code>pages/allList</code>、<code>pages/search</code></td><td>列表 = 路线点位列表；搜索改本地过滤</td></tr>
+      <tr><td>砍掉</td><td><code>pages/add</code>、<code>pages/share</code>、<code>painter/</code>、<code>cloudfunctions/*</code></td><td>上传 / 海报 / 分享 / 管理员都不做，能省 500KB+ 和一堆坑</td></tr>
+      <tr><td>修 bug</td><td><code>map.js:83</code></td><td><code>if (res.result.errMsg = "ok")</code> 是赋值不是比较</td></tr>
+      <tr><td>换废弃 API</td><td><code>map.js:270</code></td><td><code>wx.getUserProfile</code> 已废弃 → 删登录逻辑，直接用 openid</td></tr>
+    </tbody>
+  </table>
+  <p style="font-size:13.5px;color:var(--muted)">如果适配超过 1.5 天，<b>果断放弃基座、按本方案自建</b>（5 个页面约 1500 行，AI 辅助 2 天能出）。基座是省时间的，不是供起来的。</p>
+
+  <div class="warn">
+    <span class="t">⚠ 许可证红线</span>
+    <b>Apache-2.0</b>：可以用、可以改，但必须保留 <code>LICENSE</code>、README 注明来源。<br>
+    <b>MIT</b>：可改可商用，但 NFU 的图片明确"版权所有，禁止盗用"，一张都别拿。<br>
+    <b>无 License = 保留所有权利</b>：LYWL / wetour / scenery <b>不能整段复制进大创项目</b>（涉及结题、软著原创性）。只做"看着它写"。<br>
+    商业 App 的 UI 可以学信息层级，不要 1:1 复刻视觉。
+  </div>
+</section>
+
+<!-- ================= 05 ================= -->
+<section class="sec" id="s5">
+  <div class="sec-head">
+    <span class="sec-num">05</span>
+    <h2>数据方案</h2>
+    <span class="tag">大创的核心竞争力，也最耗时间</span>
+  </div>
+
+  <p><strong>目标：</strong>P0 30 个点（撑满地图、够 3 条路线），冲刺 60 个；3 条路线，每条 5–7 个点。</p>
+
+  <h3>先定名单，再补坐标</h3>
+  <table class="narrow">
+    <thead><tr><th>分类</th><th>点位</th></tr></thead>
+    <tbody>
+      <tr><td>景点 / 古迹</td><td>万楼、观湘门、文庙、海会古寺、大唐兴寺、天主堂、昭山、白石公园、雨湖公园、和平公园、菊花塘公园、湘潭之光、望衡亭</td></tr>
+      <tr><td>古镇 / 街区</td><td>窑湾古镇、十八总、杨梅洲、莲城步行街、万达广场、步步高广场</td></tr>
+      <tr><td>红色</td><td>韶山毛泽东故居、铜像广场、纪念馆、滴水洞、韶峰、乌石彭德怀故居</td></tr>
+      <tr><td>学府</td><td>湘潭大学、湖南科技大学、湖南工程学院</td></tr>
+      <tr><td>美食</td><td>灯芯糕、脑髓卷、湘潭米粉、毛氏红烧肉、槟榔、湘莲、火焙鱼（挂到具体店铺/街区）</td></tr>
+    </tbody>
+  </table>
+  <p style="font-size:13.5px;color:var(--muted)">30 个 P0 点建议配比：景点 12 + 古镇街区 6 + 红色 6 + 学府 3 + 美食 3。</p>
+
+  <div class="keep">
+  <h3>字段设计（<code>data/places.js</code>）</h3>
+<pre><code>{
+  id: <span class="s">'wanlou'</span>,
+  name: <span class="s">'万楼'</span>,
+  category: <span class="s">'scenic'</span>,        <span class="c">// scenic / food / oldtown / red / school</span>
+  tags: [<span class="s">'地标'</span>, <span class="s">'夜景'</span>],
+  lat: <span class="k">27.8712</span>, lng: <span class="k">112.9445</span>,   <span class="c">// 必须 GCJ-02，与地图组件一致</span>
+  cover: <span class="s">'cloud://xxx/wanlou.jpg'</span>,
+  summary: <span class="s">'一句话（≤30 字，卡片显示）'</span>,
+  intro: <span class="s">'80–120 字简介'</span>,
+  localTip: <span class="s">'本地人提示（傍晚去，江风+灯光最好）'</span>,
+  address: <span class="s">'湘潭市雨湖区…'</span>,
+  openTime: <span class="s">'08:00-18:00 / 全天'</span>,
+  durationMin: <span class="k">60</span>,
+  routeIds: [<span class="s">'oldtown'</span>]
+}</code></pre>
+  </div>
+
+  <h3>五步采集</h3>
+  <ol class="steps">
+    <li><b>定名单</b><span>0.5 天，确认 30 个 P0 点。</span></li>
+    <li><b>拿坐标</b><span>0.5 天。用腾讯位置服务「坐标拾取器」手工点，30 个约 1.5 小时，最稳。别在小程序里调地点搜索 API（200 次/日）。</span></li>
+    <li><b>写文案</b><span>1.5 天，每人 10 个点。文案质量决定答辩观感，别抄百科。</span></li>
+    <li><b>配图</b><span>1 天。统一裁 4:3、压到 150KB 内，传云存储；<code>places.js</code> 只存 fileID。</span></li>
+    <li><b>转 JSON</b><span>0.5 天。Excel 维护 → 20 行脚本导出 <code>places.js</code>（可借鉴 NFU 的 <code>example/</code> 管线）。</span></li>
+  </ol>
+
+  <div class="note">
+    <span class="t">图片版权怎么写</span>
+    优先自己拍 / 官方公众号图（注明来源）/ Unsplash 类免费图。文档里写明"演示用图，正式上线前替换或取得授权"——老师问起来这是加分项，不是减分项。
+  </div>
+</section>
+
+<!-- ================= 06 ================= -->
+<section class="sec" id="s6">
+  <div class="sec-head">
+    <span class="sec-num">06</span>
+    <h2>12 天排期</h2>
+    <span class="tag">每天都要能跑起来看到东西</span>
+  </div>
+  <p class="lead">假设 3 人、每天有效投入 3–4 小时。按半天为最小单位，<strong>当天没有可运行的产出，就算这天没过</strong>。</p>
+
+  <div class="miles">
+    <div class="mile"><div class="d">10.31<small>D3</small></div><div class="n">地图 + 30 个真实点 + 详情页跑通</div><div class="s">“能看了”</div></div>
+    <div class="mile"><div class="d">11.03<small>D6</small></div><div class="n">打卡完成，功能全链路打通</div><div class="s">“功能齐了”</div></div>
+    <div class="mile"><div class="d">11.05<small>D8</small></div><div class="n">功能冻结，只做内容和文档</div><div class="s">“禁止改功能”</div></div>
+    <div class="mile"><div class="d">11.08<small>D11</small></div><div class="n">彩排定稿，代码打 tag 备份</div><div class="s">“一切定稿”</div></div>
+  </div>
+
+  <ol class="tl">
+    <li><span class="date">10.28 晚 · D0</span><span class="body"><b>定方案、建仓库、开通云开发</b>申请 AppID、克隆基座跑通地图</span><span class="who">全员</span></li>
+    <li><span class="date">10.29 · D1</span><span class="body"><b>地图页骨架</b>湘潭中心 + 20 个假 marker + 点击卡片</span><span class="who">前端 A</span></li>
+    <li><span class="date">10.30 · D2</span><span class="body"><b>六分类筛选 + 气泡样式定稿</b>同时定 30 个点位名单</span><span class="who">A / C</span></li>
+    <li><span class="date">10.31 · D3</span><span class="body"><b>真实坐标入库 + 详情页 + 导航</b>项目从"demo"变成"能用"</span><span class="who">C / 前端 B</span></li>
+    <li><span class="date">11.01 · D4</span><span class="body"><b>路线页 + polyline + 序号 marker</b>先用直线连，D7 再换真实路径</span><span class="who">前端 A</span></li>
+    <li><span class="date">11.02 · D5</span><span class="body"><b>打卡全链路</b>定位 + 距离判定 + 云数据库写入 + 手动降级</span><span class="who">前端 B</span></li>
+    <li><span class="date">11.03 · D6</span><span class="body"><b>我的页 / 足迹 / 完成度</b>地图 → 详情 → 打卡数据流打通</span><span class="who">前端 B</span></li>
+    <li><span class="date">11.04 · D7</span><span class="body"><b>统一 UI</b>tokens 变量、空态 / 加载态 / 失败态、图标</span><span class="who">全体</span></li>
+    <li class="mark"><span class="date">11.05 · D8</span><span class="body"><b>功能冻结</b>真机测试、marker 性能、机型兼容、bug 清零</span><span class="who">全体</span></li>
+    <li><span class="date">11.06 · D9</span><span class="body"><b>内容冲刺</b>补到 60 个点 / 文案润色 / 图片补齐</span><span class="who">C</span></li>
+    <li><span class="date">11.07 · D10</span><span class="body"><b>答辩材料</b>PPT 10–12 页、90 秒演示脚本、录屏、README</span><span class="who">C + 全员</span></li>
+    <li><span class="date">11.08 · D11</span><span class="body"><b>彩排 3 遍</b>录屏定稿、代码冻结、打 tag + 备份</span><span class="who">全体</span></li>
+    <li><span class="date">11.09 · D12</span><span class="body"><b>交付缓冲</b>只修致命 bug，补文档</span><span class="who">全员</span></li>
+  </ol>
+</section>
+
+<!-- ================= 07 ================= -->
+<section class="sec" id="s7">
+  <div class="sec-head">
+    <span class="sec-num">07</span>
+    <h2>分工</h2>
+    <span class="tag">3 人，一人一块，不交叉</span>
+  </div>
+
+  <div class="roles">
+    <div class="role">
+      <div class="r">ROLE A</div>
+      <h4>地图前端</h4>
+      <p>地图页、路线页、marker / polyline / 气泡、性能调优。</p>
+      <div class="out">交付：pages/map · pages/routes · components/tag-bar</div>
+    </div>
+    <div class="role">
+      <div class="r">ROLE B</div>
+      <h4>交互前端</h4>
+      <p>详情页、我的页、打卡、云数据库、全局状态与兜底。</p>
+      <div class="out">交付：pages/detail · pages/mine · utils/*</div>
+    </div>
+    <div class="role">
+      <div class="r">ROLE C</div>
+      <h4>数据 + 文档</h4>
+      <p>30→60 个点采集、文案、图片、PPT、演示脚本、README。</p>
+      <div class="out">交付：data/* · docs/* · 答辩材料</div>
+    </div>
+  </div>
+
+  <h3>协作规则</h3>
+  <ol class="steps">
+    <li><b>一个 main 分支</b><span>每天结束前合并，保证当天代码能运行。宁可晚半小时下班，不要留"明天再合"。</span></li>
+    <li><b>两人不碰同一文件</b><span>公共文件（app.json / app.wxss / tokens.wxss）改动前先在群里说一声。</span></li>
+    <li><b>每天 15 分钟站会</b><span>昨天完成 / 今天目标 / 卡在哪。卡超过半天的事立刻说，不要自己硬扛。</span></li>
+    <li><b>每天一张真机截图</b><span>存 <code>docs/screenshots/</code>，最后做 PPT 和录屏直接取材，不用返工。</span></li>
+  </ol>
+</section>
+
+<!-- ================= 08 ================= -->
+<section class="sec" id="s8">
+  <div class="sec-head">
+    <span class="sec-num">08</span>
+    <h2>风险与预案</h2>
+    <span class="tag">2026-10 核实版，不是网上抄的</span>
+  </div>
+
+  <table>
+    <thead><tr><th style="width:30%">风险</th><th style="width:10%">概率</th><th>预案</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>个人主体选不了「旅游-景区服务」类目</td>
+        <td><span class="chip no">确定</span></td>
+        <td><b>本来就不上架。</b>开发版 / 体验版 + 手机投屏答辩；文档写"拟以企业主体上线"。</td>
+      </tr>
+      <tr>
+        <td><code>wx.getLocation</code> 后台申请不下来</td>
+        <td><span class="chip no">高</span></td>
+        <td>2022-07 后须在 <code>app.json</code> 声明 <code>requiredPrivateInfos</code> 并在后台「接口设置」申请。个人主体可用「工具-信息查询」类目申请（场景含地理打卡），<b>但能否通过以后台为准</b>——所以手动打卡降级是必做项。</td>
+      </tr>
+      <tr>
+        <td>云开发免费环境有坑</td>
+        <td><span class="chip mid">中</span></td>
+        <td>免费环境活动至 2026-12-31、发布后 15 天到期。先把本地 JSON + storage 跑通，云只做"能上就上"的增强。</td>
+      </tr>
+      <tr>
+        <td>主包 2MB 超限</td>
+        <td><span class="chip no">高</span></td>
+        <td>图片全部走云存储，包内只留图标和 ≤1 张示例图。</td>
+      </tr>
+      <tr>
+        <td>基座代码老旧 / 有 bug</td>
+        <td><span class="chip mid">中</span></td>
+        <td>1.5 天没改顺就自建，别在别人的烂代码上熬。</td>
+      </tr>
+      <tr>
+        <td>marker 太多导致卡顿</td>
+        <td><span class="chip mid">中</span></td>
+        <td>每分类 ≤15 个；ALWAYS 气泡只给重点位；预留点聚合开关。</td>
+      </tr>
+      <tr>
+        <td>抄代码导致软著 / 原创性存疑</td>
+        <td><span class="chip mid">中</span></td>
+        <td>只用 Apache-2.0 / MIT 并保留声明；无 License 项目只参考。</td>
+      </tr>
+      <tr>
+        <td>图片侵权</td>
+        <td><span class="chip mid">中</span></td>
+        <td>自拍 / 授权图，或明确标注"演示用图"。</td>
+      </tr>
+      <tr>
+        <td>队友掉队</td>
+        <td><span class="chip mid">中</span></td>
+        <td>任务粒度 ≤1 天；D8 功能冻结兜底。</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ================= 09 ================= -->
+<section class="sec" id="s9">
+  <div class="sec-head">
+    <span class="sec-num">09</span>
+    <h2>验收标准</h2>
+    <span class="tag">Definition of Done</span>
+  </div>
+
+  <div class="dod">
+    <div class="dod-col">
+      <h4>功能 · 一条都不能断</h4>
+      <ul>
+        <li>真机打开，3 秒内看到湘潭地图和 ≥30 个 marker</li>
+        <li>六分类切换正确、不卡顿</li>
+        <li>点 marker → 卡片 → 详情 → 导航，全链路无断点</li>
+        <li>3 条路线可切换，polyline 与序号正确</li>
+        <li>允许定位时打卡成功；拒绝定位时可手动打卡</li>
+        <li>杀进程重进记录仍在，换设备能拉回云端记录</li>
+      </ul>
+    </div>
+    <div class="dod-col">
+      <h4>非功能 · 答辩不出丑</h4>
+      <ul>
+        <li>主包 &lt; 2MB，冷启动 &lt; 3s</li>
+        <li>iOS + Android 各 1 台真机验证</li>
+        <li>无网络时友好提示，不白屏</li>
+        <li>控制台无报错</li>
+        <li>代码仓库 README：如何导入、如何跑、如何换城市</li>
+        <li>演示视频 60–90s + PPT 10–12 页 + 500 字项目简介</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 10 ================= -->
+<section class="sec" id="s10">
+  <div class="sec-head">
+    <span class="sec-num">10</span>
+    <h2>今晚就能开始的三件事</h2>
+    <span class="tag">总计约 1.5 小时</span>
+  </div>
+
+  <div class="today">
+    <div>
+      <div class="big">01</div>
+      <h4>注册小程序</h4>
+      <p>mp.weixin.qq.com → 个人主体 → 拿 AppID；顺手在「开发管理-云开发」建免费环境。</p>
+      <div class="time">约 10 分钟</div>
+    </div>
+    <div>
+      <div class="big">02</div>
+      <h4>建仓库、克隆基座</h4>
+      <p><code>git init</code>；<code>git clone --depth 1</code> 基座到 <code>_ref</code>；开发者工具导入 <code>miniprogram/</code>，填 AppID / envID，中心点改湘潭。</p>
+      <div class="time">约 20 分钟</div>
+    </div>
+    <div>
+      <div class="big">03</div>
+      <h4>跑通最小地图</h4>
+      <p>看到湘潭地图 + 5 个硬编码 marker，第一天就算成功。</p>
+      <div class="time">约 1 小时</div>
+    </div>
+  </div>
+
+  <h3>附 · 备选名称</h3>
+  <div class="names">
+    <div><b>潭州漫游</b><span>湘潭古称"潭州"，有文化感</span></div>
+    <div><b>点湘</b><span>"标点地图"+"湘"，短、好记、好做 logo</span></div>
+    <div><b>湘潭拾点</b><span>拾起一个个点</span></div>
+    <div><b>莲城打卡</b><span>湘潭别称"莲城"，直白</span></div>
+  </div>
+</section>
+
+<footer>
+  <span>湘潭「标点地图」文旅小程序 · 12 天冲刺方案 v1.1</span>
+  <span>2026-10-28 · 3 人团队 · 交付 2026-11-09</span>
+</footer>
+
+</div>
+</body>
+</html>

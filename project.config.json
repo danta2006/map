@@ -1,0 +1,26 @@
+{
+  "description": "湘潭「标点地图」文旅小程序",
+  "miniprogramRoot": "miniprogram/",
+  "compileType": "miniprogram",
+  "appid": "wx8f72fd67cbda3aa9",
+  "projectname": "xiangtan-map",
+  "setting": {
+    "urlCheck": false,
+    "es6": true,
+    "enhance": true,
+    "postcss": true,
+    "minified": true,
+    "newFeature": true,
+    "coverView": true,
+    "nodeModules": false,
+    "autoAudits": false,
+    "showShadowRootInWxmlPanel": true,
+    "checkInvalidKey": true,
+    "ignoreUploadUnusedFiles": true
+  },
+  "condition": {},
+  "editorSetting": {
+    "tabIndent": "insertSpaces",
+    "tabSize": 2
+  }
+}

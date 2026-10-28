@@ -1,0 +1,520 @@
+.page {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  background: var(--paper);
+}
+
+.map {
+  width: 100%;
+  height: 100%;
+}
+
+/* ---------- 顶部面板 ---------- */
+.header {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 10;
+  padding-bottom: 16rpx;
+  background: rgba(251, 248, 242, 0.97);
+  border-radius: 0 0 28rpx 28rpx;
+  box-shadow: 0 6rpx 24rpx rgba(29, 28, 25, 0.08);
+}
+
+.brand-row {
+  display: flex;
+  align-items: center;
+  padding: 10rpx 32rpx 0;
+}
+
+/* ---------- 城市切换 ---------- */
+.city-pill {
+  display: flex;
+  align-items: center;
+  padding: 8rpx 18rpx;
+  margin-right: 16rpx;
+  border-radius: 999rpx;
+  background: #f2ece0;
+  border: 1rpx solid var(--line);
+}
+
+.city-pill.open {
+  background: var(--red);
+  border-color: var(--red);
+}
+
+.city-pill-name {
+  font-size: 30rpx;
+  font-weight: 700;
+  color: var(--ink);
+  line-height: 1.2;
+}
+
+.city-pill.open .city-pill-name {
+  color: #fff;
+}
+
+.city-pill-caret {
+  margin-left: 8rpx;
+  font-size: 20rpx;
+  color: var(--muted);
+  line-height: 1;
+}
+
+.city-pill.open .city-pill-caret {
+  color: #fff;
+}
+
+.city-panel {
+  position: absolute;
+  top: 100%;
+  left: 32rpx;
+  width: 320rpx;
+  padding: 8rpx 0 4rpx;
+  background: #fffdf8;
+  border-radius: 16rpx;
+  border: 1rpx solid var(--line);
+  box-shadow: 0 12rpx 32rpx rgba(29, 28, 25, 0.16);
+  z-index: 30;
+}
+
+.city-option {
+  display: flex;
+  align-items: center;
+  padding: 16rpx 22rpx;
+}
+
+.city-option.active {
+  background: #f7f1e5;
+}
+
+.city-option-name {
+  font-size: 26rpx;
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.city-option-count {
+  flex: 1;
+  margin-left: 12rpx;
+  font-size: 20rpx;
+  color: var(--muted);
+}
+
+.city-option-check {
+  font-size: 24rpx;
+  color: var(--red);
+}
+
+.city-panel-tip {
+  padding: 10rpx 22rpx 12rpx;
+  font-size: 19rpx;
+  color: #a49c8c;
+  border-top: 1rpx solid var(--line);
+}
+
+/* ---------- 空城市占位 ---------- */
+.empty {
+  position: absolute;
+  left: 60rpx;
+  right: 60rpx;
+  top: 45%;
+  z-index: 12;
+  padding: 36rpx 28rpx;
+  background: rgba(255, 253, 248, 0.97);
+  border: 1rpx solid var(--line);
+  border-radius: 20rpx;
+  box-shadow: 0 12rpx 32rpx rgba(29, 28, 25, 0.12);
+  text-align: center;
+}
+
+.empty-title {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.empty-sub {
+  margin-top: 8rpx;
+  font-size: 22rpx;
+  color: var(--muted);
+}
+
+.empty-btn {
+  display: inline-block;
+  margin-top: 20rpx;
+  padding: 10rpx 30rpx;
+  border-radius: 999rpx;
+  background: var(--red);
+  color: #fff;
+  font-size: 23rpx;
+}
+
+.brand {
+  display: flex;
+  flex-direction: column;
+}
+
+.brand-name {
+  font-size: 34rpx;
+  font-weight: 700;
+  letter-spacing: 1rpx;
+  color: var(--ink);
+  line-height: 1.3;
+}
+
+.brand-sub {
+  margin-top: 2rpx;
+  font-size: 21rpx;
+  color: var(--muted);
+  letter-spacing: 1rpx;
+}
+
+/* ---------- 分类筛选 ---------- */
+.chips {
+  margin-top: 16rpx;
+  white-space: nowrap;
+}
+
+.chips-row {
+  display: inline-flex;
+  padding: 0 24rpx 4rpx;
+}
+
+.chip {
+  margin-right: 12rpx;
+  padding: 10rpx 22rpx;
+  border-radius: 999rpx;
+  background: #fffdf8;
+  border: 1rpx solid var(--line);
+  font-size: 22rpx;
+  color: var(--ink-2);
+  line-height: 1.5;
+}
+
+.chip.active {
+  background: var(--red);
+  border-color: var(--red);
+  color: #fff;
+  font-weight: 600;
+}
+
+/* ---------- 定位按钮 ---------- */
+.locate {
+  position: absolute;
+  right: 32rpx;
+  bottom: 500rpx;
+  z-index: 10;
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: 50%;
+  background: #fffdf8;
+  border: 1rpx solid var(--line);
+  color: var(--red);
+  font-size: 40rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8rpx 20rpx rgba(29, 28, 25, 0.12);
+}
+
+/* ---------- 精选路线入口 ---------- */
+.route-fab {
+  position: absolute;
+  left: 32rpx;
+  bottom: 500rpx;
+  z-index: 10;
+  padding: 14rpx 26rpx;
+  border-radius: 999rpx;
+  background: #fffdf8;
+  border: 1rpx solid var(--line);
+  color: var(--red);
+  font-size: 23rpx;
+  font-weight: 600;
+  box-shadow: 0 8rpx 20rpx rgba(29, 28, 25, 0.12);
+}
+
+/* ---------- 底部点位列表 ---------- */
+.poi-strip {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 15;
+  padding-bottom: calc(18rpx + env(safe-area-inset-bottom));
+  background: linear-gradient(
+    180deg,
+    rgba(251, 248, 242, 0) 0%,
+    rgba(251, 248, 242, 0.9) 26%,
+    rgba(251, 248, 242, 0.98) 100%
+  );
+}
+
+.strip-row {
+  display: inline-flex;
+  padding: 30rpx 24rpx 0;
+}
+
+.strip-card {
+  display: flex;
+  align-items: center;
+  width: 300rpx;
+  margin-right: 16rpx;
+  padding: 16rpx 18rpx;
+  background: #fffdf8;
+  border: 1rpx solid var(--line);
+  border-radius: 18rpx;
+  box-shadow: 0 4rpx 12rpx rgba(29, 28, 25, 0.06);
+}
+
+.strip-card.active {
+  border-color: var(--red);
+  box-shadow: 0 6rpx 16rpx rgba(176, 57, 46, 0.18);
+}
+
+.strip-emoji {
+  font-size: 38rpx;
+  margin-right: 14rpx;
+  line-height: 1;
+}
+
+.strip-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.strip-name {
+  font-size: 25rpx;
+  font-weight: 600;
+  color: var(--ink);
+  line-height: 1.35;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.strip-meta {
+  font-size: 20rpx;
+  color: var(--muted);
+  margin-top: 2rpx;
+}
+
+/* ---------- 底部卡片 ---------- */
+/* ---------- 底部详情面板（可上滑展开） ---------- */
+.sheet {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  background: var(--card);
+  border-radius: 32rpx 32rpx 0 0;
+  box-shadow: 0 -12rpx 40rpx rgba(29, 28, 25, 0.16);
+  transform: translateY(100%);
+  transition: transform 0.28s cubic-bezier(0.25, 0.9, 0.3, 1);
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.sheet.show {
+  pointer-events: auto;
+}
+
+.sheet.dragging {
+  transition: none;
+}
+
+.sheet-grab {
+  padding: 14rpx 0 4rpx;
+  display: flex;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.grab-bar {
+  width: 72rpx;
+  height: 8rpx;
+  border-radius: 4rpx;
+  background: #ddd5c4;
+}
+
+.sheet-head {
+  display: flex;
+  align-items: center;
+  padding: 8rpx 32rpx 0;
+  flex-shrink: 0;
+}
+
+.sheet-emoji {
+  width: 88rpx;
+  height: 88rpx;
+  border-radius: 22rpx;
+  margin-right: 20rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 44rpx;
+  flex-shrink: 0;
+}
+
+.sheet-heading {
+  flex: 1;
+  min-width: 0;
+}
+
+.sheet-title {
+  font-size: 36rpx;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.sheet-meta {
+  margin-top: 4rpx;
+  font-size: 22rpx;
+  color: var(--muted);
+}
+
+.sheet-close {
+  width: 56rpx;
+  height: 56rpx;
+  line-height: 52rpx;
+  text-align: center;
+  font-size: 36rpx;
+  color: var(--muted);
+  flex-shrink: 0;
+}
+
+.sheet-hint {
+  text-align: center;
+  font-size: 20rpx;
+  color: #a49c8c;
+  letter-spacing: 1rpx;
+  padding: 10rpx 0 0;
+  flex-shrink: 0;
+}
+
+.sheet-body {
+  flex: 1;
+  min-height: 0;
+  padding: 0 32rpx;
+  box-sizing: border-box;
+}
+
+.sheet-summary {
+  margin-top: 16rpx;
+  font-size: 28rpx;
+  color: var(--ink-2);
+  line-height: 1.6;
+}
+
+.facts {
+  margin-top: 12rpx;
+}
+
+.fact {
+  display: flex;
+  padding: 12rpx 0;
+  border-bottom: 1rpx dashed var(--line);
+}
+
+.fact-k {
+  width: 96rpx;
+  font-size: 22rpx;
+  color: var(--muted);
+  flex-shrink: 0;
+}
+
+.fact-v {
+  flex: 1;
+  font-size: 24rpx;
+  color: var(--ink-2);
+  line-height: 1.5;
+}
+
+.fact-v.ok {
+  color: var(--teal);
+  font-weight: 600;
+}
+
+.hl {
+  margin-top: 28rpx;
+  font-size: 21rpx;
+  color: var(--muted);
+  letter-spacing: 3rpx;
+}
+
+.para {
+  margin-top: 8rpx;
+  font-size: 26rpx;
+  color: var(--ink-2);
+  line-height: 1.75;
+  white-space: pre-wrap;
+}
+
+.checked-banner {
+  margin-top: 24rpx;
+  padding: 18rpx 24rpx;
+  background: #e9f4ee;
+  border-radius: 16rpx;
+  color: var(--teal);
+  font-size: 24rpx;
+}
+
+.body-pad {
+  height: 40rpx;
+}
+
+.sheet-foot {
+  display: flex;
+  padding: 18rpx 32rpx calc(18rpx + env(safe-area-inset-bottom));
+  border-top: 1rpx solid var(--line);
+  background: var(--card);
+  flex-shrink: 0;
+}
+
+.sheet-foot .btn {
+  flex: 1;
+}
+
+.sheet-foot .btn + .btn {
+  margin-left: 16rpx;
+}
+
+/* ---------- 点位图片气泡（圆形，不要方框） ---------- */
+.poi-bubble {
+  width: 96rpx;
+  height: 96rpx;
+  border-radius: 50%;
+  overflow: hidden;
+  box-shadow: 0 6rpx 16rpx rgba(29, 28, 25, 0.22);
+}
+
+.bubble-img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+}
+
+/* 分类色点（图例）：每个 chip 前的小圆点 */
+.chip {
+  display: inline-flex;
+  align-items: center;
+}
+
+.chip-dot {
+  width: 16rpx;
+  height: 16rpx;
+  border-radius: 50%;
+  margin-right: 8rpx;
+  flex-shrink: 0;
+  box-shadow: 0 0 0 1rpx rgba(29, 28, 25, 0.06);
+}
+
+.chip.active .chip-dot {
+  box-shadow: 0 0 0 2rpx rgba(255, 255, 255, 0.92);
+}
