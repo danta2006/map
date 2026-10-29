@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<title>标点地图 · 功能演示</title>
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body { font-family: "Microsoft YaHei","PingFang SC",-apple-system,sans-serif; color: #1d1c19; background: #fbf8f2; }
+  .page {
+    position: relative;
+    width: 297mm; height: 210mm;
+    margin: 0 auto;
+    padding: 18mm 16mm 14mm;
+    display: flex; gap: 12mm;
+    background: #fbf8f2;
+    border-bottom: 1px solid #e5ddce;
+    overflow: hidden;
+    page-break-after: always;
+  }
+  .page:last-child { page-break-after: auto; }
+  .left { flex: 1 1 42%; display: flex; flex-direction: column; }
+  .right { flex: 1 1 58%; display: flex; align-items: center; justify-content: center; }
+
+  .kicker { color: #b0392e; font-size: 11pt; letter-spacing: 3px; margin-bottom: 4mm; }
+  h2 { font-size: 26pt; line-height: 1.25; margin: 0 0 7mm; color: #1d1c19; }
+  h2::after { content: ""; display: block; width: 22mm; height: 2.2mm; background: #b0392e; margin-top: 4mm; }
+  p { font-size: 12.5pt; line-height: 1.85; margin: 0 0 4mm; color: #3f3c35; }
+  .lead { font-size: 14pt; line-height: 1.8; }
+  ul { margin: 0 0 4mm; padding-left: 6mm; }
+  li { font-size: 12.5pt; line-height: 1.9; margin-bottom: 1.6mm; color: #3f3c35; }
+  strong { color: #1d1c19; }
+  .note { font-size: 10.5pt; color: #736d61; margin-top: 2mm; }
+  .hint { margin-top: auto; font-size: 10.5pt; color: #8a8375; }
+
+  .stats { display: flex; gap: 10mm; margin: 8mm 0 6mm; }
+  .stats div { display: flex; flex-direction: column; }
+  .stats b { font-size: 30pt; color: #b0392e; line-height: 1; }
+  .stats span { font-size: 11pt; color: #736d61; margin-top: 1.5mm; }
+
+  .shot { height: 158mm; display: flex; align-items: center; justify-content: center; }
+  .shot img { height: 100%; width: auto; border-radius: 5mm; box-shadow: 0 3mm 8mm rgba(60,45,20,.16); }
+  .shots { height: 158mm; display: flex; gap: 7mm; align-items: center; justify-content: center; }
+  .shots .shot { height: 100%; }
+  .shots .shot img { height: 100%; max-width: 62mm; }
+
+  .checks { display: grid; grid-template-columns: 1fr 1fr; gap: 2.5mm 8mm; margin: 3mm 0 6mm; }
+  .checks label { font-size: 11.5pt; color: #3f3c35; }
+  .askbox { border: 1.5px dashed #cfc4ae; border-radius: 6mm; padding: 10mm; background: #fffdf8; }
+  .askbox h3 { margin: 0 0 5mm; font-size: 15pt; color: #b0392e; }
+  .askbox p { font-size: 12pt; margin-bottom: 3.5mm; }
+  .askbox .tiny { font-size: 10pt; color: #8a8375; margin-top: 6mm; }
+
+  .pagenum { position: absolute; right: 14mm; bottom: 8mm; font-size: 10pt; color: #b3aa97; }
+
+  @page { size: A4 landscape; margin: 0; }
+  @media print {
+    body { background: #fff; }
+    .page { width: 297mm; height: 210mm; margin: 0; border: none; }
+  }
+</style>
+</head>
+<body>
+
+<section class="page">
+  <div class="left">
+    <div class="kicker">功能演示 · 组内讨论用</div>
+    <h2>长株潭「标点地图」</h2>
+    
+    <p class="lead">一句话：把<strong>湘潭、长沙、株洲</strong>值得去的地方标在一张地图上，点开有图有介绍，还能排路线、打卡。</p>
+    <div class="stats">
+      <div><b>51</b><span>个点位</span></div>
+      <div><b>7</b><span>条推荐路线</span></div>
+      <div><b>3</b><span>座城市</span></div>
+    </div>
+    <p class="note">微信小程序 · 体验版 0.8.8 · 2026 年 10 月</p>
+    <p class="hint">最后一页想听听大家觉得下一版该加什么。</p>
+  
+  </div>
+  <div class="right"><div class="shot"><img src="screenshots/demo/01-map.png" alt="地图首页" /></div></div>
+  <div class="pagenum">1</div>
+</section>
+
+<section class="page">
+  <div class="left">
+    <div class="kicker">第一眼</div>
+    <h2>打开就是一张地图</h2>
+    
+    <p>进小程序不需要登录，直接看到<strong>一座城市的全部点位</strong>。红色图钉是景点，其他颜色区分古镇、红色景点、学校、美食、酒店。</p>
+    <ul>
+      <li>左上角切城市：湘潭 / 长沙 / 株洲</li>
+      <li>顶部一排色块：按类型筛选，只看想看的</li>
+      <li>红色数字是「我的行程」，点进去看自己排的路线</li>
+    </ul>
+  
+  </div>
+  <div class="right"><div class="shot"><img src="screenshots/demo/01-map.png" alt="地图首页" /></div></div>
+  <div class="pagenum">2</div>
+</section>
+
+<section class="page">
+  <div class="left">
+    <div class="kicker">看看长什么样</div>
+    <h2>放大之后，图钉上会浮出实景照片</h2>
+    
+    <p>地图放大到一定级别，每个点位的图钉上方会浮出一张<strong>圆形实景照片</strong>，不用点进去就知道那是什么地方。</p>
+    <ul>
+      <li>照片和下面的图钉是一体的，点哪个都行</li>
+      <li>图钉挨得太近时照片会自动收起，避免糊成一团</li>
+      <li>缩回去照片就消失，地图保持干净</li>
+    </ul>
+  
+  </div>
+  <div class="right"><div class="shot"><img src="screenshots/demo/02-bubbles.png" alt="图钉上的实景照片" /></div></div>
+  <div class="pagenum">3</div>
+</section>
+
+<section class="page">
+  <div class="left">
+    <div class="kicker">点开看</div>
+    <h2>点一下点位，看详细介绍</h2>
+    
+    <p>点图钉 → 底部弹出这张卡片：叫什么、属于哪类、建议玩多久、一句话介绍。</p>
+    <p>卡片往上滑是<strong>完整详情页</strong>：</p>
+    <ul>
+      <li>大图、开放时间、地址</li>
+      <li>「距你 4.3 公里」——到附近才能打卡</li>
+      <li>底部两个按钮：<b>导航</b>（调起地图）、<b>到这里打卡</b></li>
+    </ul>
+  
+  </div>
+  <div class="right"><div class="shots">
+        <div class="shot"><img src="screenshots/demo/03-card.png" alt="底部卡片" /></div>
+        <div class="shot"><img src="screenshots/demo/05-detail.png" alt="详情页" /></div>
+      </div></div>
+  <div class="pagenum">4</div>
+</section>
+
+<section class="page">
+  <div class="left">
+    <div class="kicker">不想自己排？</div>
+    <h2>跟着推荐路线逛</h2>
+    
+    <p>已经配好 <strong>7 条路线</strong>：老城湘江线、红色韶山线、河西文化线……每条线在地图上画出来，沿着<strong>真实道路</strong>走，不是两点连直线。</p>
+    <ul>
+      <li>底部列出这一路经过哪几个点，点一个看介绍</li>
+      <li>切到「交通」能看到每一段走路/公交/打车要多久</li>
+      <li>点地图上的线，也会弹出这一段怎么走</li>
+    </ul>
+  
+  </div>
+  <div class="right"><div class="shot"><img src="screenshots/demo/06-routes.png" alt="推荐路线" /></div></div>
+  <div class="pagenum">5</div>
+</section>
+
+<section class="page">
+  <div class="left">
+    <div class="kicker">按自己的节奏</div>
+    <h2>拼一条自己的行程</h2>
+    
+    <p>看到想去的地方，点「＋」加进行程。行程页会把它们<strong>连成一条线</strong>，自动算总时间、总里程。</p>
+    <ul>
+      <li>长按整个卡片上下拖，就能改顺序</li>
+      <li>每段都能选：走路 / 公交地铁 / 打车，时间跟着变</li>
+      <li>已经实测过的路段标「实测」，没测过的标估算</li>
+    </ul>
+  
+  </div>
+  <div class="right"><div class="shots">
+        <div class="shot"><img src="screenshots/demo/07-trip.png" alt="行程地图" /></div>
+        <div class="shot"><img src="screenshots/demo/08-trip-half.png" alt="行程列表" /></div>
+      </div></div>
+  <div class="pagenum">6</div>
+</section>
+
+<section class="page">
+  <div class="left">
+    <div class="kicker">走完一段有反馈</div>
+    <h2>到了能打卡，能看到进度</h2>
+    
+    <p>每个景点可以「打卡」。系统会判断你<strong>是不是真的到了附近</strong>（不同景点范围不同，景区 1 公里、小店 300 米），不是点一下就算。</p>
+    <ul>
+      <li>不在范围内会提示还差多远，可以手动打卡兜底</li>
+      <li>行程页顶部有进度条：「已打卡 1/3」</li>
+      <li>已打卡的站点在地图和列表里都有标记</li>
+    </ul>
+  
+  </div>
+  <div class="right"><div class="shot"><img src="screenshots/demo/07-trip.png" alt="打卡进度" /></div></div>
+  <div class="pagenum">7</div>
+</section>
+
+<section class="page">
+  <div class="left">
+    <div class="kicker">搜索</div>
+    <h2>想找什么，直接搜</h2>
+    
+    <p>搜名字、搜类型、搜拼音都行：</p>
+    <ul>
+      <li>输入「万楼」「wan」「wl」都能找到</li>
+      <li>结果先出一张卡片，看一眼再决定加不加进行程</li>
+      <li>搜「美食」「古镇」这种类型词也行</li>
+    </ul>
+  
+  </div>
+  <div class="right"><div class="shot"><img src="screenshots/demo/09-search.png" alt="搜索" /></div></div>
+  <div class="pagenum">8</div>
+</section>
+
+<section class="page">
+  <div class="left">
+    <div class="kicker">幕后</div>
+    <h2>内容是怎么改的？有个后台</h2>
+    
+    <p>点位、路线、文案都在一个<strong>网页后台</strong>里改，不用碰代码：</p>
+    <ul>
+      <li>改名称、介绍、地址、开放时间</li>
+      <li>调路线经过哪些点、顺序是什么</li>
+      <li>改完点「导出到小程序」，重新上传即可</li>
+      <li>后台还能看用户提交的问题反馈</li>
+    </ul>
+  
+  </div>
+  <div class="right"><div class="shot"><img src="screenshots/demo/10-admin.png" alt="内容后台" /></div></div>
+  <div class="pagenum">9</div>
+</section>
+
+<section class="page">
+  <div class="left">
+    <div class="kicker">想听听组里同学的意见</div>
+    <h2>接下来该加什么？</h2>
+    
+    <p class="lead">这是给<strong>我们自己人</strong>看的问题：下一版你想先做哪个？<strong>勾一下</strong>，在微信里回我就行。</p>
+    <div class="checks">
+      <label>□ 更多点位（先把三城补满）</label>
+      <label>□ 美食：吃什么、多少钱、哪家排队</label>
+      <label>□ 住宿：价位、位置、能不能停车</label>
+      <label>□ 门票价格 / 预约方式</label>
+      <label>□ 公交地铁具体线路和站名</label>
+      <label>□ 语音讲解 / 历史故事</label>
+      <label>□ 拍照打卡 + 生成分享海报</label>
+      <label>□ 和朋友一起编辑同一条行程</label>
+      <label>□ 离线地图（没网也能看）</label>
+      <label>□ 夜游路线 / 亲子路线 / 一日游</label>
+      <label>□ 人流、排队、实时路况</label>
+      <label>□ 后台批量导入、多人协作</label>
+      <label>□ 其他：______________________</label>
+      <label>□ 我最想先要：______________</label>
+    </div>
+    <p class="note">勾完发我微信，一句话也行：<strong>「先做 XX」</strong></p>
+  
+  </div>
+  <div class="right"><div class="askbox">
+        <h3>现在的短板（挑着补）</h3>
+        <p>· 点位只有 51 个，长沙、株洲偏少</p>
+        <p>· 6 家酒店还没有实景图</p>
+        <p>· 交通是提前算好的，没有实时路况</p>
+        <p>· 还没有「我的」页（足迹、完成度）</p>
+        <p>· 图片来自高德，正式发布要换成自己拍的</p>
+        <p class="tiny">时间有限的话，建议先补数据 + 做答辩演示，功能按性价比挑。</p>
+      </div></div>
+  <div class="pagenum">10</div>
+</section>
+</body></html>
