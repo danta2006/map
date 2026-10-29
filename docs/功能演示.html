@@ -51,6 +51,12 @@
   .askbox p { font-size: 12pt; margin-bottom: 3.5mm; }
   .askbox .tiny { font-size: 10pt; color: #8a8375; margin-top: 6mm; }
 
+  .qrbox { text-align: center; }
+  .qr { width: 92mm; height: auto; background: #fff; padding: 4mm; border-radius: 4mm; box-shadow: 0 3mm 8mm rgba(60,45,20,.16); }
+  .qrcap { margin-top: 5mm; font-size: 11.5pt; color: #736d61; line-height: 1.7; }
+  ol.steps { padding-left: 6mm; margin: 0 0 4mm; }
+  ol.steps li { font-size: 12.5pt; line-height: 1.9; margin-bottom: 1.6mm; color: #3f3c35; }
+
   .pagenum { position: absolute; right: 14mm; bottom: 8mm; font-size: 10pt; color: #b3aa97; }
 
   @page { size: A4 landscape; margin: 0; }
@@ -74,11 +80,33 @@
       <div><b>3</b><span>座城市</span></div>
     </div>
     <p class="note">微信小程序 · 体验版 0.8.8 · 2026 年 10 月</p>
-    <p class="hint">最后一页想听听大家觉得下一版该加什么。</p>
+    <p class="hint">第 2 页有体验码，可以先扫码试；最后一页想听大家意见。</p>
   
   </div>
   <div class="right"><div class="shot"><img src="screenshots/demo/01-map.png" alt="地图首页" /></div></div>
   <div class="pagenum">1</div>
+</section>
+
+<section class="page">
+  <div class="left">
+    <div class="kicker">动手试，约 3 分钟</div>
+    <h2>先扫码，进体验版</h2>
+    
+    <p class="lead">微信扫右边的码 → 打开「标点地图」体验版。不用注册，<strong>允许定位</strong>就行（拒绝也能看，只影响「距你多远」和打卡）。</p>
+    <ol class="steps">
+      <li>微信「扫一扫」，或长按识别二维码</li>
+      <li>点「标点地图」进入体验版</li>
+      <li>允许定位 → 左上角切湘潭 / 长沙 / 株洲</li>
+      <li>随手点两个点，加进行程试试</li>
+    </ol>
+    <p class="note">体验二维码 <strong>11 月 5 日前有效</strong>，过期找我再要新的。</p>
+  
+  </div>
+  <div class="right"><div class="qrbox">
+        <img class="qr" src="screenshots/demo/11-qr.png" alt="体验版二维码" />
+        <div class="qrcap">长按识别 / 微信扫一扫</div>
+      </div></div>
+  <div class="pagenum">2</div>
 </section>
 
 <section class="page">
@@ -95,7 +123,7 @@
   
   </div>
   <div class="right"><div class="shot"><img src="screenshots/demo/01-map.png" alt="地图首页" /></div></div>
-  <div class="pagenum">2</div>
+  <div class="pagenum">3</div>
 </section>
 
 <section class="page">
@@ -112,7 +140,7 @@
   
   </div>
   <div class="right"><div class="shot"><img src="screenshots/demo/02-bubbles.png" alt="图钉上的实景照片" /></div></div>
-  <div class="pagenum">3</div>
+  <div class="pagenum">4</div>
 </section>
 
 <section class="page">
@@ -133,7 +161,7 @@
         <div class="shot"><img src="screenshots/demo/03-card.png" alt="底部卡片" /></div>
         <div class="shot"><img src="screenshots/demo/05-detail.png" alt="详情页" /></div>
       </div></div>
-  <div class="pagenum">4</div>
+  <div class="pagenum">5</div>
 </section>
 
 <section class="page">
@@ -150,7 +178,7 @@
   
   </div>
   <div class="right"><div class="shot"><img src="screenshots/demo/06-routes.png" alt="推荐路线" /></div></div>
-  <div class="pagenum">5</div>
+  <div class="pagenum">6</div>
 </section>
 
 <section class="page">
@@ -170,7 +198,7 @@
         <div class="shot"><img src="screenshots/demo/07-trip.png" alt="行程地图" /></div>
         <div class="shot"><img src="screenshots/demo/08-trip-half.png" alt="行程列表" /></div>
       </div></div>
-  <div class="pagenum">6</div>
+  <div class="pagenum">7</div>
 </section>
 
 <section class="page">
@@ -187,7 +215,7 @@
   
   </div>
   <div class="right"><div class="shot"><img src="screenshots/demo/07-trip.png" alt="打卡进度" /></div></div>
-  <div class="pagenum">7</div>
+  <div class="pagenum">8</div>
 </section>
 
 <section class="page">
@@ -204,7 +232,7 @@
   
   </div>
   <div class="right"><div class="shot"><img src="screenshots/demo/09-search.png" alt="搜索" /></div></div>
-  <div class="pagenum">8</div>
+  <div class="pagenum">9</div>
 </section>
 
 <section class="page">
@@ -222,7 +250,7 @@
   
   </div>
   <div class="right"><div class="shot"><img src="screenshots/demo/10-admin.png" alt="内容后台" /></div></div>
-  <div class="pagenum">9</div>
+  <div class="pagenum">10</div>
 </section>
 
 <section class="page">
@@ -259,6 +287,6 @@
         <p>· 图片来自高德，正式发布要换成自己拍的</p>
         <p class="tiny">时间有限的话，建议先补数据 + 做答辩演示，功能按性价比挑。</p>
       </div></div>
-  <div class="pagenum">10</div>
+  <div class="pagenum">11</div>
 </section>
 </body></html>
