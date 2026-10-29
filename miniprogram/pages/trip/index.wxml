@@ -13,6 +13,7 @@
     enable-rotate="{{false}}"
     bindmarkertap="onMarkerTap"
     bindcallouttap="onCalloutTap"
+    bindpolylinetap="onPolylineTap"
     bindtap="onMapTap"
   />
 
@@ -65,6 +66,30 @@
     <view class="empty-sub">搜索景点、美食、酒店，点开介绍卡片就能加入</view>
     <view class="empty-btn" bindtap="onSearchEmpty">🔍 搜索点位</view>
     <view class="empty-btn ghost" bindtap="onGoMap">去地图挑点位</view>
+  </view>
+
+
+  <!-- 点路线弹出的分段卡片：三种交通方式直接切换 -->
+  <view class="seg-card" wx:if="{{legCard}}" style="bottom: {{cardBottom}}px">
+    <view class="seg-card-top">
+      <text class="seg-card-title">{{legCard.fromName}} → {{legCard.toName}}</text>
+      <text class="seg-card-close" catchtap="closeLegCard">×</text>
+    </view>
+    <view class="seg-card-sub">{{legCard.distanceText}}{{legCard.estimated ? ' · 距离估算' : ' · 实测'}}</view>
+    <view class="seg-modes">
+      <view
+        class="seg-mode {{m.active ? 'active' : ''}}"
+        wx:for="{{legCard.modes}}"
+        wx:for-item="m"
+        wx:key="key"
+        data-mode="{{m.key}}"
+        catchtap="onCardModeTap"
+      >
+        <text class="seg-mode-name">{{m.name}}</text>
+        <text class="seg-mode-time">约 {{m.minutes}} 分钟</text>
+      </view>
+    </view>
+    <view class="seg-card-tip">点选一种方式，地图上的线会跟着变</view>
   </view>
 
   <!-- 面板隐藏时露一条底栏，随时可以再展开 -->

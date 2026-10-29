@@ -34,7 +34,10 @@ Page({
     dragHint: '',
     draggingId: '',
     activeId: '',
-    scrollTo: ''
+    scrollTo: '',
+    // 点路线弹出的分段卡片
+    legCard: null,
+    cardBottom: 0
   },
 
   onLoad() {
@@ -356,6 +359,10 @@ Page({
   },
 
   onMapTap() {
+    if (this.data.legCard) {
+      this.closeLegCard();
+      return;
+    }
     if (Date.now() - (this.lastMarkerTapAt || 0) < 250) return;
     if (this.data.activeId) this.setData({ activeId: '' });
   },
@@ -404,6 +411,102 @@ Page({
         this.refresh({ fit: false });
       }
     });
+  },
+
+  /** 点地图上的路线：找出离点击位置最近的一段，弹分段卡片 */
+  onPolylineTap(e) {
+    const d = (e && e.detail) || {};
+    const lat = d.latitude;
+    const lng = d.longitude;
+    if (lat == null || lng == null) return;
+
+    const legs = this.data.legs || [];
+    const stops = this.data.stops || [];
+    let best = -1;
+    let bestDist = Infinity;
+
+    legs.forEach((leg, i) => {
+      const path = leg.path || [];
+      const a = stops[i];
+      const b = stops[i + 1];
+      const pts = path.length > 1
+        ? path.map((pt) => ({ latitude: pt[1], longitude: pt[0] }))
+        : a && b
+          ? [{ latitude: a.latitude, longitude: a.longitude }, { latitude: b.latitude, longitude: b.longitude }]
+          : [];
+      pts.forEach((pt) => {
+        const dy = (pt.latitude - lat) * 111320;
+        const dx = (pt.longitude - lng) * 111320 * Math.cos((lat * Math.PI) / 180);
+        const dist = Math.hypot(dx, dy);
+        if (dist < bestDist) {
+          bestDist = dist;
+          best = i;
+        }
+      });
+    });
+
+    // 800 米内才算点中（线本身不宽，给点容错）
+    if (best >= 0 && bestDist <= 800) this.openLegCard(best);
+  },
+
+  /** 弹出某一段的卡片（三种方式可点选切换） */
+  openLegCard(index) {
+    const leg = (this.data.legs || [])[index];
+    const stops = this.data.stops || [];
+    if (!leg || !stops[index] || !stops[index + 1]) return;
+
+    const card = {
+      index,
+      from: stops[index].id,
+      to: stops[index + 1].id,
+      fromName: stops[index].name,
+      toName: stops[index + 1].name,
+      distanceText: leg.distanceText,
+      estimated: !!(leg.estimated || leg.modes.every((m) => !m.real)),
+      modes: leg.modes.map((m) => ({
+        key: m.key,
+        name: m.name,
+        minutes: m.minutes,
+        active: m.key === leg.modeKey,
+        real: !!m.real
+      }))
+    };
+
+    this.setData({
+      legCard: card,
+      cardBottom: Math.max(80, this.winH - this.data.panelY + 12)
+    });
+  },
+
+  closeLegCard() {
+    this.setData({ legCard: null });
+  },
+
+  /** 卡片里点某种交通方式：改这段的方式并刷新地图折线 */
+  onCardModeTap(e) {
+    const ds = e.currentTarget.dataset;
+    const card = this.data.legCard;
+    if (!card || !ds.mode) return;
+    trip.setMode(card.from, card.to, ds.mode);
+    this.refresh({ fit: false });
+    // refresh 后重新算卡片里的选中态
+    setTimeout(() => {
+      const leg = (this.data.legs || [])[card.index];
+      if (!leg) return;
+      const fresh = this.data.legCard;
+      if (!fresh || fresh.index !== card.index) return;
+      this.setData({
+        legCard: Object.assign({}, fresh, {
+          modes: leg.modes.map((m) => ({
+            key: m.key,
+            name: m.name,
+            minutes: m.minutes,
+            active: m.key === leg.modeKey,
+            real: !!m.real
+          }))
+        })
+      });
+    }, 60);
   },
 
   /** 切换某一段的交通方式：地图上的线和时间会一起变 */

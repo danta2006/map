@@ -582,3 +582,90 @@
   color: var(--teal);
   font-size: 18rpx;
 }
+
+/* ---------- 点路线弹出的分段卡片 ---------- */
+.seg-card {
+  position: absolute;
+  left: 24rpx;
+  right: 24rpx;
+  z-index: 40;
+  padding: 20rpx 24rpx;
+  background: #fffdf8;
+  border: 1rpx solid var(--line);
+  border-radius: 20rpx;
+  box-shadow: 0 14rpx 40rpx rgba(29, 28, 25, 0.2);
+}
+
+.seg-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.seg-card-title {
+  font-size: 27rpx;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.seg-card-close {
+  font-size: 34rpx;
+  line-height: 1;
+  color: var(--muted);
+  padding: 0 6rpx;
+}
+
+.seg-card-sub {
+  margin-top: 4rpx;
+  font-size: 20rpx;
+  color: var(--muted);
+}
+
+.seg-modes {
+  display: flex;
+  margin-top: 14rpx;
+}
+
+.seg-mode {
+  flex: 1;
+  margin-right: 12rpx;
+  padding: 12rpx 8rpx;
+  border-radius: 14rpx;
+  background: #f7f2e8;
+  border: 2rpx solid transparent;
+  text-align: center;
+}
+
+.seg-mode:last-child {
+  margin-right: 0;
+}
+
+.seg-mode.active {
+  background: #fff;
+  border-color: var(--red);
+}
+
+.seg-mode-name {
+  display: block;
+  font-size: 23rpx;
+  color: var(--ink);
+}
+
+.seg-mode-time {
+  display: block;
+  margin-top: 2rpx;
+  font-size: 21rpx;
+  color: var(--muted);
+}
+
+.seg-mode.active .seg-mode-name {
+  color: var(--red);
+  font-weight: 600;
+}
+
+.seg-card-tip {
+  margin-top: 12rpx;
+  text-align: center;
+  font-size: 19rpx;
+  color: #a49c8c;
+}
