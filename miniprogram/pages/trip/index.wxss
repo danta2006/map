@@ -745,3 +745,17 @@
   color: #6f548f;
   font-size: 17rpx;
 }
+
+.hide-bar {
+  align-items: center;
+}
+
+.hide-save {
+  margin: 0 12rpx;
+  padding: 6rpx 18rpx;
+  border-radius: 999rpx;
+  background: var(--red);
+  color: #fff;
+  font-size: 20rpx;
+  flex-shrink: 0;
+}

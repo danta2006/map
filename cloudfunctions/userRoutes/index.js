@@ -49,6 +49,7 @@ async function list(event, openid) {
   const city = String(event.city || '');
   const where = {};
   if (['xiangtan', 'changsha', 'zhuzhou'].includes(city)) where.city = city;
+  else if (city === 'mixed') where.city = 'mixed';
 
   const res = await db
     .collection('user_routes')

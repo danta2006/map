@@ -1,9 +1,14 @@
 const { PLACES } = require('../../data/places');
+const { CITIES } = require('../../data/cities');
 const trip = require('../../utils/trip');
 
 const PLACE_MAP = {};
 PLACES.forEach((p) => {
   PLACE_MAP[p.id] = p;
+});
+const CITY_NAME = {};
+CITIES.forEach((c) => {
+  CITY_NAME[c.id] = c.name;
 });
 const MAX_STOPS = 20;
 
@@ -17,7 +22,10 @@ Page({
     submitting: false,
     maxStops: MAX_STOPS,
     canSubmit: false,
-    error: ''
+    error: '',
+    // 这条线涉及哪些城市（跨城时会显示在「跨城」分类里）
+    cityText: '',
+    crossCity: false
   },
 
   onLoad() {
@@ -33,9 +41,24 @@ Page({
   /** 从「我的行程」读点位，没行程就没得传 */
   refresh() {
     const data = trip.getTrip();
-    const stops = (data.ids || []).map((id) => PLACE_MAP[id]).filter(Boolean);
+    const stops = (data.ids || [])
+      .map((id) => PLACE_MAP[id])
+      .filter(Boolean)
+      .map((s) => ({ ...s, cityName: CITY_NAME[s.city] || s.city }));
     const title = this.data.title || (stops.length ? `${stops[0].name}出发 · ${stops.length} 个点` : '');
-    this.setData({ stops, title, canSubmit: stops.length >= 2 });
+
+    const cities = [];
+    stops.forEach((s) => {
+      if (s.city && cities.indexOf(s.city) < 0) cities.push(s.city);
+    });
+    const cityText = cities.map((c) => CITY_NAME[c] || c).join(' + ');
+    this.setData({
+      stops,
+      title,
+      canSubmit: stops.length >= 2,
+      cityText,
+      crossCity: cities.length > 1
+    });
   },
 
   onTitleInput(e) {

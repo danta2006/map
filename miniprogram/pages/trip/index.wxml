@@ -90,9 +90,10 @@
   </view>
 
   <!-- 面板隐藏时露一条底栏，随时可以再展开 -->
-  <view class="hide-bar" wx:if="{{panel === 'hidden' && !empty}}" bindtap="togglePanel">
-    <text class="hide-text">📋 {{summary.count}} 个点 · 在途 {{summary.travelText}}</text>
-    <text class="hide-btn">显示排序列表</text>
+  <view class="hide-bar" wx:if="{{panel === 'hidden' && !empty}}">
+    <text class="hide-text" bindtap="togglePanel">📋 {{summary.count}} 个点 · 在途 {{summary.travelText}}</text>
+    <view class="hide-save" catchtap="onSaveRoute">↑ 存为路线</view>
+    <text class="hide-btn" bindtap="togglePanel">显示排序列表</text>
   </view>
 
   <!-- 排序面板：拖动把手可在 半屏 / 全屏 / 隐藏 之间切换 -->

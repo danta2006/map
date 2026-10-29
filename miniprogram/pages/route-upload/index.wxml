@@ -10,14 +10,20 @@
   <view class="body">
     <!-- 路线预览 -->
     <view class="block">
-      <view class="block-title">这条路线 <text class="count">{{stops.length}} 个点</text></view>
+      <view class="block-title">
+        这条路线 <text class="count">{{stops.length}} 个点</text>
+        <text class="cities" wx:if="{{cityText}}"> · {{cityText}}</text>
+      </view>
       <view class="stop-list" wx:if="{{stops.length}}">
         <view class="stop" wx:for="{{stops}}" wx:key="id">
           <text class="stop-num">{{index + 1}}</text>
           <text class="stop-emoji">{{item.emoji}}</text>
           <text class="stop-name">{{item.name}}</text>
-          <text class="stop-city">{{item.city}}</text>
+          <text class="stop-city">{{item.cityName}}</text>
         </view>
+      </view>
+      <view class="cross-tip" wx:if="{{crossCity}}">
+        这条线横跨多个城市，发布后会归到「跨城」，在「全部」和「跨城」里能看到。
       </view>
       <view class="empty" wx:else>
         还没有行程。先去「我的行程」加几个点，再回来上传。

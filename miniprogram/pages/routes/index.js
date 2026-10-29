@@ -9,7 +9,9 @@ PLACES.forEach((p) => {
   PLACE_MAP[p.id] = p;
 });
 
-const CITY_TABS = [{ id: 'all', name: '全部' }].concat(CITIES.map((c) => ({ id: c.id, name: c.name })));
+const CITY_TABS = [{ id: 'all', name: '全部' }]
+  .concat(CITIES.map((c) => ({ id: c.id, name: c.name })))
+  .concat([{ id: 'mixed', name: '跨城' }]);
 const MODE_COLOR = { walk: '#2c6b63', transit: '#3a6ea5', taxi: '#8b6f47' };
 
 function byLikes(a, b) {

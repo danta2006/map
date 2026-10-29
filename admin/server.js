@@ -124,11 +124,11 @@ function runScript(scriptRel, env) {
 // ---------- 云开发 HTTP API（后台联网读/删云端数据） ----------
 let tokenCache = { token: '', exp: 0 };
 
-async function getCloudToken() {
+async function getCloudToken(force) {
   const appid = process.env.WX_APPID || '';
   const secret = process.env.WX_APPSECRET || '';
   if (!appid || !secret) throw new Error('缺 WX_APPID / WX_APPSECRET（见 admin/.env.local）');
-  if (tokenCache.token && Date.now() < tokenCache.exp) return tokenCache.token;
+  if (!force && tokenCache.token && Date.now() < tokenCache.exp) return tokenCache.token;
   const res = await fetch(`https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=${appid}&secret=${secret}`);
   const json = await res.json();
   if (!json.access_token) throw new Error('拿 access_token 失败：' + JSON.stringify(json));
@@ -139,15 +139,24 @@ async function getCloudToken() {
 async function cloudDb(action, query) {
   const env = process.env.CLOUD_ENV || '';
   if (!env) throw new Error('缺 CLOUD_ENV（见 admin/.env.local）');
-  const token = await getCloudToken();
-  const res = await fetch(`https://api.weixin.qq.com/tcb/${action}?access_token=${token}`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ env, query })
-  });
-  const json = await res.json();
-  if (json.errcode) throw new Error(`${json.errmsg} (errcode ${json.errcode})`);
-  return json;
+
+  // access_token 可能被别处刷新导致失效（40001/42001）：清缓存重拿一次再试
+  for (let attempt = 0; attempt < 2; attempt++) {
+    const token = await getCloudToken(attempt === 1);
+    const res = await fetch(`https://api.weixin.qq.com/tcb/${action}?access_token=${token}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ env, query })
+    });
+    const json = await res.json();
+    if (json.errcode === 40001 || json.errcode === 42001) {
+      tokenCache = { token: '', exp: 0 };
+      continue;
+    }
+    if (json.errcode) throw new Error(`${json.errmsg} (errcode ${json.errcode})`);
+    return json;
+  }
+  throw new Error('access_token 失效，重试后仍失败');
 }
 
 function parseCloudDoc(it) {
