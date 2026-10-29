@@ -44,6 +44,7 @@ Page({
     const sys = wx.getSystemInfoSync();
     this.winH = sys.windowHeight;
     this.rpx = sys.windowWidth / 750;
+
     // 顶部栏（返回键 + 标题 + 分段统计）的高度，和地图页保持一致
     this.topGap = (app.globalData.statusBarHeight || 20) + 52;
     this.panelTop = this.topGap;

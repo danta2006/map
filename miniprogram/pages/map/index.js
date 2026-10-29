@@ -38,7 +38,9 @@ Page({
     sheetH: 0,
     sheetY: 0,
     dragging: false,
-    expanded: false
+    expanded: false,
+    // 微信右上角胶囊按钮占的宽度（px）：顶部布局要避开，否则搜索按钮会被压住
+    menuRight: 96
   },
 
   onLoad(options) {
@@ -62,11 +64,23 @@ Page({
     this.viewScale = CITY_MAP[DEFAULT_CITY].scale;
     this.viewCenter = { ...CITY_MAP[DEFAULT_CITY].center };
 
+    // 右上角胶囊按钮（…⊙）：算出要避让的宽度，否则搜索按钮会被它压住
+    let menuRight = 96;
+    try {
+      const menu = wx.getMenuButtonBoundingClientRect();
+      if (menu && menu.left) {
+        menuRight = Math.max(48, Math.round(sys.windowWidth - menu.left + 8));
+      }
+    } catch (e) {
+      // 老基础库没有这个接口，用默认值
+    }
+
     this.setData({
       statusBarHeight: app.globalData.statusBarHeight,
       cities,
       sheetH: this.sheetH,
-      sheetY: this.closedY
+      sheetY: this.closedY,
+      menuRight
     });
 
     const cityId = options && CITY_MAP[options.city] ? options.city : DEFAULT_CITY;

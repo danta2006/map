@@ -31,7 +31,8 @@
 
   <!-- 顶部：城市切换 + 标题 + 分类筛选 -->
   <view class="header" style="padding-top: {{statusBarHeight}}px">
-    <view class="brand-row">
+    <!-- 右侧留出微信胶囊按钮的宽度，避免搜索按钮被胶囊（…⊙）压住 -->
+    <view class="brand-row" style="padding-right: {{menuRight}}px">
       <view class="city-pill {{showCityPicker ? 'open' : ''}}" bindtap="toggleCityPicker">
         <text class="city-pill-name">{{cityName}}</text>
         <text class="city-pill-caret">▾</text>
@@ -83,7 +84,7 @@
   <!-- 搜索浮层：可跨城市搜点位，点结果直接加进行程 -->
   <view class="search-layer" wx:if="{{showSearch}}">
     <view class="search-backdrop" bindtap="closeSearch"></view>
-    <view class="search-card" style="top: {{statusBarHeight + 8}}px">
+    <view class="search-card" style="top: {{statusBarHeight + 8}}px; right: {{menuRight}}px">
       <place-search
         id="mapSearch"
         placeholder="搜索景点、美食、酒店…"

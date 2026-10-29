@@ -27,9 +27,6 @@
         <view class="top-sub" wx:if="{{summary}}">{{summary.count}} 个点 · 全程约 {{summary.totalText}}</view>
         <view class="top-sub" wx:else>还没有选点位</view>
       </view>
-      <view class="panel-toggle" wx:if="{{!empty}}" bindtap="togglePanel">
-        {{panel === 'hidden' ? '显示排序' : '隐藏排序'}}
-      </view>
     </view>
 
     <!-- 打卡进度：走完几个点一目了然 -->
