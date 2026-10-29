@@ -92,13 +92,57 @@ function buildLeg(fromId, toId) {
   const straight = distance(a.latitude, a.longitude, b.latitude, b.longitude);
   const meters = real && real.distance ? real.distance : Math.round(straight * ROAD_FACTOR);
 
+  // 跨城（湘潭↔长沙↔株洲）：公交/步行都不现实，单独处理
+  const crossCity = a.city !== b.city;
+
   // 预计算的点对实测数据（同城、距离够近的两点），按方式取
-  const pair = REAL_PAIRS[key] || {};
+  const pair = crossCity ? {} : (REAL_PAIRS[key] || {});
   const pairOf = { walk: pair.walk, taxi: pair.taxi, transit: pair.transit };
 
   const modes = MODES.map((mode) => {
     const pairVal = pairOf[mode.key];
     const routeReal = !!(real && real.mode === mode.key);
+
+    // 跨城：步行不提供；公交按城际列车估算；打车按高速估算
+    if (crossCity) {
+      if (mode.key === 'walk') {
+        return {
+          key: mode.key,
+          name: mode.name,
+          color: mode.color,
+          icon: mode.icon,
+          minutes: null,
+          text: '跨城不推荐',
+          short: '—',
+          real: false,
+          realSource: '',
+          disabled: true,
+          crossCity: true,
+          weak: true,
+          distanceText: formatDistance(meters)
+        };
+      }
+      const minutes =
+        mode.key === 'transit'
+          ? Math.max(30, Math.round(meters / 1500 + 30))
+          : Math.max(20, Math.round(meters / 700 + 5));
+      return {
+        key: mode.key,
+        name: mode.key === 'transit' ? '城际/公交' : mode.name,
+        color: mode.color,
+        icon: mode.icon,
+        minutes,
+        text: `约 ${formatMinutes(minutes)}`,
+        short: `${minutes} 分`,
+        real: false,
+        realSource: '',
+        disabled: false,
+        crossCity: true,
+        weak: false,
+        distanceText: formatDistance(meters)
+      };
+    }
+
     const realThis = routeReal || !!pairVal;
     let minutes;
     if (routeReal && real.minutes) minutes = real.minutes;
@@ -120,6 +164,30 @@ function buildLeg(fromId, toId) {
       distanceText: formatDistance(meters)
     };
   });
+
+  if (crossCity) {
+    const pick = modes.filter((m) => m.key === 'transit')[0] || modes[2];
+    return {
+      key: pairKey(fromId, toId),
+      fromId,
+      toId,
+      fromName: a.name,
+      toName: b.name,
+      fromEmoji: a.emoji,
+      toEmoji: b.emoji,
+      distance: meters,
+      distanceText: formatDistance(meters),
+      modes,
+      modeKey: pick.key,
+      modeName: pick.name,
+      modeColor: pick.color,
+      modeMinutes: pick.minutes,
+      path: null,
+      real: false,
+      estimated: true,
+      crossCity: true
+    };
+  }
 
   const realWalk = modes.filter((m) => m.key === 'walk' && m.real)[0];
   const realTransit = modes.filter((m) => m.key === 'transit' && m.real)[0];

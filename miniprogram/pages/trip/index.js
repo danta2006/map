@@ -191,17 +191,21 @@ Page({
       legs.forEach((leg, i) => {
         const mid = travel.legMidpoint(leg, stops[i], stops[i + 1]);
         if (!mid) return;
+        const labelText = leg.crossCity
+          ? `跨城 ${leg.distanceText}`
+          : `${leg.modeMinutes} 分`;
         markers.push({
           id: LEG_MARKER_BASE + i,
           latitude: mid.latitude,
           longitude: mid.longitude,
-          iconPath: `/assets/marker/leg-${leg.modeKey}.png`,
-          width: LEG_MARKER_SIZE.width,
-          height: LEG_MARKER_SIZE.height,
-          anchor: { x: 0.5, y: 0.85 },
+          // 透明 1px 图标：只显示下面的文字标签，不再画小圆点
+          iconPath: '/assets/marker/blank.png',
+          width: 1,
+          height: 1,
+          anchor: { x: 0.5, y: 0.5 },
           zIndex: 10,
           label: {
-            content: `${leg.modeMinutes} 分`,
+            content: labelText,
             color: '#1d1c19',
             fontSize: 9,
             borderRadius: 6,
@@ -220,6 +224,7 @@ Page({
     // 折线：按选中的交通方式上色，先白描边再彩色，和精选路线页一个做法
     const polyline = [];
     legs.forEach((leg, i) => {
+      if (!leg || leg.crossCity) return; // 跨城不画线，用中点标签说明
       const points = travel.legPoints(leg, stops[i], stops[i + 1]);
       if (!points || points.length < 2) return;
       polyline.push({ points, color: '#FFFFFFCC', width: 13 });

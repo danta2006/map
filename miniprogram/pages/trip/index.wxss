@@ -736,3 +736,12 @@
   font-size: 19rpx !important;
   margin-top: 0 !important;
 }
+
+.cross-city {
+  margin-left: 8rpx;
+  padding: 1rpx 8rpx;
+  border-radius: 999rpx;
+  background: #f0e6f7;
+  color: #6f548f;
+  font-size: 17rpx;
+}

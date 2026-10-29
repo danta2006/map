@@ -178,7 +178,7 @@
             <view class="leg-card">
               <view class="leg-top">
                 <text class="leg-title">{{item.leg.fromName}} → {{item.leg.toName}}</text>
-                <text class="leg-km">{{item.leg.distanceText}}</text>
+                <text class="leg-km">{{item.leg.distanceText}}<text class="cross-city" wx:if="{{item.leg.crossCity}}">跨城</text></text>
               </view>
               <view class="leg-modes">
                 <view
