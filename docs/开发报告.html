@@ -8,28 +8,61 @@
   :root { --ink:#1d1c19; --ink2:#3f3c35; --muted:#736d61; --line:#e5ddce; --paper:#fbf8f2; --card:#fffdf8; --red:#b0392e; --teal:#2c6b63; }
   * { box-sizing: border-box; }
   body { margin:0; background:var(--paper); color:var(--ink); font: 15px/1.75 "Microsoft YaHei","PingFang SC",-apple-system,sans-serif; }
-  .wrap { max-width: 980px; margin: 0 auto; padding: 48px 40px 96px; }
-  h1 { font-size: 32px; border-bottom: 3px solid var(--red); padding-bottom: 14px; margin-top: 0; }
-  h2 { font-size: 24px; margin-top: 48px; padding-left: 12px; border-left: 6px solid var(--red); }
-  h3 { font-size: 19px; margin-top: 30px; color: var(--teal); }
-  h4 { font-size: 16px; margin-top: 22px; }
-  table { border-collapse: collapse; width: 100%; margin: 14px 0; background: var(--card); font-size: 14px; }
-  th, td { border: 1px solid var(--line); padding: 8px 10px; text-align: left; vertical-align: top; }
+  .wrap { max-width: 940px; margin: 0 auto; padding: 40px 44px 90px; }
+  .cover { padding: 90px 10px 60px; border-bottom: 4px solid var(--red); margin-bottom: 40px; }
+  .cover-kicker { color: var(--red); font-size: 15px; letter-spacing: 3px; }
+  .cover-title { font-size: 46px; line-height: 1.25; margin: 18px 0 14px; border: none; padding: 0; }
+  .cover-sub { font-size: 17px; color: var(--muted); letter-spacing: 1px; }
+  .cover-meta { margin-top: 42px; display: grid; grid-template-columns: 1fr; gap: 10px; font-size: 14px; }
+  .cover-meta div { display: flex; gap: 14px; }
+  .cover-meta span { width: 88px; color: var(--muted); flex-shrink: 0; }
+  .cover-meta b { font-weight: 600; }
+  .cover-foot { margin-top: 46px; padding-top: 18px; border-top: 1px dashed var(--line); font-size: 13px; color: var(--muted); }
+  h1 { font-size: 30px; border-bottom: 3px solid var(--red); padding-bottom: 12px; margin-top: 0; }
+  h2 { font-size: 23px; margin-top: 44px; padding-left: 12px; border-left: 6px solid var(--red); }
+  h3 { font-size: 18px; margin-top: 28px; color: var(--teal); }
+  h4 { font-size: 16px; margin-top: 20px; }
+  table { border-collapse: collapse; width: 100%; margin: 12px 0; background: var(--card); font-size: 13.5px; }
+  th, td { border: 1px solid var(--line); padding: 7px 9px; text-align: left; vertical-align: top; }
   th { background: #f2ece0; font-weight: 600; }
   tr:nth-child(even) td { background: #fdfaf3; }
-  code { background:#f2ece0; padding:1px 6px; border-radius:4px; font-family: Consolas, monospace; font-size: 13px; }
-  pre { background:#1d1c19; color:#f5f1e6; padding:16px 18px; border-radius:10px; overflow:auto; }
+  code { background:#f2ece0; padding:1px 6px; border-radius:4px; font-family: Consolas, monospace; font-size: 12.5px; }
+  pre { background:#1d1c19; color:#f5f1e6; padding:14px 16px; border-radius:8px; overflow:auto; font-size: 12.5px; }
   pre code { background: transparent; color: inherit; padding:0; }
-  blockquote { margin: 14px 0; padding: 10px 16px; background:#fff6e5; border-left: 4px solid #d98324; color:#5a4b33; }
-  hr { border: none; border-top: 1px dashed var(--line); margin: 32px 0; }
-  a { color: var(--red); }
-  ul, ol { padding-left: 24px; }
-  li { margin: 4px 0; }
-  @media print { body { background:#fff; } .wrap { padding: 0 12mm; } pre { white-space: pre-wrap; } }
+  blockquote { margin: 12px 0; padding: 9px 14px; background:#fff6e5; border-left: 4px solid #d98324; color:#5a4b33; }
+  hr { border: none; border-top: 1px dashed var(--line); margin: 28px 0; }
+  a { color: var(--red); word-break: break-all; }
+  ul, ol { padding-left: 22px; }
+  li { margin: 3px 0; }
+  @page { size: A4; margin: 15mm 14mm; }
+  @media print {
+    body { background:#fff; font-size: 11.5pt; }
+    .wrap { max-width: none; padding: 0; }
+    .cover { page-break-after: always; padding-top: 40mm; }
+    h2, h3, h4 { page-break-after: avoid; }
+    table { page-break-inside: auto; }
+    tr { page-break-inside: avoid; }
+    pre, blockquote { page-break-inside: avoid; }
+    a { color: var(--ink); text-decoration: none; }
+  }
 </style>
 </head>
 <body><div class="wrap">
-<h1>长株潭「标点地图」文旅小程序 · 开发报告</h1>
+
+<section class="cover">
+  <div class="cover-kicker">大学生创新创业训练项目 · 开发报告</div>
+  <h1 class="cover-title">长株潭「标点地图」<br>文旅小程序</h1>
+  <div class="cover-sub">地图 · 精选路线 · 我的行程 · 打卡 · 内容后台 · 云开发</div>
+  <div class="cover-meta">
+    <div><span>版本</span><b>0.8.8（体验版）</b></div>
+    <div><span>技术栈</span><b>微信原生小程序 / Node 本地后台 / 微信云开发 / Python 数据管线</b></div>
+    <div><span>数据规模</span><b>51 个点位 · 7 条路线 · 283 对实测交通 · 45 张实景图</b></div>
+    <div><span>代码仓库</span><b>github.com/danta2006/map</b></div>
+    <div><span>报告日期</span><b>2026 年 10 月 29 日</b></div>
+  </div>
+  <div class="cover-foot">本报告覆盖：系统架构、前端 5 个页面、后端（本地内容后台 + 微信云开发）、数据生产管线、质量保障与已知限制</div>
+</section>
+
 <table>
 <thead>
 <tr>

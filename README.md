@@ -550,3 +550,7 @@ docs/
 scripts/                   采集表生成、导入、抓取、路径、页面检查、编号图（gen_trip_markers.py）、酒店图钉（gen_hotel_marker.py）
 _tmp/                      一次性脚本与自动化测试（不打包）
 ```
+
+## 文档
+
+- `docs/开发报告.pdf` / `.html` / `.md`：开发报告（17 页）
