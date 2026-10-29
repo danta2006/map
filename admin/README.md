@@ -60,6 +60,8 @@ WX_APPID=wx8f72fd67cbda3aa9
 WX_APPSECRET=<小程序后台 AppSecret>
 CLOUD_ENV=cloud1-d5ghzdcqba4c291f8
 AMAP_KEY=<高德 Key>
+# ADMIN_TOKEN 留空也行：首次启动自动生成随机值并追加写回 .env.local
+ADMIN_TOKEN=
 ```
 
 > `admin/.env.local` 已在 `.gitignore`，**不会提交到 GitHub**；AppSecret 只存在于这台电脑上。
@@ -80,7 +82,12 @@ AMAP_KEY=<高德 Key>
 
 1. AppSecret 等同小程序后台密码：只放 `.env.local`，不要发群里、不要写进代码；
 2. 如果 AppSecret 曾发到聊天/截图里，建议去小程序后台**重置一次**，然后更新 `.env.local`；
-3. 这个后台仍然只监听 `127.0.0.1`——本机使用，不对外开放。
+3. 后台只监听 `127.0.0.1`，且：
+   - 所有 `/api/*` 需要 `X-Admin-Token`（值来自 `ADMIN_TOKEN`，浏览器打开后台页面自动带）；
+   - 校验 `Host` 头只认 `127.0.0.1 / localhost`（挡 DNS 重绑定）；
+   - **没有** `Access-Control-Allow-Origin: *`（之前有它时，任何外部网页都能跨源读走本机反馈）。
+4. `admin/data/feedback.json` 含用户文字/联系方式/openid，**已被 .gitignore 排除，绝不提交**；仓库里只放脱敏样例 `feedback.example.json`；
+5. 云数据库三个集合（`feedback` / `user_routes` / `route_likes`）权限请在云开发控制台确认为「**仅创建者可读写**」；反馈写入已改走 `feedback` 云函数（服务端清洗限流），就算集合权限配错，普通用户也读不到别人的反馈。
 
 ## 用户反馈
 
@@ -95,7 +102,7 @@ AMAP_KEY=<高德 Key>
 [标记已处理]
 ```
 
-接口：
+接口（除 `/boot.json` 和静态页面外，`/api/*` 全部要带 `X-Admin-Token` 头）：
 
 | 方法 | 路径 | 说明 |
 |---|---|---|

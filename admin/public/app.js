@@ -23,10 +23,23 @@ function setStatus(text, ok = true) {
 }
 
 async function api(path, opts) {
-  const res = await fetch(path, opts);
+  const headers = Object.assign({ 'X-Admin-Token': TOKEN }, (opts && opts.headers) || {});
+  const res = await fetch(path, Object.assign({}, opts, { headers }));
   const json = await res.json();
   if (!res.ok) throw new Error(json.error || res.status);
   return json;
+}
+
+// 后台鉴权令牌：同源启动时取一次（跨源网页没有 CORS 头读不到这个响应）
+let TOKEN = '';
+async function bootToken() {
+  try {
+    const res = await fetch('/boot.json');
+    const json = await res.json();
+    TOKEN = json.token || '';
+  } catch (e) {
+    setStatus('拿不到后台令牌：' + e.message, false);
+  }
 }
 
 async function loadData() {
@@ -402,7 +415,7 @@ async function renderFeedback() {
   try {
     feedbackStore = await api('/api/feedback');
   } catch (e) {
-    box.innerHTML = '<p class="hint">读取反馈失败：' + e.message + '</p>';
+    box.replaceChildren(el('p', 'hint', '读取反馈失败：' + e.message));
     return;
   }
   const list = (feedbackStore.feedback || []).slice().sort((x, y) => y.at - x.at);
@@ -481,7 +494,7 @@ async function renderCloud() {
       box.appendChild(card);
     });
   } catch (e) {
-    box.innerHTML = '<p class="hint">读取失败：' + e.message + '</p>';
+    box.replaceChildren(el('p', 'hint', '读取失败：' + e.message));
   }
 }
 
@@ -490,8 +503,10 @@ $('#reloadCloudBtn').onclick = () => renderCloud();
 // 支持 http://127.0.0.1:8787/#cloud 直接打开「社区路线」页签
 if (location.hash) {
   const hash = location.hash.replace('#', '');
-  const target = document.querySelector('.tab[data-tab="' + hash + '"]');
-  if (target) target.click();
+  if (/^[a-z]+$/.test(hash)) {
+    const target = document.querySelector('.tab[data-tab="' + hash + '"]');
+    if (target) target.click();
+  }
 }
 
 $('#syncCloudBtn').onclick = async () => {
@@ -534,4 +549,4 @@ $('#exportBtn').onclick = async () => {
   }
 };
 
-loadData().catch((e) => setStatus('加载失败：' + e.message, false));
+bootToken().then(loadData).catch((e) => setStatus('加载失败：' + e.message, false));

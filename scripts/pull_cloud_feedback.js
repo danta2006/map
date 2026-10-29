@@ -54,7 +54,7 @@ async function query(token, queryStr) {
       placeName: doc.placeName || '',
       page: doc.page || '',
       status: doc.status || 'new',
-      openid: doc._openid || ''
+      openid: doc.openid || doc._openid || ''
     };
   });
 
@@ -68,8 +68,9 @@ async function query(token, queryStr) {
   const cloudIds = new Set(list.map((x) => x.id));
   const merged = list.concat(local.filter((x) => x.id && x.id !== 'fb_demo_1' && !cloudIds.has(x.id)));
   merged.sort((a, b) => (b.at || 0) - (a.at || 0));
-  fs.writeFileSync(OUT, JSON.stringify({ feedback: merged }, null, 2), 'utf8');
-  console.log(`已拉取 ${list.length} 条云端反馈，合并后共 ${merged.length} 条 → admin/data/feedback.json`);
+  const capped = merged.slice(0, 2000);
+  fs.writeFileSync(OUT, JSON.stringify({ feedback: capped }, null, 2), 'utf8');
+  console.log(`已拉取 ${list.length} 条云端反馈，合并后共 ${capped.length} 条 → admin/data/feedback.json（该文件不入库）`);
 })().catch((e) => {
   console.error(String(e && e.message ? e.message : e));
   process.exit(1);

@@ -24,3 +24,10 @@ assets/photos-src/*
 # 本机私有配置（后台用到的 AppSecret / Key，不提交）
 admin/.env.local
 .env.local
+
+# 用户反馈含个人信息（文字/联系方式/openid）：只存本机，绝不进仓库（样例见 feedback.example.json）
+admin/data/feedback.json
+
+# Python 编译产物
+__pycache__/
+*.pyc

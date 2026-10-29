@@ -10,8 +10,25 @@ function read(name) {
   return JSON.parse(fs.readFileSync(path.join(DATA, name + '.json'), 'utf8'));
 }
 
-const q = (s) => "'" + String(s).replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/\n/g, '\\n') + "'";
-const arr = (a) => '[' + a.map(q).join(', ') + ']';
+// 字符串一律走 JSON.stringify：引号、\r、\n、U+2028 等全部安全转义，
+// 杜绝把 admin/data 里的内容当代码拼进生成的 JS（数据→代码注入）
+const q = (s) => JSON.stringify(String(s == null ? '' : s));
+
+// 数值必须先过 Number + isFinite：字符串型"数字"（可能夹带代码片段）直接报错，不写文件
+function num(v, label) {
+  const n = Number(v);
+  if (!Number.isFinite(n)) throw new Error(`非法数字（${label || '?'}）：${JSON.stringify(v)}`);
+  return n;
+}
+
+// 对象 key 只认合法标识符
+function ident(k, label) {
+  const s = String(k == null ? '' : k);
+  if (!/^[A-Za-z][A-Za-z0-9_]*$/.test(s)) throw new Error(`非法标识符（${label || '?'}）：${JSON.stringify(s)}`);
+  return s;
+}
+
+const arr = (a) => '[' + (Array.isArray(a) ? a : []).map(q).join(', ') + ']';
 
 function writePlaces() {
   const { categories, radius } = read('categories');
@@ -24,7 +41,7 @@ function writePlaces() {
       return `  { ${parts.join(', ')} }`;
     })
     .join(',\n');
-  const radLines = categories.map((c) => `  ${c.key}: ${radius[c.key]}`).join(',\n');
+  const radLines = categories.map((c) => `  ${ident(c.key, '分类 key')}: ${num(radius[c.key], '打卡半径 ' + c.key)}`).join(',\n');
 
   const blocks = places.map((p, i) => {
     const fields = [
@@ -34,14 +51,14 @@ function writePlaces() {
       ['category', q(p.category)],
       ['emoji', q(p.emoji)],
       ['tags', arr(p.tags || [])],
-      ['latitude', String(p.latitude)],
-      ['longitude', String(p.longitude)],
+      ['latitude', String(num(p.latitude, p.id + '.latitude'))],
+      ['longitude', String(num(p.longitude, p.id + '.longitude'))],
       ['summary', q(p.summary)],
       ['intro', q(p.intro)],
       ['note', q(p.note || '')],
       ['address', q(p.address)],
       ['openTime', q(p.openTime)],
-      ['durationMin', String(p.durationMin)]
+      ['durationMin', String(num(p.durationMin, p.id + '.durationMin'))]
     ];
     const body = fields.map(([k, v], j) => `    ${k}: ${v}${j < fields.length - 1 ? ',' : ''}`).join('\n');
     return `  {\n${body}\n  }${i === places.length - 1 ? '' : ','}`;
@@ -80,14 +97,14 @@ function writeRoutes() {
   const blocks = routes.map((r, i) => {
     const legLines = (r.legs || [])
       .map((l) => {
-        const pathStr = (l.path || []).map((pt) => `[${pt[0]}, ${pt[1]}]`).join(', ');
-        return `      { from: ${q(l.from)}, to: ${q(l.to)}, mode: ${q(l.mode)}, distance: ${l.distance}, minutes: ${l.minutes}, text: ${q(l.text)}${l.path ? `, path: [${pathStr}]` : ''} }`;
+        const pathStr = (l.path || []).map((pt) => `[${num(pt[0], 'leg.path 经度')}, ${num(pt[1], 'leg.path 纬度')}]`).join(', ');
+        return `      { from: ${q(l.from)}, to: ${q(l.to)}, mode: ${q(l.mode)}, distance: ${num(l.distance, r.id + '.distance')}, minutes: ${num(l.minutes, r.id + '.minutes')}, text: ${q(l.text)}${l.path ? `, path: [${pathStr}]` : ''} }`;
       })
       .join(',\n');
     const pathLines = [];
     const rp = r.path || [];
     for (let k = 0; k < rp.length; k += 6) {
-      pathLines.push('      ' + rp.slice(k, k + 6).map((pt) => `[${pt[0]}, ${pt[1]}]`).join(', '));
+      pathLines.push('      ' + rp.slice(k, k + 6).map((pt) => `[${num(pt[0], 'route.path 经度')}, ${num(pt[1], 'route.path 纬度')}]`).join(', '));
     }
     return `  {
     id: ${q(r.id)},
@@ -126,7 +143,7 @@ function writeCities() {
   const lines = cities
     .map(
       (c) =>
-        `  { id: ${q(c.id)}, name: ${q(c.name)}, center: { latitude: ${c.center.latitude}, longitude: ${c.center.longitude} }, scale: ${c.scale} }`
+        `  { id: ${q(c.id)}, name: ${q(c.name)}, center: { latitude: ${num(c.center.latitude, c.id + '.latitude')}, longitude: ${num(c.center.longitude, c.id + '.longitude')} }, scale: ${num(c.scale, c.id + '.scale')} }`
     )
     .join(',\n');
   const js = `/**
@@ -153,7 +170,7 @@ function exportAll() {
   return results;
 }
 
-module.exports = { exportAll };
+module.exports = { exportAll, q, num, ident };
 
 if (require.main === module) {
   console.log('导出：');

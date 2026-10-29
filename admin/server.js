@@ -2,6 +2,7 @@
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
+const crypto = require('crypto');
 const { spawn } = require('child_process');
 const { exportAll } = require('./export');
 
@@ -27,6 +28,38 @@ function loadEnvFile() {
   }
 }
 loadEnvFile();
+
+// ---------- 后台鉴权 ----------
+// 令牌来源：环境变量 ADMIN_TOKEN 或 admin/.env.local；都没有就生成一个随机值并写回 .env.local
+function ensureAdminToken() {
+  if (process.env.ADMIN_TOKEN) return;
+  const token = crypto.randomBytes(16).toString('hex');
+  process.env.ADMIN_TOKEN = token;
+  try {
+    const file = path.join(__dirname, '.env.local');
+    // 若已有内容且末尾没换行，先补一个，避免和最后一行粘连
+    let prefix = '';
+    if (fs.existsSync(file)) {
+      const tail = fs.readFileSync(file, 'utf8').slice(-1);
+      if (tail && tail !== '\n') prefix = '\n';
+    }
+    fs.appendFileSync(file, `${prefix}ADMIN_TOKEN=${token}\n`, 'utf8');
+    console.log('已生成后台令牌 ADMIN_TOKEN，写入 admin/.env.local（下次启动沿用）');
+  } catch (e) {
+    console.warn('ADMIN_TOKEN 写入 .env.local 失败，本次进程内仍然有效：' + e.message);
+  }
+}
+ensureAdminToken();
+
+// 常量时间比较，避免计时侧信道
+function timingSafeEq(a, b) {
+  const ba = Buffer.from(String(a));
+  const bb = Buffer.from(String(b));
+  return ba.length === bb.length && crypto.timingSafeEqual(ba, bb);
+}
+
+const ALLOWED_HOSTS = new Set(['127.0.0.1', 'localhost']);
+const FEEDBACK_MAX_KEEP = 1000; // 反馈只留最近这些条，防止文件无限膨胀
 
 const NAMES = ['places', 'routes', 'cities', 'categories', 'feedback'];
 const EXPORTABLE = new Set(['places', 'routes', 'cities', 'categories']);
@@ -75,12 +108,9 @@ const MIME = {
   '.jpg': 'image/jpeg'
 };
 
-// 给小程序反馈接口放行跨域（开发者工具里是 file:// 场景）
-function cors(res) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-}
+// 说明：不给任何 CORS 头。后台页面与 API 同源；小程序的 wx.request 走原生层、
+// 不受浏览器同源约束，也不需要 CORS。之前放通 `Access-Control-Allow-Origin: *`
+// 反而让任意外部网页能跨源读写本机 API（用户数据泄露面），现已删除。
 
 // 跑 node 脚本（云同步用），返回输出尾巴
 function runNode(scriptRel, env) {
@@ -170,10 +200,26 @@ function parseCloudDoc(it) {
 
 const server = http.createServer(async (req, res) => {
   const url = new URL(req.url, `http://${HOST}:${PORT}`);
-  cors(res);
-  if (req.method === 'OPTIONS') return send(res, 204, '');
+
+  // Host 必须指向本机：挡 DNS 重绑定（外部域名解析到 127.0.0.1 打这里）
+  const hostName = String(req.headers.host || '').toLowerCase().replace(/:\d+$/, '');
+  if (!ALLOWED_HOSTS.has(hostName)) return send(res, 403, { error: 'forbidden host' });
 
   try {
+    // 令牌下发：只给同源页面读（没有 CORS 头，外部网页跨源读不到这个响应）
+    if (url.pathname === '/boot.json' && req.method === 'GET') {
+      return send(res, 200, { token: process.env.ADMIN_TOKEN });
+    }
+
+    // 所有 /api/* 必须带正确的 X-Admin-Token
+    if (url.pathname.startsWith('/api/')) {
+      const got = String(req.headers['x-admin-token'] || '');
+      const want = String(process.env.ADMIN_TOKEN || '');
+      if (!want || !got || !timingSafeEq(got, want)) {
+        return send(res, 401, { error: '缺少或错误的 X-Admin-Token（见 admin/.env.local）' });
+      }
+    }
+
     // ---------- 数据读写 ----------
     if (url.pathname === '/api/data' && req.method === 'GET') {
       const out = {};
@@ -209,12 +255,13 @@ const server = http.createServer(async (req, res) => {
         at: Date.now(),
         text: text.slice(0, 2000),
         contact: String(payload.contact || '').slice(0, 100),
-        placeId: String(payload.placeId || ''),
-        placeName: String(payload.placeName || ''),
-        page: String(payload.page || ''),
+        placeId: String(payload.placeId || '').slice(0, 60),
+        placeName: String(payload.placeName || '').slice(0, 60),
+        page: String(payload.page || '').slice(0, 20),
         status: 'new'
       };
       store.feedback.unshift(item);
+      if (store.feedback.length > FEEDBACK_MAX_KEEP) store.feedback.length = FEEDBACK_MAX_KEEP;
       writeJson('feedback', store);
       return send(res, 200, { ok: true, id: item.id, total: store.feedback.length });
     }
@@ -296,8 +343,9 @@ const server = http.createServer(async (req, res) => {
 
     // ---------- 静态文件 ----------
     let file = url.pathname === '/' ? '/index.html' : url.pathname;
-    const abs = path.join(PUBLIC, file.replace(/^\/+/, ''));
-    if (!abs.startsWith(PUBLIC)) return send(res, 403, { error: 'forbidden' });
+    const abs = path.resolve(PUBLIC, file.replace(/^\/+/, ''));
+    // 比较时带上分隔符，避免 public_evil 这类同名前缀目录被当成 PUBLIC 之内
+    if (abs !== PUBLIC && !abs.startsWith(PUBLIC + path.sep)) return send(res, 403, { error: 'forbidden' });
     if (!fs.existsSync(abs) || fs.statSync(abs).isDirectory()) return send(res, 404, { error: 'not found' });
     const ext = path.extname(abs).toLowerCase();
     res.writeHead(200, { 'Content-Type': MIME[ext] || 'application/octet-stream' });
@@ -308,9 +356,19 @@ const server = http.createServer(async (req, res) => {
 });
 
 server.listen(PORT, HOST, () => {
-  console.log(`\n标点地图后台已启动：http://${HOST}:${PORT}\n`);
+  console.log(`\n标点地图后台已启动：http://${HOST}:${PORT}（仅本机）\n`);
+  console.log('  所有 /api/* 需要 X-Admin-Token（admin/.env.local 里的 ADMIN_TOKEN）');
   console.log('  数据目录：admin/data/*.json');
   console.log('  导出目标：miniprogram/data/{places,routes,cities}.js');
   console.log(`  重算交通/路径：${process.env.AMAP_KEY ? '可用（已检测到 AMAP_KEY）' : '不可用（启动时设置 $env:AMAP_KEY）'}`);
   console.log('  按 Ctrl+C 停止\n');
+});
+
+
+// 后台常驻：任何未捕获异常只记日志，不退出进程
+process.on('uncaughtException', (e) => {
+  console.error('[uncaughtException]', e && e.message ? e.message : e);
+});
+process.on('unhandledRejection', (e) => {
+  console.error('[unhandledRejection]', e && e.message ? e.message : e);
 });

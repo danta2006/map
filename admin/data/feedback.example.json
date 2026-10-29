@@ -1,0 +1,15 @@
+{
+  "feedback": [
+    {
+      "id": "fb_example_1",
+      "at": 1761700000000,
+      "text": "示例条目：真实反馈存在 admin/data/feedback.json（已被 .gitignore 排除，不进仓库）。",
+      "contact": "",
+      "placeId": "wanlou",
+      "placeName": "万楼",
+      "page": "detail",
+      "status": "new",
+      "openid": ""
+    }
+  ]
+}
