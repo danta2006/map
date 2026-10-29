@@ -20,3 +20,7 @@ dist/
 assets/photos-src/*
 !assets/photos-src/.gitkeep
 !assets/photos-src/README.txt
+
+# 本机私有配置（后台用到的 AppSecret / Key，不提交）
+admin/.env.local
+.env.local

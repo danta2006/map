@@ -20,6 +20,7 @@
     <button class="tab" data-tab="places">点位</button>
     <button class="tab" data-tab="cities">城市</button>
     <button class="tab" data-tab="feedback">用户反馈</button>
+    <button class="tab" data-tab="cloud">社区路线</button>
   </nav>
 
   <main>
@@ -60,6 +61,15 @@
         <button id="syncCloudBtn">从云端同步</button>
       </div>
       <div id="feedbackList" class="feedback-list"></div>
+    </section>
+
+    <!-- 社区路线（云端） -->
+    <section id="tab-cloud" class="panel hidden">
+      <div class="toolbar">
+        <button id="reloadCloudBtn">刷新</button>
+        <span class="hint">云端 user_routes 集合；删除后用户手机上立即看不到，点赞记录一并清掉</span>
+      </div>
+      <div id="cloudList" class="feedback-list"></div>
     </section>
 
     <!-- 城市 -->

@@ -40,6 +40,7 @@ function renderAll() {
   renderPlaces();
   renderCities();
   renderFeedback();
+  renderCloud();
 }
 
 /* ---------------- 路线 ---------------- */
@@ -309,7 +310,7 @@ document.querySelectorAll('.tab').forEach((btn) => {
     btn.classList.add('active');
     const tab = btn.dataset.tab;
     state.tab = tab;
-    ['routes', 'places', 'cities', 'feedback'].forEach((t) => {
+    ['routes', 'places', 'cities', 'feedback', 'cloud'].forEach((t) => {
       $('#tab-' + t).classList.toggle('hidden', t !== tab);
     });
   };
@@ -436,6 +437,62 @@ async function renderFeedback() {
 }
 
 $('#reloadFeedbackBtn').onclick = () => renderFeedback();
+
+/* ---------------- 社区路线（云端） ---------------- */
+async function renderCloud() {
+  const box = $('#cloudList');
+  if (!box) return;
+  box.innerHTML = '<p class="hint">读取云端路线…</p>';
+  try {
+    const res = await api('/api/cloud-routes');
+    const rows = res.routes || [];
+    if (!rows.length) {
+      box.innerHTML = '<p class="hint">云端还没有社区路线。</p>';
+      return;
+    }
+    box.innerHTML = '';
+    rows.forEach((r) => {
+      const card = el('div', 'fb-card');
+      const head = el('div', 'fb-head');
+      head.appendChild(el('span', 'fb-time', new Date(r.at || Date.now()).toLocaleString('zh-CN')));
+      head.appendChild(el('span', 'fb-where', [r.nickname, r.city].filter(Boolean).join(' · ')));
+      card.appendChild(head);
+      card.appendChild(el('div', 'fb-text', r.title));
+      if (r.desc) card.appendChild(el('div', 'fb-contact', r.desc));
+      card.appendChild(el('div', 'fb-contact', `${r.count} 站 · ♥ ${r.likes} · id ${String(r.id).slice(0, 10)}…`));
+      const ops = el('div', 'fb-ops');
+      const del = el('button', 'danger', '删除');
+      del.onclick = async () => {
+        if (!confirm(`确定删除「${r.title}」？用户手机上就看不到了`)) return;
+        try {
+          await api('/api/cloud-route-delete', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: r.id })
+          });
+          setStatus('已删除：' + r.title);
+          renderCloud();
+        } catch (e) {
+          setStatus('删除失败：' + e.message, false);
+        }
+      };
+      ops.appendChild(del);
+      card.appendChild(ops);
+      box.appendChild(card);
+    });
+  } catch (e) {
+    box.innerHTML = '<p class="hint">读取失败：' + e.message + '</p>';
+  }
+}
+
+$('#reloadCloudBtn').onclick = () => renderCloud();
+
+// 支持 http://127.0.0.1:8787/#cloud 直接打开「社区路线」页签
+if (location.hash) {
+  const hash = location.hash.replace('#', '');
+  const target = document.querySelector('.tab[data-tab="' + hash + '"]');
+  if (target) target.click();
+}
 
 $('#syncCloudBtn').onclick = async () => {
   setStatus('从云开发拉取反馈中…');

@@ -11,6 +11,23 @@ const DATA = path.join(__dirname, 'data');
 const PUBLIC = path.join(__dirname, 'public');
 const ROOT = path.join(__dirname, '..');
 
+// 读取本机私有配置（admin/.env.local，已 gitignore，不会提交）
+function loadEnvFile() {
+  try {
+    const file = path.join(__dirname, '.env.local');
+    if (!fs.existsSync(file)) return;
+    fs.readFileSync(file, 'utf8').split(/\r?\n/).forEach((line) => {
+      const m = line.match(/^\s*([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.*)\s*$/);
+      if (!m) return;
+      const val = m[2].replace(/^["']|["']$/g, '');
+      if (!process.env[m[1]]) process.env[m[1]] = val;
+    });
+  } catch (e) {
+    console.warn('读取 admin/.env.local 失败：' + e.message);
+  }
+}
+loadEnvFile();
+
 const NAMES = ['places', 'routes', 'cities', 'categories', 'feedback'];
 const EXPORTABLE = new Set(['places', 'routes', 'cities', 'categories']);
 
@@ -104,6 +121,44 @@ function runScript(scriptRel, env) {
   });
 }
 
+// ---------- 云开发 HTTP API（后台联网读/删云端数据） ----------
+let tokenCache = { token: '', exp: 0 };
+
+async function getCloudToken() {
+  const appid = process.env.WX_APPID || '';
+  const secret = process.env.WX_APPSECRET || '';
+  if (!appid || !secret) throw new Error('缺 WX_APPID / WX_APPSECRET（见 admin/.env.local）');
+  if (tokenCache.token && Date.now() < tokenCache.exp) return tokenCache.token;
+  const res = await fetch(`https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=${appid}&secret=${secret}`);
+  const json = await res.json();
+  if (!json.access_token) throw new Error('拿 access_token 失败：' + JSON.stringify(json));
+  tokenCache = { token: json.access_token, exp: Date.now() + (json.expires_in - 300) * 1000 };
+  return tokenCache.token;
+}
+
+async function cloudDb(action, query) {
+  const env = process.env.CLOUD_ENV || '';
+  if (!env) throw new Error('缺 CLOUD_ENV（见 admin/.env.local）');
+  const token = await getCloudToken();
+  const res = await fetch(`https://api.weixin.qq.com/tcb/${action}?access_token=${token}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ env, query })
+  });
+  const json = await res.json();
+  if (json.errcode) throw new Error(`${json.errmsg} (errcode ${json.errcode})`);
+  return json;
+}
+
+function parseCloudDoc(it) {
+  if (typeof it !== 'string') return it || {};
+  try {
+    return JSON.parse(it);
+  } catch (e) {
+    return {};
+  }
+}
+
 const server = http.createServer(async (req, res) => {
   const url = new URL(req.url, `http://${HOST}:${PORT}`);
   cors(res);
@@ -194,8 +249,40 @@ const server = http.createServer(async (req, res) => {
       return send(res, 200, { ok: true, output: result.output, feedback: readJson('feedback').feedback.length });
     }
 
+    // 云端社区路线：列表 / 删除
+    if (url.pathname === '/api/cloud-routes' && req.method === 'GET') {
+      const json = await cloudDb('databasequery', 'db.collection("user_routes").orderBy("createdAt","desc").limit(100).get()');
+      const routes = (json.data || []).map((it) => {
+        const d = parseCloudDoc(it);
+        return {
+          id: d._id || '',
+          title: d.title || '',
+          desc: d.desc || '',
+          nickname: d.nickname || '',
+          city: d.city || '',
+          count: (d.stops || []).length,
+          likes: d.likes || 0,
+          at: d.createdAt || 0
+        };
+      });
+      return send(res, 200, { ok: true, routes });
+    }
+
+    if (url.pathname === '/api/cloud-route-delete' && req.method === 'POST') {
+      const payload = await body(req);
+      const id = String(payload.id || '');
+      if (!/^[A-Za-z0-9_-]{1,80}$/.test(id)) return send(res, 400, { error: 'id 不合法' });
+      await cloudDb('databasedelete', `db.collection("user_routes").doc("${id}").remove()`);
+      try {
+        await cloudDb('databasedelete', `db.collection("route_likes").where({"routeId":"${id}"}).remove()`);
+      } catch (e) {
+        // 点赞表清理失败不影响主流程
+      }
+      return send(res, 200, { ok: true, id });
+    }
+
     if (url.pathname === '/api/health') {
-      return send(res, 200, { ok: true, port: PORT, data: NAMES, hasKey: !!process.env.AMAP_KEY });
+      return send(res, 200, { ok: true, port: PORT, data: NAMES, hasKey: !!process.env.AMAP_KEY, hasSecret: !!process.env.WX_APPSECRET, env: process.env.CLOUD_ENV || '' });
     }
 
     // ---------- 静态文件 ----------

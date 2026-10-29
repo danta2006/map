@@ -58,9 +58,18 @@ async function query(token, queryStr) {
     };
   });
 
-  const store = { feedback: list };
-  fs.writeFileSync(OUT, JSON.stringify(store, null, 2), 'utf8');
-  console.log(`已拉取 ${list.length} 条反馈 → admin/data/feedback.json`);
+  // 合并：云端的为准，但本地已有、云端没同步到的条目保留（避免覆盖后台手动记录）
+  let local = [];
+  try {
+    local = JSON.parse(fs.readFileSync(OUT, 'utf8')).feedback || [];
+  } catch (e) {
+    local = [];
+  }
+  const cloudIds = new Set(list.map((x) => x.id));
+  const merged = list.concat(local.filter((x) => x.id && x.id !== 'fb_demo_1' && !cloudIds.has(x.id)));
+  merged.sort((a, b) => (b.at || 0) - (a.at || 0));
+  fs.writeFileSync(OUT, JSON.stringify({ feedback: merged }, null, 2), 'utf8');
+  console.log(`已拉取 ${list.length} 条云端反馈，合并后共 ${merged.length} 条 → admin/data/feedback.json`);
 })().catch((e) => {
   console.error(String(e && e.message ? e.message : e));
   process.exit(1);
