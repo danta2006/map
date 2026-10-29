@@ -437,6 +437,17 @@ async function renderFeedback() {
 
 $('#reloadFeedbackBtn').onclick = () => renderFeedback();
 
+$('#syncCloudBtn').onclick = async () => {
+  setStatus('从云开发拉取反馈中…');
+  try {
+    const res = await api('/api/sync-cloud', { method: 'POST' });
+    setStatus('云端同步完成：' + res.output.trim());
+    renderFeedback();
+  } catch (e) {
+    setStatus('云端同步失败：' + e.message, false);
+  }
+};
+
 /* ---------------- 重算交通/路径 ---------------- */
 $('#refreshBtn').onclick = async () => {
   const what = prompt('重算什么？legs（路线交通）/ paths（两点路径）/ photos（照片）/ all', 'legs');

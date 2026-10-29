@@ -65,6 +65,25 @@ function cors(res) {
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 }
 
+// 跑 node 脚本（云同步用），返回输出尾巴
+function runNode(scriptRel, env) {
+  return new Promise((resolve) => {
+    const child = spawn(process.execPath, [path.join(ROOT, scriptRel)], {
+      cwd: ROOT,
+      env: Object.assign({}, process.env, env || {})
+    });
+    let out = '';
+    const cap = (buf) => {
+      out += buf.toString('utf8');
+      if (out.length > 20000) out = out.slice(-20000);
+    };
+    child.stdout.on('data', cap);
+    child.stderr.on('data', cap);
+    child.on('close', (code) => resolve({ code, output: out.slice(-4000) }));
+    child.on('error', (e) => resolve({ code: -1, output: String(e.message || e) }));
+  });
+}
+
 /** 跑脚本（重算交通/路径/照片），返回输出尾巴 */
 function runScript(scriptRel, env) {
   return new Promise((resolve) => {
@@ -157,6 +176,22 @@ const server = http.createServer(async (req, res) => {
         results.push({ script, result: await runScript(script, pyEnv) });
       }
       return send(res, 200, { ok: true, results });
+    }
+
+    if (url.pathname === '/api/sync-cloud' && req.method === 'POST') {
+      const env = {
+        WX_APPID: process.env.WX_APPID || '',
+        WX_APPSECRET: process.env.WX_APPSECRET || '',
+        CLOUD_ENV: process.env.CLOUD_ENV || ''
+      };
+      if (!env.WX_APPSECRET || !env.CLOUD_ENV) {
+        return send(res, 400, {
+          error: '后台进程缺 WX_APPSECRET / CLOUD_ENV，重启时设置这两个环境变量'
+        });
+      }
+      const result = await runNode('scripts/pull_cloud_feedback.js', env);
+      if (result.code !== 0) return send(res, 500, { error: result.output || '同步失败' });
+      return send(res, 200, { ok: true, output: result.output, feedback: readJson('feedback').feedback.length });
     }
 
     if (url.pathname === '/api/health') {

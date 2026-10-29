@@ -72,20 +72,60 @@ admin/data/*.json   ← 唯一数据源（界面保存 / 手改都行）
 - 这是**本机 127.0.0.1 服务**：开发者工具里能提交；**真机 / 体验版连不上**，会退化成"存本地 + toast 提示"
 - 想在真机收集，要走**微信云开发**（不需要域名备案），方案见下
 
-## 接微信云开发（真机收集反馈的推荐方案）
+## 接微信云开发（真机收集反馈）
 
-1. 开发者工具里点「云开发」→ 开通（个人主体可用，有免费额度）→ 记下环境 ID
-2. 建集合 `feedback`，权限设为「仅创建者可写、所有人可读」或「仅管理端可读写」
-3. 小程序里加：
-   ```js
-   wx.cloud.init({ env: '你的环境ID' });
-   wx.cloud.database().collection('feedback').add({ data: { ...payload, at: Date.now() } });
+代码已经准备好了，只差开通 + 填环境 ID：
+
+1. 开发者工具顶部点「**云开发**」→ 开通（按提示实名；选最便宜的套餐/免费额度）
+2. 创建一个环境，例如 `xiangtan-map`，记下**环境 ID**（形如 `xiangtan-map-1gxxxxxx`）
+3. 把环境 ID 填到 `miniprogram/config.js` 的 `CLOUD_ENV`
+4. 部署两个云函数（开发者工具里右键 `cloudfunctions/initEnv`、`ping` → 上传并部署；或命令行）：
+   ```powershell
+   cli cloud functions deploy --env <环境ID> --names initEnv ping --project C:\微信小程序
    ```
-   （替换 `miniprogram/utils/api.js` 里的 HTTP 提交，失败兜底逻辑保留）
-4. 后台看反馈：云开发控制台「数据库 → feedback」直接看；或用云开发 HTTP API 把数据同步到本地 `admin/data/feedback.json`，这个后台的「用户反馈」页签就能继续用
-5. 需要云函数做校验/频率限制时再加 `cloudfunctions/submitFeedback`
+5. 调用一次 `initEnv`（云开发控制台 → 云函数 → initEnv → 测试，event 填 `{}`），它会建好 `feedback` 集合
+6. 小程序里提交反馈 → 云开发控制台「数据库 → feedback」就能看到；真机也能写
 
-## 目录
+### 后台同步云反馈（可选，需要 AppSecret）
+
+后台想直接看云上的反馈，需要小程序的 **AppSecret**（后台「开发管理 → 开发设置」里，别泄露）：
+
+```powershell
+$env:AMAP_KEY   = "高德 Key"
+$env:WX_APPID   = "wx8f72fd67cbda3aa9"
+$env:WX_APPSECRET = "你的 AppSecret"
+$env:CLOUD_ENV  = "xiangtan-map-1gxxxxxx"
+node admin/server.js
+```
+
+然后后台「用户反馈」页签点「**从云端同步**」，会把最近 200 条拉进 `admin/data/feedback.json`。
+
+> AppSecret 只在这台机器上用；不要提交到 git、不要发给别人。
+
+## 常见问题
+
+### 开通云开发时报 `tcbDescribeUserPromotionalActivity 失败 ... ret:1000 system error`
+
+这是微信云开发控制台在拉「优惠活动」时服务端报错，不是项目代码问题。按顺序试：
+
+1. 关掉云开发窗口，重新点开发者工具工具栏的云朵图标 ☁（多数是微信侧抖动，重试就好）
+2. 重启微信开发者工具（或退出登录后重新扫码）
+3. 确认已在 mp 后台完成**实名认证**、绑定**微信支付**（开通页要拉支付/优惠信息）
+4. 升级开发者工具到最新稳定版（本项目测试版本 2.02.2609240 Stable，偏旧）
+
+**已开通（2026-10-29 深夜）**：环境 ID `cloud1-d5ghzdcqba4c291f8`（免费试用），云函数 `initEnv` / `ping` 已部署，`feedback` 集合已创建；小程序反馈已实测写入云数据库。
+后台要把云上反馈同步到本地列表，需要 AppSecret：按下面命令重启后台后，在「用户反馈」页签点「从云端同步」。
+
+**之前的报错记录（已恢复，留作备查）**
+
+- 完全退出开发者工具、重开、再点云开发 → 仍报 `tcb/DescribeEnvs` ret=1000
+- 命令行 `cli cloud env list` 同样报错，`reqId`：`5807387f-1793285353` / `1e580919-1793285499` / `c81c887-1793285728`
+- 说明是微信侧对该 appid 的上游异常（或主体/认证不满足云开发条件），不是本地缓存或项目代码问题
+- 处理建议：先在云开发控制台「反馈」或微信开放社区提工单（贴上面 reqId + AppID + 报错截图），确认账号能开通再付费（最低 ¥19.9/月）
+
+**实在开不了就先跳过**：`miniprogram/config.js` 里 `CLOUD_ENV` 留空时，反馈会走「本地后台 → 本地存储」两级降级，开发者工具里提交的反馈在后台「用户反馈」页签照样能看到，不影响答辩演示。
+
+## 目录## 目录
 
 ```
 admin/

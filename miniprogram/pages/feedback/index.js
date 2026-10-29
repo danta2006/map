@@ -63,9 +63,12 @@ Page({
     };
 
     reportFeedback(payload)
-      .then(() => {
+      .then((res) => {
         wx.setStorageSync('feedback_contact', payload.contact);
-        done(true, '已提交，谢谢反馈');
+        const via = (res && res.via) || 'admin';
+        if (via === 'cloud') done(true, '已提交到云端，谢谢反馈');
+        else if (via === 'admin') done(true, '已提交，谢谢反馈');
+        else done(false, '已记录在本地（未连后台）');
       })
       .catch(() => {
         // 真机/体验版连不到本地后台：先存本地，演示时也能说清楚

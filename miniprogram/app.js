@@ -1,7 +1,11 @@
+const config = require('./config');
+
 App({
   globalData: {
     statusBarHeight: 20,
-    windowWidth: 375
+    windowWidth: 375,
+    cloudReady: false,
+    cloudEnv: ''
   },
 
   onLaunch() {
@@ -14,6 +18,17 @@ App({
       const sys = wx.getSystemInfoSync();
       this.globalData.statusBarHeight = sys.statusBarHeight || 20;
       this.globalData.windowWidth = sys.windowWidth || 375;
+    }
+
+    // 云开发：配置了环境 ID 才初始化
+    if (config.CLOUD_ENV && wx.cloud) {
+      try {
+        wx.cloud.init({ env: config.CLOUD_ENV, traceUser: true });
+        this.globalData.cloudReady = true;
+        this.globalData.cloudEnv = config.CLOUD_ENV;
+      } catch (e) {
+        console.warn('wx.cloud.init 失败', e);
+      }
     }
   }
 });
