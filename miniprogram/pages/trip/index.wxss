@@ -669,3 +669,24 @@
   font-size: 19rpx;
   color: #a49c8c;
 }
+
+/* ---------- 整块拖动排序 ---------- */
+.stop-block {
+  position: relative;
+  transition: transform 0.16s ease;
+}
+
+.stop-block.dragging {
+  transition: none;
+  z-index: 8;
+}
+
+.stop-block.dragging .stop-row {
+  background: #fff;
+  border-color: var(--line);
+  box-shadow: 0 12rpx 30rpx rgba(29, 28, 25, 0.18);
+}
+
+.drag-handle {
+  cursor: grab;
+}

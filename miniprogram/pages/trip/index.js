@@ -231,9 +231,20 @@ Page({
     if (!stops.length) panel = 'hidden';
     else if (!this.loaded && !this.ready) panel = 'half';
 
+    // 排序用的「整块」：一个站点 + 它后面那段交通，整块一起拖
+    const blocks = stops.map((stop, i) => ({
+      key: 'block-' + stop.id,
+      index: i,
+      rowId: 'stop-row-' + i,
+      stop,
+      leg: legs[i] || null,
+      offset: 0
+    }));
+
     const next = {
       stops,
       rows,
+      blocks,
       legs,
       markers,
       polyline,
@@ -335,8 +346,8 @@ Page({
   onMarkerTap(e) {
     const id = e.detail.markerId;
     if (id >= LEG_MARKER_BASE) {
-      const leg = this.data.legs[id - LEG_MARKER_BASE];
-      if (leg) this.focusStop(leg.index);
+      // 点两站之间的「30 分」时间图标 = 点这一段路线
+      this.openLegCard(id - LEG_MARKER_BASE);
       return;
     }
     this.focusStop(id);
@@ -358,10 +369,19 @@ Page({
     if (this.data.panel === 'hidden') this.setPanel('half');
   },
 
-  onMapTap() {
+  onMapTap(e) {
     if (this.data.legCard) {
       this.closeLegCard();
       return;
+    }
+    // 点在路线附近也算点路线（微信的折线点击要正好戳中，比较难触发）
+    const d = (e && e.detail) || {};
+    if (d.latitude != null && d.longitude != null && Date.now() - (this.lastMarkerTapAt || 0) > 250) {
+      const near = this.nearestLeg(d.latitude, d.longitude);
+      if (near.index >= 0 && near.meters <= this.tapToleranceMeters(d.latitude)) {
+        this.openLegCard(near.index);
+        return;
+      }
     }
     if (Date.now() - (this.lastMarkerTapAt || 0) < 250) return;
     if (this.data.activeId) this.setData({ activeId: '' });
@@ -413,13 +433,8 @@ Page({
     });
   },
 
-  /** 点地图上的路线：找出离点击位置最近的一段，弹分段卡片 */
-  onPolylineTap(e) {
-    const d = (e && e.detail) || {};
-    const lat = d.latitude;
-    const lng = d.longitude;
-    if (lat == null || lng == null) return;
-
+  /** 找离坐标最近的一段路线（点到折线顶点的最近距离） */
+  nearestLeg(lat, lng) {
     const legs = this.data.legs || [];
     const stops = this.data.stops || [];
     let best = -1;
@@ -445,8 +460,40 @@ Page({
       });
     });
 
-    // 800 米内才算点中（线本身不宽，给点容错）
-    if (best >= 0 && bestDist <= 800) this.openLegCard(best);
+    return { index: best, meters: bestDist };
+  },
+
+  /** 当前缩放下"手指头能碰到"的容差（米） */
+  tapToleranceMeters(lat) {
+    const scale = this.viewScale || this.data.scale || 13;
+    const metersPerPx = (156543.03392 * Math.cos((lat * Math.PI) / 180)) / Math.pow(2, scale);
+    return Math.max(60, Math.min(400, metersPerPx * 45));
+  },
+
+  /** 记录真实缩放（只存实例，不 setData，避免地图抖） */
+  onViewChange(e) {
+    if (e && e.scale) this.viewScale = e.scale;
+    else if (this.mapCtx && this.mapCtx.getScale) {
+      this.mapCtx.getScale({
+        success: (r) => {
+          if (r && r.scale) this.viewScale = r.scale;
+        },
+        fail: () => {}
+      });
+    }
+  },
+
+  /** 点地图上的路线：找出离点击位置最近的一段，弹分段卡片 */
+  onPolylineTap(e) {
+    const d = (e && e.detail) || {};
+    const lat = d.latitude;
+    const lng = d.longitude;
+    if (lat == null || lng == null) return;
+
+    const near = this.nearestLeg(lat, lng);
+    if (near.index >= 0 && near.meters <= this.tapToleranceMeters(lat) * 1.4) {
+      this.openLegCard(near.index);
+    }
   },
 
   /** 弹出某一段的卡片（三种方式可点选切换） */
@@ -517,59 +564,96 @@ Page({
     this.refresh({ fit: false });
   },
 
-  // ---------- 拖动排序：按住 ⠿ 直接拖，松开落到最近的站点位置 ----------
-  onDragStart(e) {
-    const index = Number(e.currentTarget.dataset.stop);
-    if (isNaN(index) || !this.data.stops[index]) return;
-    this.dragFrom = index;
-    this.dragTarget = index;
-    this.lastHintIndex = -1;
-    this.dragging = true;
+  // ---------- 拖动排序：长按整块卡片 → 整块跟手移动，松手落位 ----------
+  onBlockTouchStart(e) {
+    const block = Number(e.currentTarget.dataset.block);
+    if (isNaN(block) || !this.data.stops[block]) return;
+    this.dragBlock = block;
+    this.dragTarget = block;
     this.dragStartY = e.touches[0].clientY;
-    this.setData({
-      draggingId: this.data.stops[index].id,
-      dragHint: `拖动中 · 当前第 ${index + 1} 位`
-    });
-
-    wx.createSelectorQuery()
-      .in(this)
-      .selectAll('.stop-row')
-      .boundingClientRect((rects) => {
-        this.dragRects = rects || [];
-      })
-      .exec();
+    this.dragMoved = 0;
+    this.draggingBlock = false;
+    this.dragTimer = setTimeout(() => {
+      if (Math.abs(this.dragMoved) > 10) return;
+      if (this.data.stops.length < 2) return;
+      // 长按 260ms 还没怎么移动 → 进入拖动
+      this.draggingBlock = true;
+      this.dragQueried = false;
+      this.setData({ draggingId: this.data.stops[this.dragBlock].id, dragHint: '拖动中，松手落位' });
+      try {
+        wx.vibrateShort({ type: 'light', fail: () => {} });
+      } catch (err) {}
+      wx.createSelectorQuery()
+        .in(this)
+        .selectAll('.stop-block')
+        .boundingClientRect((rects) => {
+          this.blockRects = rects || [];
+        })
+        .exec();
+    }, 260);
   },
 
-  onDragMove(e) {
-    if (!this.dragging || !this.dragRects || !this.dragRects.length) return;
+  onBlockTouchMove(e) {
+    if (this.dragBlock == null) return;
     const y = e.touches[0].clientY;
-    let best = this.dragFrom;
-    let bestDist = Infinity;
-    this.dragRects.forEach((rect, i) => {
-      const dist = Math.abs(rect.top + rect.height / 2 - y);
-      if (dist < bestDist) {
-        bestDist = dist;
-        best = i;
+    const dy = y - this.dragStartY;
+    this.dragMoved = dy;
+
+    // 还没进入拖动：手指明显移动就当成滚动，取消长按
+    if (!this.draggingBlock) {
+      if (Math.abs(dy) > 10 && this.dragTimer) {
+        clearTimeout(this.dragTimer);
+        this.dragTimer = null;
+        this.dragBlock = null;
+      }
+      return;
+    }
+    if (!this.blockRects || !this.blockRects.length) return;
+
+    // 找手指最近的一块 → 目标位置
+    let target = this.dragBlock;
+    let best = Infinity;
+    this.blockRects.forEach((r, i) => {
+      const d = Math.abs(r.top + r.height / 2 - y);
+      if (d < best) {
+        best = d;
+        target = i;
       }
     });
-    this.dragTarget = best;
-    if (best === this.lastHintIndex) return;
-    this.lastHintIndex = best;
-    this.setData({
-      dragHint: best === this.dragFrom ? '松手放回原位' : `松手放到第 ${best + 1} 位`
+    this.dragTarget = target;
+
+    const H = this.blockRects[this.dragBlock].height;
+    const blocks = this.data.blocks.map((b, j) => {
+      let offset = 0;
+      if (j === this.dragBlock) offset = dy;
+      else if (this.dragBlock < target && j > this.dragBlock && j <= target) offset = -H;
+      else if (this.dragBlock > target && j >= target && j < this.dragBlock) offset = H;
+      return Object.assign({}, b, { offset });
     });
+    this.setData({ blocks });
   },
 
-  onDragEnd() {
-    if (!this.dragging) return;
-    const from = this.dragFrom;
+  onBlockTouchEnd() {
+    if (this.dragTimer) {
+      clearTimeout(this.dragTimer);
+      this.dragTimer = null;
+    }
+    const from = this.dragBlock;
     const to = this.dragTarget;
-    const stop = this.data.stops[from];
-    this.dragging = false;
-    this.dragRects = null;
+    const wasDragging = this.draggingBlock;
+    this.dragBlock = null;
+    this.dragTarget = null;
+    this.draggingBlock = false;
+    this.blockRects = null;
     this.dragStartY = 0;
+    if (!wasDragging) return;
+
     this.setData({ draggingId: '', dragHint: '' });
-    if (!stop || typeof to !== 'number' || to === from) return;
+    const stop = from != null ? this.data.stops[from] : null;
+    if (!stop || typeof to !== 'number' || to === from) {
+      this.refresh({ fit: false });
+      return;
+    }
     trip.move(stop.id, to);
     this.refresh({ fit: false, focusId: stop.id });
   },

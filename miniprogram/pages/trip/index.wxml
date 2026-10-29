@@ -14,6 +14,7 @@
     bindmarkertap="onMarkerTap"
     bindcallouttap="onCalloutTap"
     bindpolylinetap="onPolylineTap"
+    bindregionchange="onViewChange"
     bindtap="onMapTap"
   />
 
@@ -141,68 +142,70 @@
       scroll-into-view="{{scrollTo}}"
       scroll-with-animation
     >
-      <block wx:for="{{rows}}" wx:key="key">
-        <!-- 一个站点 -->
+      <block wx:for="{{blocks}}" wx:key="key">
         <view
-          wx:if="{{item.type === 'stop'}}"
-          id="{{item.rowId}}"
-          class="stop-row {{activeId === item.data.id ? 'active' : ''}} {{draggingId === item.data.id ? 'dragging' : ''}}"
+          class="stop-block {{draggingId === item.stop.id ? 'dragging' : ''}}"
+          style="transform: translateY({{item.offset}}px)"
+          data-block="{{item.index}}"
+          bindtouchstart="onBlockTouchStart"
+          bindtouchmove="onBlockTouchMove"
+          bindtouchend="onBlockTouchEnd"
+          bindtouchcancel="onBlockTouchEnd"
         >
+          <!-- 一个站点 -->
           <view
-            class="drag-handle"
-            data-stop="{{item.stopIndex}}"
-            bindtouchstart="onDragStart"
-            catchtouchmove="onDragMove"
-            bindtouchend="onDragEnd"
-            bindtouchcancel="onDragEnd"
-          >⠿</view>
-          <view class="stop-num" style="background: {{item.data.color}}">{{item.stopIndex + 1}}</view>
-          <view class="stop-main" data-stop="{{item.stopIndex}}" bindtap="onStopTap">
-            <view class="stop-name">{{item.data.emoji}} {{item.data.name}}<text class="stop-done" wx:if="{{item.data.checked}}">✓ 已打卡</text></view>
-            <view class="stop-meta">{{item.data.cityName}} · {{item.data.categoryName}} · 建议 {{item.data.durationMin}} 分钟</view>
-          </view>
-          <view class="stop-ops">
-            <view class="op" data-stop="{{item.stopIndex}}" data-dir="-1" catchtap="onMoveStop">▲</view>
-            <view class="op" data-stop="{{item.stopIndex}}" data-dir="1" catchtap="onMoveStop">▼</view>
-            <view class="op danger" data-id="{{item.data.id}}" catchtap="onRemoveStop">✕</view>
-          </view>
-        </view>
-
-        <!-- 两站之间：三种交通方式的耗时 -->
-        <view wx:else class="leg-row">
-          <view class="leg-rail">
-            <view class="leg-rail-line" style="background: {{item.data.modeColor}}"></view>
-            <view class="leg-rail-dot" style="background: {{item.data.modeColor}}"></view>
-          </view>
-          <view class="leg-card">
-            <view class="leg-top">
-              <text class="leg-title">{{item.data.fromName}} → {{item.data.toName}}</text>
-              <text class="leg-km">{{item.data.distanceText}}</text>
+            id="{{item.rowId}}"
+            class="stop-row {{activeId === item.stop.id ? 'active' : ''}}"
+          >
+            <view class="drag-handle">⠿</view>
+            <view class="stop-num" style="background: {{item.stop.color}}">{{item.index + 1}}</view>
+            <view class="stop-main" data-stop="{{item.index}}" bindtap="onStopTap">
+              <view class="stop-name">{{item.stop.emoji}} {{item.stop.name}}<text class="stop-done" wx:if="{{item.stop.checked}}">✓ 已打卡</text></view>
+              <view class="stop-meta">{{item.stop.cityName}} · {{item.stop.categoryName}} · 建议 {{item.stop.durationMin}} 分钟</view>
             </view>
-            <view class="leg-modes">
-              <view
-                wx:for="{{item.data.modes}}"
-                wx:for-item="m"
-                wx:key="key"
-                class="leg-mode {{item.data.modeKey === m.key ? 'on' : ''}}"
-                style="{{item.data.modeKey === m.key ? 'border-color: ' + m.color : ''}}"
-                data-from="{{item.data.fromId}}"
-                data-to="{{item.data.toId}}"
-                data-mode="{{m.key}}"
-                catchtap="onModeTap"
-              >
-                <view class="leg-mode-dot" style="background: {{m.color}}"></view>
-                <view class="leg-mode-body">
-                  <view class="leg-mode-name">
-                    {{m.name}}
-                    <text class="real-tag" wx:if="{{m.real}}">实测</text>
+            <view class="stop-ops">
+              <view class="op" data-stop="{{item.index}}" data-dir="-1" catchtap="onMoveStop">▲</view>
+              <view class="op" data-stop="{{item.index}}" data-dir="1" catchtap="onMoveStop">▼</view>
+              <view class="op danger" data-id="{{item.stop.id}}" catchtap="onRemoveStop">✕</view>
+            </view>
+          </view>
+
+          <!-- 两站之间：三种交通方式的耗时 -->
+          <view wx:if="{{item.leg}}" class="leg-row">
+            <view class="leg-rail">
+              <view class="leg-rail-line" style="background: {{item.leg.modeColor}}"></view>
+              <view class="leg-rail-dot" style="background: {{item.leg.modeColor}}"></view>
+            </view>
+            <view class="leg-card">
+              <view class="leg-top">
+                <text class="leg-title">{{item.leg.fromName}} → {{item.leg.toName}}</text>
+                <text class="leg-km">{{item.leg.distanceText}}</text>
+              </view>
+              <view class="leg-modes">
+                <view
+                  wx:for="{{item.leg.modes}}"
+                  wx:for-item="m"
+                  wx:key="key"
+                  class="leg-mode {{item.leg.modeKey === m.key ? 'on' : ''}}"
+                  style="{{item.leg.modeKey === m.key ? 'border-color: ' + m.color : ''}}"
+                  data-from="{{item.leg.fromId}}"
+                  data-to="{{item.leg.toId}}"
+                  data-mode="{{m.key}}"
+                  catchtap="onModeTap"
+                >
+                  <view class="leg-mode-dot" style="background: {{m.color}}"></view>
+                  <view class="leg-mode-body">
+                    <view class="leg-mode-name">
+                      {{m.name}}
+                      <text class="real-tag" wx:if="{{m.real}}">实测</text>
+                    </view>
+                    <view class="leg-mode-time">{{m.text}}</view>
                   </view>
-                  <view class="leg-mode-time">{{m.text}}</view>
                 </view>
               </view>
+              <view class="leg-tip" wx:if="{{item.leg.estimated}}">没有实测数据的点对按距离估算；带「实测」的时间来自高德路线规划</view>
+              <view class="leg-tip warn" wx:if="{{item.leg.transitWeak}}">这段很近，坐公交不太划算</view>
             </view>
-            <view class="leg-tip" wx:if="{{item.data.estimated}}">没有实测数据的点对按距离估算；带「实测」的时间来自高德路线规划</view>
-            <view class="leg-tip warn" wx:if="{{item.data.transitWeak}}">这段很近，坐公交不太划算</view>
           </view>
         </view>
       </block>
