@@ -114,7 +114,7 @@
       <text class="fab-icon">📋</text>
       <text>我的行程{{tripCount ? ' ' + tripCount : ''}}</text>
     </view>
-    <view class="route-fab" bindtap="onGoRoutes">🧭 精选路线</view>
+    <view class="route-fab" bindtap="onGoRoutes">🧭 社区路线</view>
   </view>
 
   <!-- 底部点位列表：主要入口，比点地图上的小图钉好点 -->

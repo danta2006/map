@@ -673,6 +673,15 @@ Page({
     wx.reLaunch({ url: '/pages/map/index' });
   },
 
+  /** 把当前行程发到社区（跳上传页） */
+  onSaveRoute() {
+    if ((this.data.stops || []).length < 2) {
+      wx.showToast({ title: '至少 2 个点才能存成路线', icon: 'none' });
+      return;
+    }
+    wx.navigateTo({ url: '/pages/route-upload/index' });
+  },
+
   onGoMap() {
     this.onBack();
   },

@@ -37,7 +37,10 @@
 .input {
   width: 100%;
   box-sizing: border-box;
-  padding: 20rpx 22rpx;
+  /* 微信 input 不会用 padding 撑高，必须写死高度，否则文字被裁 */
+  height: 92rpx;
+  line-height: 92rpx;
+  padding: 0 22rpx;
   background: #fffdf8;
   border: 1rpx solid var(--line);
   border-radius: 16rpx;
@@ -45,9 +48,10 @@
   color: var(--ink);
 }
 
-.area {
+.input.area {
   height: 260rpx;
   line-height: 1.6;
+  padding: 18rpx 22rpx;
 }
 
 .counter {

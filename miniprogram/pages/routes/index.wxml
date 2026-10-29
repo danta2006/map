@@ -11,126 +11,85 @@
     enable-scroll
     enable-rotate="{{false}}"
     bindmarkertap="onMarkerTap"
-    bindpolylinetap="onPolylineTap"
-    bindpoitap="onPoiTap"
-    bindregionchange="onViewChange"
     bindtap="onMapTap"
   ></map>
 
-  <!-- 顶部：城市切换 + 路线切换 -->
+  <!-- 顶部：标题 + 上传入口（右侧给微信胶囊让位） -->
   <view class="top" style="padding-top: {{statusBarHeight}}px">
-    <view class="city-row">
-      <view class="city-pill {{showCityPicker ? 'open' : ''}}" bindtap="toggleCityPicker">
-        <text class="city-pill-name">{{cityName}}</text>
-        <text class="city-pill-caret">▾</text>
+    <view class="top-row" style="padding-right: {{menuRight}}px">
+      <view class="top-main">
+        <view class="top-title">社区路线</view>
+        <view class="top-sub">大家上传的路线，点赞高的排在前面</view>
       </view>
-      <text class="city-hint">{{cityRoutes.length}} 条路线</text>
+      <view class="upload-btn" bindtap="onUpload">＋ 上传</view>
     </view>
 
-    <view class="city-panel" wx:if="{{showCityPicker}}">
+    <view class="city-tabs">
       <view
-        wx:for="{{cities}}"
+        wx:for="{{cityTabs}}"
         wx:key="id"
-        class="city-option {{item.id === activeCity ? 'active' : ''}}"
+        class="city-tab {{activeCity === item.id ? 'active' : ''}}"
         data-id="{{item.id}}"
-        bindtap="onCityTap"
-      >
-        <text class="city-option-name">{{item.name}}</text>
-        <text class="city-option-count">{{item.count}} 条路线</text>
-        <text class="city-option-check" wx:if="{{item.id === activeCity}}">✓</text>
-      </view>
+        bindtap="onCityTab"
+      >{{item.name}}</view>
+    </view>
+  </view>
+
+  <!-- 底部：社区路线列表 -->
+  <view class="panel">
+    <view class="panel-head">
+      <text class="panel-title">路线列表</text>
+      <text class="panel-hint" wx:if="{{!loading && !error}}">{{routes.length}} 条</text>
     </view>
 
-    <view class="tabs">
+    <view class="state" wx:if="{{loading}}">加载中…</view>
+    <view class="state error" wx:elif="{{error}}">{{error}}</view>
+
+    <scroll-view class="list" scroll-y wx:else>
       <view
-        wx:for="{{cityRoutes}}"
+        wx:for="{{routes}}"
         wx:key="id"
-        class="tab {{activeId === item.id ? 'active' : ''}}"
+        class="route {{activeId === item.id ? 'active' : ''}}"
         data-id="{{item.id}}"
         bindtap="onRouteTap"
       >
-        <view class="dot" style="background: {{item.color}}"></view>
-        <text>{{item.name}}</text>
-      </view>
-    </view>
-
-    <view class="meta" wx:if="{{active}}">
-      <text class="desc">{{active.desc}}</text>
-      <text class="nums">{{active.stops.length}} 个点 · 约 {{totalKm}} km</text>
-    </view>
-  </view>
-
-  <!-- 底部：站点 / 交通 二选一 -->
-  <view class="bottom">
-    <view class="seg">
-      <view class="seg-item {{tab === 'stops' ? 'active' : ''}}" data-tab="stops" bindtap="switchTab">站点</view>
-      <view class="seg-item {{tab === 'legs' ? 'active' : ''}}" data-tab="legs" bindtap="switchTab">交通</view>
-    </view>
-
-    <scroll-view wx:if="{{tab === 'stops'}}" class="panel" scroll-x enhanced show-scrollbar="{{false}}">
-      <view class="stops-row">
-        <view
-          wx:for="{{active.stops}}"
-          wx:key="id"
-          class="stop"
-          data-index="{{index}}"
-          bindtap="onStopTap"
-        >
-          <view class="stop-num" style="background: {{active.color}}">{{index + 1}}</view>
-          <view class="stop-info">
-            <view class="stop-name">{{item.name}}</view>
-            <view class="stop-meta">{{item.durationMin}} 分钟</view>
+        <view class="route-main">
+          <view class="route-title">{{item.title}}</view>
+          <view class="route-meta">
+            <text>{{item.nickname}}</text>
+            <text>· {{item.count}} 站</text>
+            <text wx:if="{{item.desc}}">· {{item.desc}}</text>
           </view>
         </view>
-      </view>
-    </scroll-view>
-
-    <scroll-view wx:else class="panel legs" scroll-y>
-      <view wx:for="{{legs}}" wx:key="index" class="leg">
-        <view class="leg-idx" style="background: {{active.color}}">{{item.index}}</view>
-        <view class="leg-body">
-          <view class="leg-title">{{item.from}} → {{item.to}}</view>
-          <view class="leg-text {{item.mode}}">{{item.text}}</view>
+        <view class="like {{item.liked ? 'on' : ''}}" data-id="{{item.id}}" catchtap="onLike">
+          <text class="like-ico">{{item.liked ? '♥' : '♡'}}</text>
+          <text class="like-num">{{item.likes}}</text>
         </view>
       </view>
+
+      <view class="empty" wx:if="{{!routes.length}}">
+        还没有人上传路线
+        <view class="empty-btn" bindtap="onUpload">上传我的行程，发第一条 ›</view>
+      </view>
     </scroll-view>
   </view>
 
-  <!-- 点地点：显示这个点前后两段的路线 -->
-  <view class="stop-card {{tab === 'legs' ? 'high' : ''}} {{stopCard ? 'show' : ''}}" catchtap="closeStopCard">
-    <view class="stop-card-top">
-      <text class="stop-card-idx">第 {{stopCard.index}} 站 / 共 {{stopCard.total}} 站</text>
-      <text class="stop-card-close">×</text>
+  <!-- 选中路线的摘要 -->
+  <view class="active-bar" wx:if="{{active}}">
+    <view class="active-title">{{active.title}}</view>
+    <view class="active-meta">{{active.count}} 站 · {{active.distanceText}} · {{active.nickname}}</view>
+    <view class="active-like {{active.liked ? 'on' : ''}}" data-id="{{active.id}}" catchtap="onLike">
+      {{active.liked ? '♥' : '♡'}} {{active.likes}}
     </view>
-    <view class="stop-card-name">{{stopCard.name}}</view>
-
-    <view class="stop-card-leg" wx:if="{{stopCard.prev}}">
-      <view class="stop-card-leg-head">
-        <text class="stop-card-label">上一段</text>
-        <text class="stop-card-mode mode-{{stopCard.prev.mode}}">{{stopCard.prev.modeText}}</text>
-      </view>
-      <text class="stop-card-text">{{stopCard.prev.from}} → {{stopCard.prev.to}} · {{stopCard.prev.text}}</text>
-    </view>
-
-    <view class="stop-card-leg" wx:if="{{stopCard.next}}">
-      <view class="stop-card-leg-head">
-        <text class="stop-card-label">下一段</text>
-        <text class="stop-card-mode mode-{{stopCard.next.mode}}">{{stopCard.next.modeText}}</text>
-      </view>
-      <text class="stop-card-text">{{stopCard.next.from}} → {{stopCard.next.to}} · {{stopCard.next.text}}</text>
-    </view>
-
-    <view class="stop-card-btn" catchtap="onCardDetail">看点位详情</view>
   </view>
 
-  <!-- 点路线：显示这一段怎么走 -->
-  <view class="leg-card {{tab === 'legs' ? 'high' : ''}} {{legCard ? 'show' : ''}}" catchtap="closeLegCard">
-    <view class="leg-card-top">
-      <text class="stop-card-mode mode-{{legCard.mode}}">{{legCard.modeText}}</text>
-      <text class="stop-card-close">×</text>
+  <!-- 点位卡片 -->
+  <view class="stop-card" wx:if="{{stopCard}}">
+    <view class="stop-card-head">
+      <view class="stop-card-title">{{stopCard.emoji}} {{stopCard.name}}</view>
+      <view class="stop-card-close" catchtap="closeStopCard">×</view>
     </view>
-    <view class="leg-card-title">{{legCard.from}} → {{legCard.to}}</view>
-    <view class="leg-card-text">{{legCard.text}}</view>
-    <view class="leg-card-tip">点地图空白处关闭</view>
+    <view class="stop-card-meta">第 {{stopCard.index}} / {{stopCard.total}} 站</view>
+    <view class="stop-card-btn" catchtap="onCardDetail">看详情 ›</view>
   </view>
 </view>

@@ -4,7 +4,8 @@
     "pages/trip/index",
     "pages/routes/index",
     "pages/detail/index",
-    "pages/feedback/index"
+    "pages/feedback/index",
+    "pages/route-upload/index"
   ],
   "window": {
     "backgroundColor": "#fbf8f2",

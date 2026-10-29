@@ -1,0 +1,9 @@
+{
+  "name": "userRoutes",
+  "version": "1.0.0",
+  "description": "社区路线：上传 / 列表 / 点赞",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

@@ -1,0 +1,51 @@
+<view class="page">
+  <view class="head" style="padding-top: {{statusBarHeight + 12}}px">
+    <view class="back" bindtap="onOpenTrip">‹</view>
+    <view class="head-main">
+      <view class="head-title">上传路线</view>
+      <view class="head-sub">把「我的行程」发到社区，别人能看也能点赞</view>
+    </view>
+  </view>
+
+  <view class="body">
+    <!-- 路线预览 -->
+    <view class="block">
+      <view class="block-title">这条路线 <text class="count">{{stops.length}} 个点</text></view>
+      <view class="stop-list" wx:if="{{stops.length}}">
+        <view class="stop" wx:for="{{stops}}" wx:key="id">
+          <text class="stop-num">{{index + 1}}</text>
+          <text class="stop-emoji">{{item.emoji}}</text>
+          <text class="stop-name">{{item.name}}</text>
+          <text class="stop-city">{{item.city}}</text>
+        </view>
+      </view>
+      <view class="empty" wx:else>
+        还没有行程。先去「我的行程」加几个点，再回来上传。
+        <view class="empty-btn" bindtap="onOpenTrip">去我的行程 ›</view>
+      </view>
+    </view>
+
+    <view class="field">
+      <view class="label">标题</view>
+      <input class="input" cursor-spacing="24" value="{{title}}" maxlength="30" placeholder="比如：湘潭老城半日游" bindinput="onTitleInput" />
+    </view>
+
+    <view class="field">
+      <view class="label">昵称（选填）</view>
+      <input class="input" cursor-spacing="24" value="{{nickname}}" maxlength="20" placeholder="显示在路线卡片上，不填就是「旅行者」" bindinput="onNickInput" />
+    </view>
+
+    <view class="field">
+      <view class="label">一句话介绍（选填）</view>
+      <textarea class="input area" cursor-spacing="24" value="{{desc}}" maxlength="200" placeholder="这条线适合谁、什么时候去、要注意什么…" bindinput="onDescInput"></textarea>
+    </view>
+
+    <view class="error" wx:if="{{error}}">{{error}}</view>
+
+    <button class="submit {{!canSubmit || submitting ? 'disabled' : ''}}" bindtap="onSubmit">
+      {{submitting ? '发布中…' : '发布到社区'}}
+    </button>
+
+    <view class="tip">发布后别人能在「社区路线」里看到并点赞；点赞多的会排在前面。</view>
+  </view>
+</view>

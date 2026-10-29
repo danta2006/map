@@ -9,7 +9,7 @@
     <view class="field">
       <view class="label">问题描述（至少 5 个字）</view>
       <textarea
-        class="input area"
+        class="input area" cursor-spacing="24"
         placeholder="比如：开放时间写错了，实际是 09:00-17:30；或者这里已经关门了"
         maxlength="{{maxLen}}"
         value="{{text}}"
@@ -21,7 +21,7 @@
     <view class="field">
       <view class="label">联系方式（选填）</view>
       <input
-        class="input"
+        class="input" cursor-spacing="24"
         placeholder="微信 / 手机号，方便我们跟你确认"
         value="{{contact}}"
         bindinput="onContactInput"

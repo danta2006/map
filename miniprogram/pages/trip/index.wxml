@@ -113,6 +113,7 @@
     <view class="panel-head">
       <view class="panel-title">行程排序</view>
       <view class="panel-actions">
+        <view class="panel-action" bindtap="onSaveRoute">↑ 存为路线</view>
         <view class="panel-action" bindtap="onGoMap">＋ 加点</view>
         <view class="panel-action danger" wx:if="{{!empty}}" bindtap="onClear">清空</view>
       </view>
