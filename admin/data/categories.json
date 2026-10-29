@@ -1,0 +1,42 @@
+{
+  "categories": [
+    {
+      "key": "scenic",
+      "name": "景点",
+      "color": "#2c6b63"
+    },
+    {
+      "key": "oldtown",
+      "name": "古镇街区",
+      "color": "#8b6f47"
+    },
+    {
+      "key": "red",
+      "name": "红色",
+      "color": "#b0392e"
+    },
+    {
+      "key": "school",
+      "name": "学府",
+      "color": "#3a6ea5"
+    },
+    {
+      "key": "food",
+      "name": "美食",
+      "color": "#d98324"
+    },
+    {
+      "key": "hotel",
+      "name": "酒店",
+      "color": "#6f548f"
+    }
+  ],
+  "radius": {
+    "scenic": 600,
+    "oldtown": 800,
+    "red": 1200,
+    "school": 1500,
+    "food": 300,
+    "hotel": 300
+  }
+}

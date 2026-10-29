@@ -23,20 +23,19 @@
       <view class="top-main">
         <view class="top-title">我的行程</view>
         <view class="top-sub" wx:if="{{summary}}">{{summary.count}} 个点 · 全程约 {{summary.totalText}}</view>
-      <view class="top-sub" wx:if="{{progress}}">{{summary.progressText}}</view>
         <view class="top-sub" wx:else>还没有选点位</view>
       </view>
       <view class="panel-toggle" wx:if="{{!empty}}" bindtap="togglePanel">
         {{panel === 'hidden' ? '显示排序' : '隐藏排序'}}
       </view>
+    </view>
 
-      <!-- 打卡进度：走完几个点一目了然 -->
-      <view class="progress" wx:if="{{progress && progress.total}}">
-        <view class="progress-bar">
-          <view class="progress-fill" style="width: {{progress.percent}}%"></view>
-        </view>
-        <text class="progress-label">完成 {{progress.done}}/{{progress.total}}</text>
+    <!-- 打卡进度：走完几个点一目了然 -->
+    <view class="progress" wx:if="{{progress && progress.total}}">
+      <view class="progress-bar">
+        <view class="progress-fill" style="width: {{progress.percent}}%"></view>
       </view>
+      <text class="progress-label">已打卡 {{progress.done}}/{{progress.total}}</text>
     </view>
 
     <view class="summary-row" wx:if="{{summary}}">

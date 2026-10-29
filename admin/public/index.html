@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <title>标点地图 · 内容后台</title>
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+  <header>
+    <h1>标点地图 · 内容后台</h1>
+    <div class="actions">
+      <span id="status" class="status">加载中…</span>
+      <button id="exportBtn" class="primary">导出到小程序</button>
+    </div>
+  </header>
+
+  <nav>
+    <button class="tab active" data-tab="routes">精选路线</button>
+    <button class="tab" data-tab="places">点位</button>
+    <button class="tab" data-tab="cities">城市</button>
+  </nav>
+
+  <main>
+    <!-- 路线 -->
+    <section id="tab-routes" class="panel">
+      <div class="split">
+        <ul id="routeList" class="list"></ul>
+        <div id="routeEditor" class="editor">
+          <p class="hint">← 从左边选一条路线</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 点位 -->
+    <section id="tab-places" class="panel hidden">
+      <div class="toolbar">
+        <input id="placeSearch" placeholder="搜索名称 / id / 城市" />
+        <span id="placeCount" class="hint"></span>
+      </div>
+      <div class="split">
+        <ul id="placeList" class="list scroll"></ul>
+        <div id="placeEditor" class="editor">
+          <p class="hint">← 从左边选一个点位</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 城市 -->
+    <section id="tab-cities" class="panel hidden">
+      <div id="cityEditor" class="editor wide"></div>
+    </section>
+  </main>
+
+  <script src="/app.js"></script>
+</body>
+</html>

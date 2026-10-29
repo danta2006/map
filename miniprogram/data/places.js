@@ -1,11 +1,6 @@
 /**
- * 湘潭 POI 数据（工作版 v0.1）
- *
- * ⚠️ 坐标是 GCJ-02 近似值，仅用于先把地图跑通；
- *    正式内容必须用腾讯位置服务「坐标拾取器」逐点校准（见 docs/plan.md §5.4）。
- * 字段含义见 docs/plan.md §5.3。
+ * 点位数据（由 admin 后台导出，勿手改；改数据请用 `node admin/server.js`）
  */
-
 const CATEGORIES = [
   { key: 'scenic', name: '景点', color: '#2c6b63' },
   { key: 'oldtown', name: '古镇街区', color: '#8b6f47' },
@@ -14,6 +9,21 @@ const CATEGORIES = [
   { key: 'food', name: '美食', color: '#d98324' },
   { key: 'hotel', name: '酒店', color: '#6f548f' }
 ];
+
+const CATEGORY_MAP = {};
+CATEGORIES.forEach((c) => {
+  CATEGORY_MAP[c.key] = c;
+});
+
+// 打卡半径（米）：单个点位可用 radius 字段覆盖
+const CATEGORY_RADIUS = {
+  scenic: 600,
+  oldtown: 800,
+  red: 1200,
+  school: 1500,
+  food: 300,
+  hotel: 300
+};
 
 const PLACES = [
   {
@@ -736,12 +746,6 @@ const PLACES = [
     openTime: '08:30-17:00',
     durationMin: 60
   },
-
-  /* ---------------- 酒店（v0.8.0 新增） ----------------
-   * 酒店也是点位：能在地图上显示、能加进行程当「今晚住哪」的一站。
-   * 坐标同样是 GCJ-02 近似值，正式上线前要逐点校准；
-   * durationMin 只算「办理入住 + 放行李」的时间，不含过夜。
-   */
   {
     id: 'huayin',
     name: '湘潭华银国际大酒店',
@@ -840,27 +844,4 @@ const PLACES = [
   }
 ];
 
-/**
- * 打卡判定半径（米）：按分类给个默认值，单个点位可用 radius 字段覆盖
- * 校园/景区动辄一两公里，500 米根本走不进去，所以按类型放宽
- */
-const CATEGORY_RADIUS = {
-  scenic: 600,   // 景点：一个楼、一个公园
-  oldtown: 800,  // 古镇/街区：成片区域
-  red: 1200,     // 红色景区：韶山冲这种大片区
-  school: 1500,  // 学府：校园太大，从南门走到北门就一公里
-  food: 300,     // 美食：到店门口
-  hotel: 300     // 酒店：到门口，大堂就算到
-};
-
-const CATEGORY_MAP = CATEGORIES.reduce((map, item) => {
-  map[item.key] = item;
-  return map;
-}, {});
-
-module.exports = {
-  CATEGORIES,
-  PLACES,
-  CATEGORY_MAP,
-  CATEGORY_RADIUS
-};
+module.exports = { CATEGORIES, PLACES, CATEGORY_MAP, CATEGORY_RADIUS };

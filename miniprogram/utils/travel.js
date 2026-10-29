@@ -9,6 +9,7 @@
 const { distance, formatDistance } = require('./geo');
 const { ROUTES } = require('../data/routes');
 const { REAL_PAIRS } = require('../data/realLegs');
+const { PAIR_PATHS } = require('../data/pairPaths');
 const { PLACES } = require('../data/places');
 
 const PLACE_MAP = {};
@@ -150,7 +151,8 @@ function buildLeg(fromId, toId) {
     modeColor: recommendedMode.color,
     modeMinutes: recommendedMode.minutes,
     // 有实测路径时用真实路径画线
-    path: real && real.path ? real.path : null,
+    // 路径优先级：精选路线的实测路径 > 任意两点的真实路径 > null（前端画直线兜底）
+    path: (real && real.path) ? real.path : (PAIR_PATHS[key] || null),
     real: modes.some((m) => m.real),
     estimated: !modes.some((m) => m.real)
   };
