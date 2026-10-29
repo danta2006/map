@@ -35,8 +35,8 @@
     </view>
   </view>
 
-  <!-- 底部：社区路线列表 -->
-  <view class="panel">
+  <!-- 底部：社区路线列表（未选中路线时） -->
+  <view class="panel" wx:if="{{!active}}">
     <view class="panel-head">
       <text class="panel-title">路线列表</text>
       <text class="panel-hint" wx:if="{{!loading && !error}}">{{routes.length}} 条</text>
@@ -49,7 +49,7 @@
       <view
         wx:for="{{routes}}"
         wx:key="id"
-        class="route {{activeId === item.id ? 'active' : ''}}"
+        class="route"
         data-id="{{item.id}}"
         bindtap="onRouteTap"
       >
@@ -74,12 +74,70 @@
     </scroll-view>
   </view>
 
-  <!-- 选中路线的摘要 -->
-  <view class="active-bar" wx:if="{{active}}">
-    <view class="active-title">{{active.title}}</view>
-    <view class="active-meta">{{active.count}} 站 · {{active.distanceText}} · {{active.nickname}}</view>
-    <view class="active-like {{active.liked ? 'on' : ''}}" data-id="{{active.id}}" catchtap="onLike">
-      {{active.liked ? '♥' : '♡'}} {{active.likes}}
+  <!-- 路线详情：站点 / 交通方式可切换，选完可一键加进行程 -->
+  <view class="detail" wx:if="{{active}}">
+    <view class="detail-grab"></view>
+
+    <view class="detail-head">
+      <view class="detail-main">
+        <view class="detail-title">{{active.title}}</view>
+        <view class="detail-meta">{{active.nickname}} · {{active.count}} 站 · {{active.distanceText}}</view>
+      </view>
+      <view class="detail-like {{active.liked ? 'on' : ''}}" data-id="{{active.id}}" catchtap="onLike">
+        {{active.liked ? '♥' : '♡'}} {{active.likes}}
+      </view>
+      <view class="detail-close" catchtap="onCloseDetail">×</view>
+    </view>
+
+    <view class="tabs">
+      <view class="tab {{tab === 'legs' ? 'on' : ''}}" data-tab="legs" catchtap="onTab">交通方式</view>
+      <view class="tab {{tab === 'stops' ? 'on' : ''}}" data-tab="stops" catchtap="onTab">站点</view>
+    </view>
+
+    <scroll-view class="detail-body" scroll-y>
+      <block wx:if="{{tab === 'legs'}}">
+        <view class="totals">
+          <view class="totals-item"><text class="dot walk"></text>全步行 {{totals.walk}} 分</view>
+          <view class="totals-item"><text class="dot transit"></text>公交 {{totals.transit}} 分</view>
+          <view class="totals-item"><text class="dot taxi"></text>打车 {{totals.taxi}} 分</view>
+        </view>
+
+        <view class="leg" wx:for="{{legs}}" wx:key="index">
+          <view class="leg-head">
+            <text class="leg-title">{{item.fromName}} → {{item.toName}}</text>
+            <text class="leg-km">{{item.distanceText}}</text>
+          </view>
+          <view class="leg-modes">
+            <view
+              wx:for="{{item.modes}}"
+              wx:for-item="m"
+              wx:key="key"
+              class="mode {{item.chosen === m.key ? 'on' : ''}} {{m.disabled ? 'off' : ''}}"
+              data-leg="{{item.index}}"
+              data-mode="{{m.key}}"
+              catchtap="onModeTap"
+              style="{{item.chosen === m.key && !m.disabled ? 'border-color:' + m.color + ';color:' + m.color : ''}}"
+            >
+              <text class="mode-name">{{m.name}}</text>
+              <text class="mode-min">{{m.disabled ? '不推荐' : m.minutes + ' 分'}}</text>
+            </view>
+          </view>
+        </view>
+      </block>
+
+      <block wx:else>
+        <view class="stop" wx:for="{{active.stops}}" wx:key="id" data-index="{{index}}" catchtap="onStopTap">
+          <text class="stop-num">{{index + 1}}</text>
+          <text class="stop-emoji">{{item.emoji}}</text>
+          <text class="stop-name">{{item.name}}</text>
+          <text class="stop-go">›</text>
+        </view>
+      </block>
+    </scroll-view>
+
+    <view class="detail-foot">
+      <view class="foot-ghost" catchtap="onCloseDetail">返回列表</view>
+      <view class="foot-primary" catchtap="onUseRoute">一键加进行程 · 约 {{chosenTotal}} 分</view>
     </view>
   </view>
 

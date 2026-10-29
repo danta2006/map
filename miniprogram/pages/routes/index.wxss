@@ -292,3 +292,265 @@
   font-size: 24rpx;
   color: var(--red);
 }
+
+/* ---------- 路线详情：站点 / 交通方式 ---------- */
+.detail {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 56vh;
+  background: var(--paper);
+  border-radius: 28rpx 28rpx 0 0;
+  box-shadow: 0 -10rpx 34rpx rgba(60, 45, 20, 0.16);
+  z-index: 12;
+  display: flex;
+  flex-direction: column;
+  padding: 14rpx 24rpx 12rpx;
+}
+
+.detail-grab {
+  width: 72rpx;
+  height: 8rpx;
+  border-radius: 999rpx;
+  background: #e0d6c4;
+  margin: 0 auto 10rpx;
+}
+
+.detail-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 12rpx;
+}
+
+.detail-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.detail-title {
+  font-size: 30rpx;
+  font-weight: 700;
+  color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.detail-meta {
+  margin-top: 4rpx;
+  font-size: 20rpx;
+  color: var(--muted);
+}
+
+.detail-like {
+  flex-shrink: 0;
+  padding: 8rpx 18rpx;
+  border-radius: 999rpx;
+  background: #f2ece0;
+  color: var(--muted);
+  font-size: 22rpx;
+}
+
+.detail-like.on {
+  background: #fbe9e7;
+  color: #c0392b;
+}
+
+.detail-close {
+  flex-shrink: 0;
+  width: 52rpx;
+  height: 52rpx;
+  line-height: 46rpx;
+  text-align: center;
+  font-size: 36rpx;
+  color: var(--muted);
+}
+
+.tabs {
+  display: flex;
+  gap: 10rpx;
+  margin: 12rpx 0 8rpx;
+}
+
+.tab {
+  padding: 8rpx 24rpx;
+  border-radius: 999rpx;
+  background: #f2ece0;
+  color: var(--ink2);
+  font-size: 23rpx;
+}
+
+.tab.on {
+  background: var(--ink);
+  color: #fff;
+}
+
+.detail-body {
+  flex: 1;
+  min-height: 0;
+}
+
+.totals {
+  display: flex;
+  gap: 10rpx;
+  margin-bottom: 12rpx;
+}
+
+.totals-item {
+  flex: 1;
+  text-align: center;
+  padding: 10rpx 6rpx;
+  background: #fffdf8;
+  border: 1rpx solid var(--line);
+  border-radius: 12rpx;
+  font-size: 20rpx;
+  color: var(--ink2);
+}
+
+.dot {
+  display: inline-block;
+  width: 14rpx;
+  height: 14rpx;
+  border-radius: 50%;
+  margin-right: 6rpx;
+}
+
+.dot.walk {
+  background: #2c6b63;
+}
+
+.dot.transit {
+  background: #3a6ea5;
+}
+
+.dot.taxi {
+  background: #8b6f47;
+}
+
+.leg {
+  padding: 12rpx 0;
+  border-bottom: 1rpx dashed var(--line);
+}
+
+.leg-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.leg-title {
+  font-size: 24rpx;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.leg-km {
+  font-size: 20rpx;
+  color: var(--muted);
+}
+
+.leg-modes {
+  display: flex;
+  gap: 8rpx;
+  margin-top: 8rpx;
+}
+
+.mode {
+  flex: 1;
+  text-align: center;
+  padding: 8rpx 4rpx;
+  border: 1rpx solid var(--line);
+  border-radius: 12rpx;
+  background: #fffdf8;
+  color: var(--ink2);
+}
+
+.mode.on {
+  background: #fff5f1;
+  border-width: 2rpx;
+}
+
+.mode.off {
+  opacity: 0.4;
+}
+
+.mode-name {
+  display: block;
+  font-size: 20rpx;
+}
+
+.mode-min {
+  display: block;
+  font-size: 22rpx;
+  font-weight: 600;
+  margin-top: 2rpx;
+}
+
+.stop {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  padding: 14rpx 6rpx;
+  border-bottom: 1rpx dashed var(--line);
+}
+
+.stop-num {
+  width: 36rpx;
+  height: 36rpx;
+  line-height: 36rpx;
+  text-align: center;
+  border-radius: 50%;
+  background: var(--red);
+  color: #fff;
+  font-size: 20rpx;
+}
+
+.stop-emoji {
+  font-size: 26rpx;
+}
+
+.stop-name {
+  flex: 1;
+  font-size: 25rpx;
+  color: var(--ink);
+}
+
+.stop-go {
+  color: var(--muted);
+  font-size: 26rpx;
+}
+
+.detail-foot {
+  display: flex;
+  gap: 12rpx;
+  padding-top: 12rpx;
+}
+
+.foot-ghost {
+  flex: 0 0 32%;
+  height: 76rpx;
+  line-height: 76rpx;
+  text-align: center;
+  border-radius: 38rpx;
+  background: #f2ece0;
+  color: var(--ink2);
+  font-size: 24rpx;
+}
+
+.foot-primary {
+  flex: 1;
+  height: 76rpx;
+  line-height: 76rpx;
+  text-align: center;
+  border-radius: 38rpx;
+  background: var(--red);
+  color: #fff;
+  font-size: 24rpx;
+  font-weight: 600;
+}
+
+/* 详情打开时，点位卡片上移到详情面板上方 */
+.stop-card {
+  bottom: calc(56vh + 90rpx);
+}

@@ -2,6 +2,7 @@ const app = getApp();
 const { PLACES } = require('../../data/places');
 const { CITIES } = require('../../data/cities');
 const travel = require('../../utils/travel');
+const trip = require('../../utils/trip');
 
 const PLACE_MAP = {};
 PLACES.forEach((p) => {
@@ -9,7 +10,7 @@ PLACES.forEach((p) => {
 });
 
 const CITY_TABS = [{ id: 'all', name: '全部' }].concat(CITIES.map((c) => ({ id: c.id, name: c.name })));
-const ROUTE_COLOR = '#b0392e';
+const MODE_COLOR = { walk: '#2c6b63', transit: '#3a6ea5', taxi: '#8b6f47' };
 
 function byLikes(a, b) {
   if ((b.likes || 0) !== (a.likes || 0)) return (b.likes || 0) - (a.likes || 0);
@@ -31,11 +32,15 @@ Page({
     active: null,
     markers: [],
     polyline: [],
-    stopCard: null
+    stopCard: null,
+    // 路线详情（站点 / 交通方式）
+    tab: 'legs',
+    legs: [],
+    totals: { walk: 0, transit: 0, taxi: 0 },
+    chosenTotal: 0
   },
 
   onLoad() {
-    // 右上角胶囊：上传按钮要避开，别叠在一起
     const sys = wx.getSystemInfoSync();
     let menuRight = 96;
     try {
@@ -48,11 +53,9 @@ Page({
   },
 
   onShow() {
-    // 从上传页返回时刷新列表
     if (this.loadedOnce) this.loadRoutes();
   },
 
-  /** 拉社区路线（云开发） */
   async loadRoutes() {
     this.loadedOnce = true;
     if (!wx.cloud || !app.globalData.cloudReady) {
@@ -63,10 +66,7 @@ Page({
     try {
       const res = await wx.cloud.callFunction({
         name: 'userRoutes',
-        data: {
-          action: 'list',
-          city: this.data.activeCity === 'all' ? '' : this.data.activeCity
-        }
+        data: { action: 'list', city: this.data.activeCity === 'all' ? '' : this.data.activeCity }
       });
       const r = (res && res.result) || {};
       if (!r.ok) throw new Error(r.error || '加载失败');
@@ -89,14 +89,17 @@ Page({
   },
 
   clearMap() {
-    this.setData({ activeId: '', active: null, markers: [], polyline: [], stopCard: null });
+    this.visibleStops = [];
+    this.legObjs = [];
+    this.modeState = [];
+    this.setData({ activeId: '', active: null, markers: [], polyline: [], stopCard: null, legs: [] });
   },
 
   onUpload() {
     wx.navigateTo({ url: '/pages/route-upload/index' });
   },
 
-  /** 选中一条社区路线：画编号点 + 沿路折线 */
+  /** 选中路线：站点 + 每段三种交通方式 + 按方式着色的折线 */
   setRoute(id) {
     const route = this.data.routes.find((r) => r.id === id);
     if (!route) return;
@@ -114,6 +117,86 @@ Page({
     });
     this.visibleStops = stops;
 
+    const legs = [];
+    const modeState = [];
+    let meters = 0;
+    for (let i = 1; i < stops.length; i++) {
+      const a = PLACE_MAP[stops[i - 1].id];
+      const b = PLACE_MAP[stops[i].id];
+      if (!a || !b) {
+        legs.push(null);
+        modeState.push('walk');
+        continue;
+      }
+      const leg = travel.buildLeg(a.id, b.id);
+      meters += leg.distance || 0;
+      const modes = (leg.modes || []).map((m) => ({
+        key: m.key,
+        name: m.name,
+        color: m.color,
+        minutes: m.minutes,
+        disabled: !!m.disabled,
+        text: m.text
+      }));
+      const chosen = leg.modeKey || 'walk';
+      modeState.push(chosen);
+      legs.push({
+        index: i,
+        fromId: leg.fromId,
+        toId: leg.toId,
+        fromName: leg.fromName || stops[i - 1].name,
+        toName: leg.toName || stops[i].name,
+        distanceText: leg.distanceText,
+        modes,
+        chosen
+      });
+    }
+    this.legObjs = legs;
+    this.modeState = modeState;
+
+    this.setData({
+      activeId: id,
+      active: { ...route, stops, distanceText: (meters / 1000).toFixed(1) + ' km' },
+      tab: 'legs',
+      stopCard: null
+    });
+    this.recalc();
+    this.draw();
+    setTimeout(() => {
+      const points = stops.map((p) => ({ latitude: p.latitude, longitude: p.longitude }));
+      if (this.mapCtx && points.length) {
+        this.mapCtx.includePoints({ points, padding: [180, 80, 460, 80] });
+      }
+    }, 300);
+  },
+
+  /** 交通列表（带当前选择） */
+  legRows() {
+    return (this.legObjs || [])
+      .map((leg, i) => (leg ? { ...leg, chosen: this.modeState[i] } : null))
+      .filter(Boolean);
+  },
+
+  /** 三种方式全程合计 + 当前所选合计 */
+  recalc() {
+    const totals = { walk: 0, transit: 0, taxi: 0 };
+    let chosenTotal = 0;
+    (this.legObjs || []).forEach((leg, i) => {
+      if (!leg) return;
+      const chosen = this.modeState[i];
+      leg.modes.forEach((m) => {
+        if (!m.disabled && totals[m.key] != null) totals[m.key] += m.minutes || 0;
+      });
+      const hit = leg.modes.find((m) => m.key === chosen) || leg.modes.find((m) => !m.disabled);
+      chosenTotal += (hit && hit.minutes) || 0;
+      leg.chosen = chosen;
+    });
+    this.setData({ totals, chosenTotal, legs: this.legRows() });
+  },
+
+  /** 按每段所选方式着色画折线 */
+  draw() {
+    const stops = this.visibleStops || [];
     const markers = stops.map((p, i) => ({
       id: i,
       latitude: p.latitude,
@@ -137,48 +220,43 @@ Page({
       }
     }));
 
-    // 沿真实道路的折线（同城点对走 pairPaths，跨城退化成直线）
-    const linePoints = [];
-    let meters = 0;
-    for (let i = 1; i < stops.length; i++) {
-      const a = PLACE_MAP[stops[i - 1].id];
-      const b = PLACE_MAP[stops[i].id];
-      if (!a || !b) continue;
-      const leg = travel.buildLeg(a.id, b.id);
-      meters += leg.distance || 0;
+    const underlays = [];
+    const lines = [];
+    (this.legObjs || []).forEach((leg, i) => {
+      if (!leg) return;
+      const a = PLACE_MAP[leg.fromId];
+      const b = PLACE_MAP[leg.toId];
+      if (!a || !b) return;
       const pts = travel.legPoints(leg, a, b) || [];
-      pts.forEach((pt) => {
-        const last = linePoints[linePoints.length - 1];
-        if (!last || last.latitude !== pt.latitude || last.longitude !== pt.longitude) {
-          linePoints.push({ latitude: pt.latitude, longitude: pt.longitude });
-        }
-      });
-    }
-    if (linePoints.length < 2) {
-      stops.forEach((p) => linePoints.push({ latitude: p.latitude, longitude: p.longitude }));
-    }
-
-    const points = stops.map((p) => ({ latitude: p.latitude, longitude: p.longitude }));
-    this.setData({
-      activeId: id,
-      active: {
-        ...route,
-        stops,
-        distanceText: (meters / 1000).toFixed(1) + ' km'
-      },
-      markers,
-      polyline: [
-        { points: linePoints, color: '#FFFFFFCC', width: 14 },
-        { points: linePoints, color: ROUTE_COLOR, width: 9 }
-      ],
-      stopCard: null
+      if (pts.length < 2) return;
+      underlays.push({ points: pts, color: '#FFFFFFCC', width: 15 });
+      lines.push({ points: pts, color: MODE_COLOR[this.modeState[i]] || '#b0392e', width: 9 });
     });
 
-    setTimeout(() => {
-      if (this.mapCtx && points.length) {
-        this.mapCtx.includePoints({ points, padding: [180, 80, 320, 80] });
-      }
-    }, 300);
+    this.setData({ markers, polyline: underlays.concat(lines) });
+  },
+
+  /** 切某一段的交通方式 */
+  onModeTap(e) {
+    const data = e.currentTarget.dataset;
+    const idx = Number(data.leg);
+    const leg = (this.legObjs || []).find((x) => x && x.index === idx);
+    if (!leg) return;
+    const mode = leg.modes.find((m) => m.key === data.mode && !m.disabled);
+    if (!mode) return;
+    const pos = this.legObjs.indexOf(leg);
+    this.modeState[pos] = mode.key;
+    this.recalc();
+    this.draw();
+  },
+
+  onTab(e) {
+    this.setData({ tab: e.currentTarget.dataset.tab });
+  },
+
+  onCloseDetail() {
+    this.setData({ activeId: '', active: null, stopCard: null });
+    this.clearMap();
   },
 
   onRouteTap(e) {
@@ -187,7 +265,26 @@ Page({
     this.setRoute(id);
   },
 
-  /** 点赞 / 取消点赞（云端去重，按 openid） */
+  /** 一键把这条路线加进「我的行程」（按当前选的交通方式） */
+  onUseRoute() {
+    const stops = this.visibleStops || [];
+    if (stops.length < 2) return;
+    wx.showModal({
+      title: '用这条路线替换我的行程？',
+      content: `会加入 ${stops.length} 个点，并保留你选的交通方式`,
+      confirmText: '替换',
+      success: (res) => {
+        if (!res.confirm) return;
+        trip.clear();
+        stops.forEach((s) => trip.add(s.id));
+        (this.legObjs || []).forEach((leg, i) => {
+          if (leg) trip.setMode(leg.fromId, leg.toId, this.modeState[i]);
+        });
+        wx.navigateTo({ url: '/pages/trip/index' });
+      }
+    });
+  },
+
   async onLike(e) {
     const id = e.currentTarget.dataset.id;
     if (!wx.cloud) return;
