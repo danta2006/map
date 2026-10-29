@@ -94,7 +94,9 @@ Page({
         color: category.color || '#2c6b63',
         cityName: city.name || '',
         durationMin: p.durationMin || 60,
-        address: p.address || ''
+        address: p.address || '',
+        // 这个点有没有打过卡（打卡记录存在 storage 里）
+        checked: !!wx.getStorageSync('checkin_' + p.id)
       });
     });
 
@@ -140,9 +142,16 @@ Page({
     const visitMin = stops.reduce((sum, s) => sum + s.durationMin, 0);
     const travelMin = legs.reduce((sum, l) => sum + (l ? l.modeMinutes : 0), 0);
     const meters = legs.reduce((sum, l) => sum + (l ? l.distance : 0), 0);
+    const doneCount = stops.filter((s) => s.checked).length;
+    const progress = stops.length
+      ? { done: doneCount, total: stops.length, percent: Math.round((doneCount / stops.length) * 100) }
+      : null;
+
     const summary = stops.length
       ? {
           count: stops.length,
+          done: doneCount,
+          progressText: `已打卡 ${doneCount}/${stops.length}`,
           visitText: travel.formatMinutes(visitMin),
           travelText: travel.formatMinutes(travelMin),
           totalText: travel.formatMinutes(visitMin + travelMin),
@@ -226,6 +235,7 @@ Page({
       markers,
       polyline,
       summary,
+      progress,
       empty: stops.length === 0,
       panel,
       panelY: this.panelYFor(panel)

@@ -23,10 +23,19 @@
       <view class="top-main">
         <view class="top-title">我的行程</view>
         <view class="top-sub" wx:if="{{summary}}">{{summary.count}} 个点 · 全程约 {{summary.totalText}}</view>
+      <view class="top-sub" wx:if="{{progress}}">{{summary.progressText}}</view>
         <view class="top-sub" wx:else>还没有选点位</view>
       </view>
       <view class="panel-toggle" wx:if="{{!empty}}" bindtap="togglePanel">
         {{panel === 'hidden' ? '显示排序' : '隐藏排序'}}
+      </view>
+
+      <!-- 打卡进度：走完几个点一目了然 -->
+      <view class="progress" wx:if="{{progress && progress.total}}">
+        <view class="progress-bar">
+          <view class="progress-fill" style="width: {{progress.percent}}%"></view>
+        </view>
+        <text class="progress-label">完成 {{progress.done}}/{{progress.total}}</text>
       </view>
     </view>
 
@@ -125,7 +134,7 @@
           >⠿</view>
           <view class="stop-num" style="background: {{item.data.color}}">{{item.stopIndex + 1}}</view>
           <view class="stop-main" data-stop="{{item.stopIndex}}" bindtap="onStopTap">
-            <view class="stop-name">{{item.data.emoji}} {{item.data.name}}</view>
+            <view class="stop-name">{{item.data.emoji}} {{item.data.name}}<text class="stop-done" wx:if="{{item.data.checked}}">✓ 已打卡</text></view>
             <view class="stop-meta">{{item.data.cityName}} · {{item.data.categoryName}} · 建议 {{item.data.durationMin}} 分钟</view>
           </view>
           <view class="stop-ops">
@@ -168,7 +177,7 @@
                 </view>
               </view>
             </view>
-            <view class="leg-tip" wx:if="{{item.data.estimated}}">按直线距离估算，实际以导航为准</view>
+            <view class="leg-tip" wx:if="{{item.data.estimated}}">没有实测数据的点对按距离估算；带「实测」的时间来自高德路线规划</view>
             <view class="leg-tip warn" wx:if="{{item.data.transitWeak}}">这段很近，坐公交不太划算</view>
           </view>
         </view>

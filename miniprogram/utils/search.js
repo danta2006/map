@@ -6,6 +6,7 @@
 
 const { PLACES, CATEGORY_MAP } = require('../data/places');
 const { CITY_MAP } = require('../data/cities');
+const { PINYIN } = require('../data/pinyin');
 
 // 启动时把点位整理成可搜索的索引，避免每次输入都拼字符串
 const INDEX = PLACES.map((p) => {
@@ -28,6 +29,9 @@ const INDEX = PLACES.map((p) => {
     address: p.address || '',
     tags: Array.isArray(p.tags) ? p.tags.slice() : [],
     nameText: String(p.name || '').toLowerCase(),
+    py: ((PINYIN[p.id] || {}).py || '').toLowerCase(),
+    pyi: ((PINYIN[p.id] || {}).pyi || '').toLowerCase(),
+    pyAll: ((PINYIN[p.id] || {}).pyAll || '').toLowerCase(),
     tagText: tags.toLowerCase(),
     restText: [city.name, category.name, p.address, tags, p.summary, p.id]
       .filter(Boolean)
@@ -36,13 +40,24 @@ const INDEX = PLACES.map((p) => {
   };
 });
 
-/** 命中权重：名称完全相同 > 名称开头 > 名称包含 > 标签 > 其它字段 */
+/**
+ * 命中权重
+ * 中文：名称完全相同 > 名称开头 > 名称包含
+ * 拼音：全拼开头 > 首字母开头 > 全拼包含 > 首字母包含（支持 yuelu / ylsy / yl 这类输入）
+ */
 function scoreOf(entry, keyword) {
-  if (entry.nameText === keyword) return 100;
-  if (entry.nameText.indexOf(keyword) === 0) return 80;
-  if (entry.nameText.indexOf(keyword) >= 0) return 60;
-  if (entry.tagText.indexOf(keyword) >= 0) return 40;
-  if (entry.restText.indexOf(keyword) >= 0) return 20;
+  const k = keyword;
+  if (entry.nameText === k) return 100;
+  if (entry.nameText.indexOf(k) === 0) return 90;
+  if (entry.py === k || entry.pyi === k) return 85;
+  if (entry.py.indexOf(k) === 0) return 80;
+  if (entry.pyi.indexOf(k) === 0) return 76;
+  if (entry.nameText.indexOf(k) >= 0) return 70;
+  if (entry.py.indexOf(k) >= 0) return 60;
+  if (entry.pyi.indexOf(k) >= 0) return 55;
+  if (entry.tagText.indexOf(k) >= 0) return 40;
+  if (entry.pyAll.indexOf(k) >= 0) return 35;
+  if (entry.restText.indexOf(k) >= 0) return 20;
   return 0;
 }
 

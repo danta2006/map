@@ -545,3 +545,40 @@
 .leg-tip.warn {
   color: var(--orange);
 }
+/* ---------- 打卡进度 ---------- */
+.progress {
+  display: flex;
+  align-items: center;
+  margin-top: 10rpx;
+}
+
+.progress-bar {
+  flex: 1;
+  height: 12rpx;
+  border-radius: 6rpx;
+  background: rgba(29, 28, 25, 0.1);
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  border-radius: 6rpx;
+  background: linear-gradient(90deg, #2c6b63, #57a08f);
+  transition: width 0.3s ease;
+}
+
+.progress-label {
+  margin-left: 14rpx;
+  font-size: 20rpx;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.stop-done {
+  margin-left: 12rpx;
+  padding: 2rpx 10rpx;
+  border-radius: 999rpx;
+  background: #e9f4ee;
+  color: var(--teal);
+  font-size: 18rpx;
+}

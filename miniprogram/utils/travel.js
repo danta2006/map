@@ -8,6 +8,7 @@
 
 const { distance, formatDistance } = require('./geo');
 const { ROUTES } = require('../data/routes');
+const { REAL_PAIRS } = require('../data/realLegs');
 const { PLACES } = require('../data/places');
 
 const PLACE_MAP = {};
@@ -90,9 +91,18 @@ function buildLeg(fromId, toId) {
   const straight = distance(a.latitude, a.longitude, b.latitude, b.longitude);
   const meters = real && real.distance ? real.distance : Math.round(straight * ROAD_FACTOR);
 
+  // 预计算的点对实测数据（同城、距离够近的两点），按方式取
+  const pair = REAL_PAIRS[key] || {};
+  const pairOf = { walk: pair.walk, taxi: pair.taxi, transit: pair.transit };
+
   const modes = MODES.map((mode) => {
-    const realThis = !!(real && real.mode === mode.key);
-    const minutes = realThis && real.minutes ? real.minutes : minutesFor(mode.key, meters);
+    const pairVal = pairOf[mode.key];
+    const routeReal = !!(real && real.mode === mode.key);
+    const realThis = routeReal || !!pairVal;
+    let minutes;
+    if (routeReal && real.minutes) minutes = real.minutes;
+    else if (pairVal) minutes = pairVal[1];
+    else minutes = minutesFor(mode.key, meters);
     return {
       key: mode.key,
       name: mode.name,
@@ -103,13 +113,17 @@ function buildLeg(fromId, toId) {
       short: `${minutes} 分`,
       // 实时公交（高德）只给了其中一种方式，其余是估算；有实测就标出来
       real: realThis,
+      realSource: routeReal ? 'route' : (pairVal ? 'pair' : ''),
       // 很近的距离坐公交并不划算，界面上给它加个提示
       weak: mode.key === 'transit' && meters < 1000,
       distanceText: formatDistance(meters)
     };
   });
 
-  const realMode = modes.filter((m) => m.real)[0] || null;
+  const realWalk = modes.filter((m) => m.key === 'walk' && m.real)[0];
+  const realTransit = modes.filter((m) => m.key === 'transit' && m.real)[0];
+  const realAny = modes.filter((m) => m.real)[0];
+  const realMode = realWalk || realTransit || realAny || null;
   const recommended = realMode
     ? realMode.key
     : meters < 1200
@@ -137,8 +151,8 @@ function buildLeg(fromId, toId) {
     modeMinutes: recommendedMode.minutes,
     // 有实测路径时用真实路径画线
     path: real && real.path ? real.path : null,
-    real: !!real,
-    estimated: !real
+    real: modes.some((m) => m.real),
+    estimated: !modes.some((m) => m.real)
   };
 }
 
