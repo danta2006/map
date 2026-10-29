@@ -48,7 +48,7 @@ Page({
     this.topGap = (app.globalData.statusBarHeight || 20) + 52;
     this.panelTop = this.topGap;
     this.panelH = this.winH - this.topGap;
-    const halfH = Math.max(280, Math.min(this.panelH, Math.round(this.winH * 0.52)));
+    const halfH = Math.max(260, Math.min(this.panelH, Math.round(this.winH * 0.42)));
     this.halfH = halfH;
 
     this.setData({
@@ -229,7 +229,7 @@ Page({
     // 面板状态：空行程收起来；第一次有数据默认半屏
     let panel = this.data.panel;
     if (!stops.length) panel = 'hidden';
-    else if (!this.loaded && !this.ready) panel = 'half';
+    else if (!this.ready) panel = 'hidden'; // 首次进来先收着，别一上来就挡住地图
 
     // 排序用的「整块」：一个站点 + 它后面那段交通，整块一起拖
     const blocks = stops.map((stop, i) => ({

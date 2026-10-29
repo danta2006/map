@@ -90,7 +90,6 @@
         <text class="seg-mode-time">约 {{m.minutes}} 分钟</text>
       </view>
     </view>
-    <view class="seg-card-tip">点选一种方式，地图上的线会跟着变</view>
   </view>
 
   <!-- 面板隐藏时露一条底栏，随时可以再展开 -->

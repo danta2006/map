@@ -690,3 +690,49 @@
 .drag-handle {
   cursor: grab;
 }
+
+/* ---------- 顶部统计再紧凑一点，别挡地图 ---------- */
+.summary-row {
+  padding: 8rpx 20rpx !important;
+  margin-top: 8rpx !important;
+}
+
+.sum-item .sum-k {
+  font-size: 18rpx !important;
+}
+
+.sum-item .sum-v {
+  font-size: 24rpx !important;
+}
+
+/* ---------- 分段卡片紧凑版 ---------- */
+.seg-card {
+  padding: 14rpx 18rpx !important;
+}
+
+.seg-card-title {
+  font-size: 25rpx !important;
+}
+
+.seg-card-sub {
+  margin-top: 2rpx !important;
+  font-size: 19rpx !important;
+}
+
+.seg-modes {
+  margin-top: 10rpx !important;
+}
+
+.seg-mode {
+  padding: 8rpx 6rpx !important;
+  margin-right: 8rpx !important;
+}
+
+.seg-mode-name {
+  font-size: 21rpx !important;
+}
+
+.seg-mode-time {
+  font-size: 19rpx !important;
+  margin-top: 0 !important;
+}
