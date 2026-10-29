@@ -1,0 +1,1027 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>长株潭「标点地图」开发报告</title>
+<style>
+  :root { --ink:#1d1c19; --ink2:#3f3c35; --muted:#736d61; --line:#e5ddce; --paper:#fbf8f2; --card:#fffdf8; --red:#b0392e; --teal:#2c6b63; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--paper); color:var(--ink); font: 15px/1.75 "Microsoft YaHei","PingFang SC",-apple-system,sans-serif; }
+  .wrap { max-width: 980px; margin: 0 auto; padding: 48px 40px 96px; }
+  h1 { font-size: 32px; border-bottom: 3px solid var(--red); padding-bottom: 14px; margin-top: 0; }
+  h2 { font-size: 24px; margin-top: 48px; padding-left: 12px; border-left: 6px solid var(--red); }
+  h3 { font-size: 19px; margin-top: 30px; color: var(--teal); }
+  h4 { font-size: 16px; margin-top: 22px; }
+  table { border-collapse: collapse; width: 100%; margin: 14px 0; background: var(--card); font-size: 14px; }
+  th, td { border: 1px solid var(--line); padding: 8px 10px; text-align: left; vertical-align: top; }
+  th { background: #f2ece0; font-weight: 600; }
+  tr:nth-child(even) td { background: #fdfaf3; }
+  code { background:#f2ece0; padding:1px 6px; border-radius:4px; font-family: Consolas, monospace; font-size: 13px; }
+  pre { background:#1d1c19; color:#f5f1e6; padding:16px 18px; border-radius:10px; overflow:auto; }
+  pre code { background: transparent; color: inherit; padding:0; }
+  blockquote { margin: 14px 0; padding: 10px 16px; background:#fff6e5; border-left: 4px solid #d98324; color:#5a4b33; }
+  hr { border: none; border-top: 1px dashed var(--line); margin: 32px 0; }
+  a { color: var(--red); }
+  ul, ol { padding-left: 24px; }
+  li { margin: 4px 0; }
+  @media print { body { background:#fff; } .wrap { padding: 0 12mm; } pre { white-space: pre-wrap; } }
+</style>
+</head>
+<body><div class="wrap">
+<h1>长株潭「标点地图」文旅小程序 · 开发报告</h1>
+<table>
+<thead>
+<tr>
+<th>项</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>项目性质</td>
+<td>大学生创新创业训练项目 / 课程作品（非商业，演示为主）</td>
+</tr>
+<tr>
+<td>代码仓库</td>
+<td><a href="https://github.com/danta2006/map%EF%BC%88%E5%85%AC%E5%BC%80%EF%BC%89">https://github.com/danta2006/map（公开）</a></td>
+</tr>
+<tr>
+<td>技术栈</td>
+<td>微信原生小程序（WXML/WXSS/JS）+ Node 本地内容后台 + 微信云开发 + Python 数据管线</td>
+</tr>
+<tr>
+<td>当前版本</td>
+<td><strong>0.8.8</strong>（体验版）</td>
+</tr>
+<tr>
+<td>数据规模</td>
+<td>51 个点位 / 7 条路线 / 283 对实测交通 / 283 条真实路径 / 45 张实景图</td>
+</tr>
+<tr>
+<td>主包体积</td>
+<td>1.29 MB（上限 2 MB）</td>
+</tr>
+<tr>
+<td>代码规模</td>
+<td>小程序 41 文件 ~8.0 千行；后台 11 文件 ~4.5 千行；脚本 15 个 ~2.2 千行</td>
+</tr>
+<tr>
+<td>云开发环境</td>
+<td><code>cloud1-d5ghzdcqba4c291f8</code>（免费试用）</td>
+</tr>
+<tr>
+<td>报告日期</td>
+<td>2026-10-29</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>1. 项目概述</h2>
+<h3>1.1 目标</h3>
+<p>做一个<strong>能在一张地图上把长株潭值得去的点标出来</strong>的小程序：点开有攻略、能按精选路线逛、到了能打卡，还能自己拼一条「我的行程」。</p>
+<p>不做第二个大众点评，只保证三件事：<strong>点是真的、路线是能走的、演示是稳的</strong>。</p>
+<h3>1.2 最终成果</h3>
+<table>
+<thead>
+<tr>
+<th>能力</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>三城地图</td>
+<td>湘潭 26 / 长沙 16 / 株洲 9，共 51 个点位，6 个分类着色</td>
+</tr>
+<tr>
+<td>点位信息</td>
+<td>一句话、简介、本地备注、地址、开放时间、建议时长、实景图</td>
+</tr>
+<tr>
+<td>精选路线</td>
+<td>7 条（湘潭 3 / 长沙 2 / 株洲 2），沿道路真实折线 + 每段真实交通</td>
+</tr>
+<tr>
+<td>我的行程</td>
+<td>自选点位、拖拽排序、三种交通方式随时切换、打卡进度可视化</td>
+</tr>
+<tr>
+<td>搜索</td>
+<td>名称 / 标签 / 城市 / 分类 / 拼音全拼与首字母</td>
+</tr>
+<tr>
+<td>打卡</td>
+<td>按分类半径判定（300–1500 米），本地记录，可手动打卡兜底</td>
+</tr>
+<tr>
+<td>内容后台</td>
+<td>本地 Web 后台：点位/路线/城市可视化编辑、增删、一键重算、导出、反馈管理</td>
+</tr>
+<tr>
+<td>用户反馈</td>
+<td>详情页反馈入口 → 云端数据库（真机可用），三级降级保底</td>
+</tr>
+<tr>
+<td>数据管线</td>
+<td>高德接口批量拉点位 / 交通 / 路径 / 照片，脚本可重复执行</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>2. 系统架构</h2>
+<pre><code>                    ┌────────────────────────────────────────────┐
+                    │              微信小程序（前端）              │
+                    │  pages/map      地图 · 城市 · 分类 · 气泡     │
+                    │  pages/trip     我的行程 · 排序 · 交通 · 进度  │
+                    │  pages/routes   精选路线 · 折线点击 · 分段卡   │
+                    │  pages/detail   点位详情 · 打卡 · 导航        │
+                    │  pages/feedback 反馈提交（三级降级）          │
+                    │  components/place-search  搜索组件            │
+                    └───────────┬───────────────────┬─────────────┘
+                                │ 静态数据（打包）    │ wx.cloud
+                                ▼                   ▼
+        ┌───────────────────────────────┐   ┌──────────────────────────┐
+        │ miniprogram/data/*.js         │   │ 微信云开发                │
+        │ places / routes / cities      │   │ 环境 cloud1-d5ghzdcqba4c291f8 │
+        │ realLegs / pairPaths          │   │ 云函数 initEnv、ping       │
+        │ photos / pinyin               │   │ 云数据库 feedback 集合      │
+        └───────────┬───────────────────┘   └──────────────────────────┘
+                    │ 生成
+        ┌───────────▼───────────────────┐
+        │ 本地内容后台 admin/            │◀── 浏览器 http://127.0.0.1:8787
+        │ data/*.json（唯一数据源）      │
+        │ 编辑 → 导出 → 上面的 data/*.js │
+        └───────────┬───────────────────┘
+                    │ 调用
+        ┌───────────▼───────────────────┐
+        │ Python / Node 数据管线 scripts/│──▶ 高德 Web 服务 API（place/text、
+        │ 抓点位、交通、路径、照片、拼音   │     direction/walking|driving|transit）
+        └───────────────────────────────┘
+</code></pre>
+<p><strong>设计取舍</strong>：小程序端读<strong>打包进去的静态数据</strong>（而不是运行时请求后端），原因有三——</p>
+<ol>
+<li>个人主体无法备案 HTTPS 域名，真机请求外部接口会被拦；</li>
+<li>静态数据首屏无网络依赖，演示最稳；</li>
+<li>内容生产用本地后台，改完导出即可，不需要运维服务器。</li>
+</ol>
+<p>云开发只承担「真机收集反馈」这一件事（云数据库不需要域名备案）。</p>
+<hr>
+<h2>3. 前端开发</h2>
+<h3>3.1 工程结构</h3>
+<pre><code>miniprogram/
+├── app.js / app.json / app.wxss   全局（云开发初始化、导航、主题变量）
+├── config.js                      环境配置（CLOUD_ENV / ADMIN_API）
+├── data/                          数据层（6 个模块，约 90 KB）
+├── utils/                         geo / travel / trip / search / api
+├── components/place-search/       搜索组件
+├── pages/
+│   ├── map/      671 + 207 + 663 行   （js/wxml/wxss）
+│   ├── trip/     697 + 214 + 747 行
+│   ├── routes/   323 + 136 + 482 行
+│   ├── detail/   219 + 66 + 247 行
+│   └── feedback/  82 + 37 + 80 行
+└── assets/                        分类 marker、时间图标、路线序号、实景图
+</code></pre>
+<h3>3.2 地图首页（<code>pages/map</code>）</h3>
+<p><strong>职责</strong>：总入口。看全城点位、切城市、筛分类、看点位卡片、进入详情或行程。</p>
+<table>
+<thead>
+<tr>
+<th>功能</th>
+<th>实现方式</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>点位标记</td>
+<td><code>map</code> 的 <code>markers</code>，按分类取不同 pin 图，<code>callout</code> 显示名称（点击显示）</td>
+</tr>
+<tr>
+<td>分类筛选</td>
+<td>6 个 chip（全部/景点/古镇街区/红色/学府/美食/酒店），带分类色点当图例</td>
+</tr>
+<tr>
+<td>城市切换</td>
+<td>左上角城市 pill，下拉面板，切城市同时换 center/scale 与点位</td>
+</tr>
+<tr>
+<td>点位卡片</td>
+<td>底部卡片（名称/分类/时长/一句话/备注/导航），点卡片进详情</td>
+</tr>
+<tr>
+<td>上滑详情面板</td>
+<td>卡片可上滑展开整页详情（简介/地址/开放时间/距你/打卡），也可下滑收起</td>
+</tr>
+<tr>
+<td>实景图气泡</td>
+<td>缩放 ≥13.5 且与相邻点位屏幕间距 ≥128px 时，点位上方浮出圆形实景图气泡</td>
+</tr>
+<tr>
+<td>加入行程</td>
+<td>列表卡片右上「＋」、面板标题「＋ 行程」</td>
+</tr>
+<tr>
+<td>搜索</td>
+<td>右上 🔍 打开浮层，边输边出结果，结果先出介绍卡片再决定加入</td>
+</tr>
+<tr>
+<td>定位</td>
+<td>右下 ◎ <code>wx.getLocation</code> + <code>mapCtx.moveToLocation</code></td>
+</tr>
+</tbody></table>
+<p><strong>关键技术点</strong></p>
+<ol>
+<li><strong>气泡（customCallout）</strong>：用 <code>map</code> 的 <code>&lt;cover-view slot=&quot;callout&quot;&gt;</code> + <code>marker-id</code> 绑定；显隐用 <code>marker.customCallout.display</code>。<ul>
+<li>气泡尺寸 96rpx 圆形，<code>anchorX/anchorY</code> 控制位置（文档语义：<strong>向右/向下为正</strong>）；</li>
+<li>当前取值 <code>anchorX:6 / anchorY:10</code>，即正对图钉上方且底边贴住钉帽；</li>
+<li><strong>坑</strong>：<code>customCallout</code> 改变后地图不会自动重绘，必须把 <code>markers</code> 清空再写回强制重建；</li>
+<li>气泡本身也绑了 <code>bindtap</code>，点气泡等于点图钉。</li>
+</ul>
+</li>
+<li><strong>点击命中</strong>：<code>bindmarkertap</code>（点图钉）、<code>bindcallouttap</code>（点原生气泡）、<code>bindtap</code>（空白处关闭），三者用 200–350ms 时间窗互斥，避免「卡片刚弹出就被关」。</li>
+<li><strong>抖动治理</strong>：地图中心/缩放<strong>不做 regionchange 回写</strong>（早期回写会导致拖动后地图自己跳），只在切城市/切分类/定位时主动设置；气泡重算用「显示集合 key 去重」，集合没变不 <code>setData</code>。</li>
+<li><strong>城市切换</strong>：<code>CITIES</code> 配置三城中心与缩放，切城市同时过滤点位、重置分类、收起卡片。</li>
+</ol>
+<h3>3.3 我的行程（<code>pages/trip</code>）</h3>
+<p><strong>职责</strong>：用户自选点位拼行程，看总耗时/里程、调顺序、切交通方式、看打卡进度。</p>
+<p><strong>数据模型</strong></p>
+<pre><code class="language-js">// utils/trip.js，存 wx.storage: { ids: [...], modes: { &#39;a|b&#39;: &#39;walk&#39;|&#39;transit&#39;|&#39;taxi&#39; }, updatedAt }
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>能力</th>
+<th>实现</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>加点 / 移点</td>
+<td>地图页「＋」、详情页头图「＋ 加入行程」、行程页搜索框；同一点位再点即移出</td>
+</tr>
+<tr>
+<td>排序</td>
+<td><strong>长按 260ms 进入拖动</strong>，整个「站点块（站点 + 该段交通）」跟手移动，松手按最近块落位；也可用 ▲▼</td>
+</tr>
+<tr>
+<td>地图绘制</td>
+<td>编号 marker（1..N）+ 每段按交通方式着色的双层折线（白描边 13 + 主色 8）</td>
+</tr>
+<tr>
+<td>交通耗时</td>
+<td>每段列步行 / 公交地铁 / 打车三种时间，点选切换；有实测标「实测」</td>
+</tr>
+<tr>
+<td>时间与里程</td>
+<td>顶部统计：点位 / 游玩 / 在途 / 里程；里程用各段真实距离累加</td>
+</tr>
+<tr>
+<td>打卡进度</td>
+<td>「已打卡 N/M」+ 进度条 + 每个已打卡站点 ✓（读 <code>checkin_&lt;id&gt;</code> 记录）</td>
+</tr>
+<tr>
+<td>面板</td>
+<td>默认收起（只留底部一条），点开半屏（42% 屏高），可拖到全屏/隐藏</td>
+</tr>
+<tr>
+<td>点路线弹卡</td>
+<td>点折线<strong>附近</strong>、点两站之间的时间图标都能弹该段卡片，三种方式直接切</td>
+</tr>
+</tbody></table>
+<p><strong>交通时间的三级数据源</strong>（<code>utils/travel.js</code>）</p>
+<ol>
+<li>精选路线里出现过的点对 → 直接用 <code>routes.js</code> 里高德返回的实测（<code>realSource: &#39;route&#39;</code>）；</li>
+<li>同城 ≤8km 的其他点对 → 预计算的 <code>data/realLegs.js</code>（283 对，覆盖率 93%）；</li>
+<li>其余 → 直线距离 × 道路系数 1.28 + 各方式速度折算，界面标注估算。</li>
+</ol>
+<p><strong>跨城处理</strong>：两点不同城时，步行禁用（显示「跨城不推荐」），公交按城际列车估算（<code>距离/1500 m/min + 30min</code>），打车按高速估算（<code>距离/700 m/min + 5min</code>）；折线不画，改在中点标「跨城 XX 公里」。</p>
+<h3>3.4 精选路线（<code>pages/routes</code>）</h3>
+<table>
+<thead>
+<tr>
+<th>能力</th>
+<th>实现</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>路线分组</td>
+<td>7 条路线按城市过滤，切城市同时切默认路线</td>
+</tr>
+<tr>
+<td>真实折线</td>
+<td><code>routes.js</code> 的 <code>path</code>（高德 steps polyline 抽稀），双层描边</td>
+</tr>
+<tr>
+<td>站点/交通切换</td>
+<td>底部「站点 / 交通」二选一：横向站点卡 / 纵向逐段交通列表</td>
+</tr>
+<tr>
+<td>点站点</td>
+<td>弹「上一段 / 下一段」卡片 + 看详情按钮</td>
+</tr>
+<tr>
+<td>点路线</td>
+<td><code>bindpolylinetap</code>（3.1.0+）+ <code>bindtap</code> 坐标兜底（按缩放换算容差，60–400m）</td>
+</tr>
+<tr>
+<td>里程</td>
+<td>各段 <code>legs[].distance</code> 累加</td>
+</tr>
+</tbody></table>
+<h3>3.5 点位详情（<code>pages/detail</code>）</h3>
+<p>结构：头图（实景图 + 渐变遮罩，无图退化分类色块）→ 事实信息（分类/地址/开放时间/建议时长/距你）→ 关于这里 → 备注或补充 → 反馈链接 → 底部「导航 / 到这里打卡」。</p>
+<p><strong>打卡规则</strong>（<code>data/places.js</code> 的 <code>CATEGORY_RADIUS</code>，单点可用 <code>radius</code> 覆盖）</p>
+<table>
+<thead>
+<tr>
+<th>分类</th>
+<th>半径</th>
+<th>理由</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>学府</td>
+<td>1500 m</td>
+<td>一座校园从南门到北门就一公里</td>
+</tr>
+<tr>
+<td>红色</td>
+<td>1200 m</td>
+<td>韶山冲这类成片景区</td>
+</tr>
+<tr>
+<td>古镇街区</td>
+<td>800 m</td>
+<td>成片区域不是一个点</td>
+</tr>
+<tr>
+<td>景点</td>
+<td>600 m</td>
+<td>一栋楼、一座公园</td>
+</tr>
+<tr>
+<td>美食 / 酒店</td>
+<td>300 m</td>
+<td>到店门口</td>
+</tr>
+</tbody></table>
+<p>状态机：范围内直接打卡；范围外弹窗可选手动打卡；无定位引导设置或手动；&gt;30km 额外提示疑似模拟定位。记录：<code>{ at, distance, manual }</code>。</p>
+<h3>3.6 反馈页（<code>pages/feedback</code>）</h3>
+<ul>
+<li>入口：详情页底部「发现信息有误？点这里反馈 ›」</li>
+<li>表单：问题描述（≥5 字）+ 联系方式（选填）</li>
+<li>提交链路（三级降级）：<strong>云数据库 → 本地后台 → 本地存储</strong>，成功提示区分「已提交到云端 / 已提交 / 已记录在本地」</li>
+</ul>
+<h3>3.7 数据层（<code>miniprogram/data/</code>）</h3>
+<table>
+<thead>
+<tr>
+<th>文件</th>
+<th>内容</th>
+<th>体积</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>places.js</code></td>
+<td>51 个点位 + 6 分类 + 分类打卡半径</td>
+<td>33 KB</td>
+</tr>
+<tr>
+<td><code>routes.js</code></td>
+<td>7 条路线（stops / legs / path）</td>
+<td>17 KB</td>
+</tr>
+<tr>
+<td><code>cities.js</code></td>
+<td>三城中心与缩放</td>
+<td>0.5 KB</td>
+</tr>
+<tr>
+<td><code>realLegs.js</code></td>
+<td>283 对点位的真实交通时间（步行/打车/公交）</td>
+<td>19 KB</td>
+</tr>
+<tr>
+<td><code>pairPaths.js</code></td>
+<td>283 条两点真实路径（抽稀后平均 13 点）</td>
+<td>86 KB</td>
+</tr>
+<tr>
+<td><code>photos.js</code></td>
+<td>45 个点位实景图（圆形 marker 96px + 详情大图 320px）</td>
+<td>3.6 KB</td>
+</tr>
+<tr>
+<td><code>pinyin.js</code></td>
+<td>51 个点位拼音（全拼/首字母/含括号全拼）</td>
+<td>4.2 KB</td>
+</tr>
+</tbody></table>
+<p>点位字段：</p>
+<pre><code class="language-js">{ id, name, city, category, emoji, tags, latitude, longitude,
+  summary, intro, note, address, openTime, durationMin }
+</code></pre>
+<h3>3.8 视觉与交互规范</h3>
+<ul>
+<li>主题色：米白底 <code>#fbf8f2</code>、卡片 <code>#fffdf8</code>、主色红 <code>#b0392e</code>、青 <code>#2c6b63</code></li>
+<li>分类色：景点青 / 古镇街区褐 / 红色红 / 学府蓝 / 美食橙 / 酒店紫</li>
+<li>圆角：卡片 20–32rpx，按钮 999rpx（胶囊）</li>
+<li>动效：底部面板 <code>transform + cubic-bezier</code>，拖动时关 transition；气泡显隐 0.2s</li>
+<li>文案：疑问句标题、口语化备注、不用感叹号</li>
+</ul>
+<h3>3.9 包体与性能</h3>
+<table>
+<thead>
+<tr>
+<th>项</th>
+<th>数值</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>主包</td>
+<td>1.29 MB / 2 MB</td>
+</tr>
+<tr>
+<td>其中实景图</td>
+<td>约 900 KB（45 张圆形 134KB + 大图 763KB）</td>
+</tr>
+<tr>
+<td>数据文件</td>
+<td>约 163 KB</td>
+</tr>
+<tr>
+<td>小程序代码</td>
+<td>约 200 KB</td>
+</tr>
+</tbody></table>
+<p>优化手段：</p>
+<ol>
+<li>实景图 PNG 调色板量化（96px 从 12KB → 3KB）；</li>
+<li>详情大图 320px JPG q68（平均 17KB）；</li>
+<li>路径 Douglas-Peucker 抽稀（容差 ~33m，最多 60 点/条）；</li>
+<li>气泡重算去重（显示集合不变不 setData）；</li>
+<li>地图 markers 只在城市/分类/气泡状态变化时重建。</li>
+</ol>
+<hr>
+<h2>4. 后端开发</h2>
+<h3>4.1 本地内容后台（<code>admin/</code>，11 文件 4.5 千行）</h3>
+<p><strong>定位</strong>：内容生产后台（不是运行时接口）。零依赖 Node HTTP 服务，数据源是 JSON，导出成小程序静态数据。</p>
+<pre><code>admin/
+├── server.js        HTTP 服务（API + 静态页面 + 重算脚本 + 云同步）
+├── export.js        JSON → miniprogram/data/{places,routes,cities}.js
+├── init-data.js     一次性：把现有 data/*.js 反向导成 JSON
+├── data/*.json      唯一数据源（places/routes/cities/categories/feedback）
+└── public/          原生 HTML/CSS/JS 管理界面
+</code></pre>
+<p><strong>启动</strong>：<code>node admin/server.js</code> → <a href="http://127.0.0.1:8787">http://127.0.0.1:8787</a></p>
+<p><strong>API 清单</strong></p>
+<table>
+<thead>
+<tr>
+<th>方法</th>
+<th>路径</th>
+<th>作用</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>GET</td>
+<td><code>/api/data</code></td>
+<td>一次拿全部数据</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/save</code></td>
+<td><code>{name, data}</code> 写入 <code>admin/data/&lt;name&gt;.json</code>（含 feedback 状态修改）</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/export</code></td>
+<td>生成小程序数据文件，返回各文件条目数</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/feedback</code></td>
+<td>小程序提交反馈（带 CORS）</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/feedback</code></td>
+<td>反馈列表</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/refresh</code></td>
+<td>一键重算：<code>legs</code> / <code>paths</code> / <code>photos</code> / <code>all</code>（spawn Python）</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/api/sync-cloud</code></td>
+<td>用 AppSecret 调云开发 HTTP API 拉取云端反馈</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/api/health</code></td>
+<td>健康检查（含是否有 AMAP_KEY）</td>
+</tr>
+</tbody></table>
+<p><strong>界面能力</strong></p>
+<table>
+<thead>
+<tr>
+<th>页签</th>
+<th>能力</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>精选路线</td>
+<td>名称/城市/颜色/简介/站点顺序；新增路线；删除路线</td>
+</tr>
+<tr>
+<td>点位</td>
+<td>名称/emoji/分类/一句话/标签/简介/备注/地址/开放时间/时长/经纬度；搜索；新增；删除</td>
+</tr>
+<tr>
+<td>城市</td>
+<td>默认中心经纬度、缩放</td>
+</tr>
+<tr>
+<td>用户反馈</td>
+<td>列表、标记已处理/还原、刷新、从云端同步</td>
+</tr>
+</tbody></table>
+<p><strong>数据流</strong></p>
+<pre><code>界面编辑 → admin/data/*.json（唯一源）
+                ├─ 导出 → miniprogram/data/*.js → 开发者工具编译
+                └─ 重算 → scripts/*.py → data/realLegs.js / pairPaths.js / photos
+</code></pre>
+<p><strong>安全与约束</strong></p>
+<ul>
+<li>只监听 127.0.0.1，不对外网暴露；</li>
+<li>无鉴权（本地工具），文档注明不要部署到公网；</li>
+<li>AppSecret 只通过环境变量传入，不落盘、不入库。</li>
+</ul>
+<h3>4.2 微信云开发</h3>
+<table>
+<thead>
+<tr>
+<th>项</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>环境</td>
+<td><code>cloud1-d5ghzdcqba4c291f8</code>（免费试用）</td>
+</tr>
+<tr>
+<td>云函数</td>
+<td><code>initEnv</code>（创建 feedback 集合，幂等）、<code>ping</code>（连通性自测）</td>
+</tr>
+<tr>
+<td>数据库</td>
+<td><code>feedback</code> 集合，字段：<code>text/contact/placeId/placeName/page/at/status/_openid</code></td>
+</tr>
+<tr>
+<td>小程序初始化</td>
+<td><code>app.js</code> 读 <code>config.CLOUD_ENV</code>，非空才 <code>wx.cloud.init({ env, traceUser: true })</code></td>
+</tr>
+<tr>
+<td>部署方式</td>
+<td><code>cli cloud functions deploy --env &lt;id&gt; --names initEnv ping -r --project &lt;path&gt;</code></td>
+</tr>
+</tbody></table>
+<p><strong>反馈写入链路</strong>（<code>utils/api.js</code>）</p>
+<pre><code>reportFeedback(payload)
+  ├─ cloudReady() → wx.cloud.database().collection(&#39;feedback&#39;).add(...)
+  ├─ 失败 → POST /api/feedback（本地后台）
+  └─ 再失败 → wx.storage 本地队列 + 提示
+</code></pre>
+<p><strong>踩坑记录</strong></p>
+<ol>
+<li>函数首次创建处于 <code>Creating</code> 状态，立刻部署会报 <code>FailedOperation.UpdateFunctionCode</code>，需等 15–20s 重试；</li>
+<li>不加 <code>-r</code>（云端安装依赖）时运行时报 <code>Cannot find module &#39;wx-server-sdk&#39;</code>；</li>
+<li><code>customCallout</code> 更新不重绘（前端问题，见 3.2）；</li>
+<li>开通初期控制台 <code>tcb/DescribeEnvs</code> 与 <code>tcbDescribeUserPromotionalActivity</code> 均报 <code>ret:1000 system error</code>，重启开发者工具 3 次后恢复。</li>
+</ol>
+<h3>4.3 数据生产管线（<code>scripts/</code>，15 个脚本 2.2 千行）</h3>
+<table>
+<thead>
+<tr>
+<th>脚本</th>
+<th>输入</th>
+<th>输出</th>
+<th>依赖</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>fetch_pois.py</code></td>
+<td>高德 place/text（多关键词分组）</td>
+<td><code>docs/采集草稿-*.xlsx</code></td>
+<td>AMAP_KEY</td>
+</tr>
+<tr>
+<td><code>make_form.py</code></td>
+<td>草稿 + 现有点位</td>
+<td><code>docs/长株潭点位采集表-v3.xlsx</code>（168 行）</td>
+<td>node</td>
+</tr>
+<tr>
+<td><code>import_places.py</code></td>
+<td>采集表 v3</td>
+<td><code>miniprogram/data/places.js</code></td>
+<td>node</td>
+</tr>
+<tr>
+<td><code>fetch_legs.py</code></td>
+<td>routes.js 的站点序列</td>
+<td><code>_tmp/legs.json</code>（每段步行/公交/打车）</td>
+<td>AMAP_KEY</td>
+</tr>
+<tr>
+<td><code>fetch_route_paths.py</code></td>
+<td>同上</td>
+<td><code>route_paths.json</code> + <code>leg_paths.json</code></td>
+<td>AMAP_KEY</td>
+</tr>
+<tr>
+<td><code>fetch_real_legs.py</code></td>
+<td>同城 ≤8km 点对</td>
+<td><code>data/realLegs.js</code>（283 对）</td>
+<td>AMAP_KEY</td>
+</tr>
+<tr>
+<td><code>clean_real_legs.js</code></td>
+<td>realLegs.js</td>
+<td>清洗后（剔除 45 个不合理值）</td>
+<td>node</td>
+</tr>
+<tr>
+<td><code>fetch_pair_paths.py</code></td>
+<td>realLegs 点对</td>
+<td><code>data/pairPaths.js</code>（283 条，86KB）</td>
+<td>AMAP_KEY</td>
+</tr>
+<tr>
+<td><code>fetch_photos.py</code></td>
+<td>点位的 POI photos 字段</td>
+<td><code>assets/photos-src/&lt;id&gt;.jpg</code>（45 张）</td>
+<td>AMAP_KEY</td>
+</tr>
+<tr>
+<td><code>make_photo_markers.py</code></td>
+<td>photos-src</td>
+<td>圆形 marker + 详情大图 + <code>photos.js</code></td>
+<td>Pillow</td>
+</tr>
+<tr>
+<td><code>build_pinyin.py</code></td>
+<td>places.js</td>
+<td><code>data/pinyin.js</code></td>
+<td>pypinyin</td>
+</tr>
+<tr>
+<td><code>pull_cloud_feedback.js</code></td>
+<td>云开发 HTTP API</td>
+<td><code>admin/data/feedback.json</code></td>
+<td>AppID/AppSecret</td>
+</tr>
+<tr>
+<td><code>check_pages.js</code></td>
+<td>全部页面 wxml/js</td>
+<td>事件绑定/标签闭合检查报告</td>
+<td>node</td>
+</tr>
+<tr>
+<td><code>gen_hotel_marker.py</code> / <code>gen_trip_markers.py</code></td>
+<td>—</td>
+<td>酒店 marker、路线序号 7–20</td>
+<td>Pillow</td>
+</tr>
+</tbody></table>
+<p>外部接口调用量（本次开发累计）：place/text 约 1400 次（三城关键词分组分页）、direction 约 1200 次（路线 + 点对交通 + 点对路径）、photos 45 次。高德个人配额 5000 次/日，未超限。</p>
+<hr>
+<h2>5. 数据资产</h2>
+<table>
+<thead>
+<tr>
+<th>内容</th>
+<th>规模</th>
+<th>来源</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>点位</td>
+<td>51（湘潭 26 / 长沙 16 / 株洲 9）</td>
+<td>高德地点搜索 + 人工筛选文案</td>
+</tr>
+<tr>
+<td>分类</td>
+<td>6（景点 25 / 古镇街区 6 / 红色 6 / 学府 4 / 美食 4 / 酒店 6）</td>
+<td>人工定义</td>
+</tr>
+<tr>
+<td>路线</td>
+<td>7 条，共 26 站、19 段交通、245 个折线点</td>
+<td>人工设计 + 高德路径</td>
+</tr>
+<tr>
+<td>两点实测</td>
+<td>283 对（步行 134 / 打车 263 / 公交 205，三方式齐全 59）</td>
+<td>高德路线规划</td>
+</tr>
+<tr>
+<td>两点路径</td>
+<td>283 条（平均 13 点/条）</td>
+<td>高德路线规划</td>
+</tr>
+<tr>
+<td>实景图</td>
+<td>45 张（6 家酒店暂缺）</td>
+<td>高德 POI photos</td>
+</tr>
+<tr>
+<td>拼音索引</td>
+<td>51 条</td>
+<td>pypinyin</td>
+</tr>
+<tr>
+<td>采集表</td>
+<td>v3 共 168 行（湘潭 65 / 长沙 55 / 株洲 48）</td>
+<td>脚本从 1381 条草稿筛出</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>6. 质量保障</h2>
+<h3>6.1 静态检查（<code>scripts/check_pages.js</code>）</h3>
+<p>对每个页面检查：</p>
+<ol>
+<li>WXML 里绑定的事件（<code>bindtap</code>/<code>catchtap</code>/<code>bindtouchmove</code> 等）在 JS 中是否有对应函数；</li>
+<li>标签闭合（含 <code>&lt;image&gt;&lt;/image&gt;</code> 等自闭合标签的特殊处理）。</li>
+</ol>
+<blockquote>
+<p>这个脚本是因为一次误删 <code>toggleCityPicker</code> 导致「点城市按钮没反应」才加的，现在是上传前必跑项。</p>
+</blockquote>
+<h3>6.2 自动化验证</h3>
+<p>用 <code>miniprogram-automator</code> 连接开发者工具，做了以下验证（均通过）：</p>
+<table>
+<thead>
+<tr>
+<th>用例</th>
+<th>结果</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>三城切换（地图页/路线页）</td>
+<td>湘潭 26 / 长沙 16 / 株洲 9 正确切换</td>
+</tr>
+<tr>
+<td>分类筛选（含酒店）</td>
+<td>酒店 2 个点</td>
+</tr>
+<tr>
+<td>加入/移出行程</td>
+<td>tripCount、行程页站点数同步</td>
+</tr>
+<tr>
+<td>行程排序（长按整块拖动）</td>
+<td>顺序正确变更，编号图钉同步</td>
+</tr>
+<tr>
+<td>交通方式切换</td>
+<td>行程页折线颜色、统计同步</td>
+</tr>
+<tr>
+<td>打卡进度</td>
+<td>1/3 → 33% 进度条正确</td>
+</tr>
+<tr>
+<td>点路线弹卡</td>
+<td>折线附近 / 时间图标 / 精确折线三种方式均弹卡</td>
+</tr>
+<tr>
+<td>气泡显隐</td>
+<td>放大 18 个气泡 → 缩回 0 个</td>
+</tr>
+<tr>
+<td>反馈提交</td>
+<td>开发者工具 → 后台入库；云开发 → 云数据库入库</td>
+</tr>
+<tr>
+<td>采集表导入</td>
+<td>湘潭 24 行导入，其它城市不丢</td>
+</tr>
+</tbody></table>
+<h3>6.3 已知问题闭环</h3>
+<table>
+<thead>
+<tr>
+<th>问题</th>
+<th>状态</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>27 个点位坐标错误（湘大偏 6.2km）</td>
+<td>已用高德接口重取</td>
+</tr>
+<tr>
+<td>城市切换点了没反应</td>
+<td>误删事件函数，已修复并加静态检查</td>
+</tr>
+<tr>
+<td>卡片互相堆叠</td>
+<td>统一 <code>setCard()</code>，两类卡片互斥</td>
+</tr>
+<tr>
+<td>气泡不显示</td>
+<td><code>regionchange</code> 的 <code>e.scale</code> 不可靠，改 <code>mapCtx.getScale()</code></td>
+</tr>
+<tr>
+<td>气泡收不起来</td>
+<td><code>customCallout</code> 不重绘，改为清空 markers 强制重建</td>
+</tr>
+<tr>
+<td>标点变图片不可读</td>
+<td>回退彩色 pin，图片只放气泡</td>
+</tr>
+<tr>
+<td>行程画直线</td>
+<td>补 283 条真实路径，跨城不画线</td>
+</tr>
+<tr>
+<td>跨城出现「步行 631 分钟」</td>
+<td>跨城步行禁用，改城际估算</td>
+</tr>
+<tr>
+<td>云开发 <code>ret:1000</code></td>
+<td>微信侧抖动，重启后恢复</td>
+</tr>
+<tr>
+<td>云函数缺依赖</td>
+<td>部署加 <code>-r</code> 云端安装依赖</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>7. 已知限制</h2>
+<ol>
+<li><strong>没有运行时后端</strong>：小程序读静态数据，改内容要重新导出、重新上传体验版（这是为绕开备案域名做的取舍）。</li>
+<li><strong>个人主体限制</strong>：不能选「旅游-景区服务」类目，不能发布上线；<code>wx.getLocation</code> 正式接口权限未申请，真机依赖授权弹窗与手动打卡兜底。</li>
+<li><strong>图片版权</strong>：45 张实景图来自高德 POI，<strong>仅限课程演示</strong>，商用/公开发布需替换为自有素材（替换流程已脚本化）。</li>
+<li><strong>交通时间为静态预计算</strong>：不含实时路况，早晚高峰驾车会偏乐观；跨城时间为估算。</li>
+<li><strong>云开发为免费试用</strong>：到期需续费（¥19.9/月）或迁回本地，数据在环境内。</li>
+<li><strong>6 家酒店暂无实景图</strong>（气泡退化为分类 pin）。</li>
+<li><strong>我的页 / 足迹页未做</strong>：打卡记录只在本机，未做汇总页。</li>
+<li><strong>后台无鉴权</strong>：仅限本机使用，不能部署公网。</li>
+</ol>
+<hr>
+<h2>8. 后续计划</h2>
+<table>
+<thead>
+<tr>
+<th>优先级</th>
+<th>事项</th>
+<th>预计</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>P0</td>
+<td>真机回归测试（三城、行程、打卡、反馈）</td>
+<td>0.5 天</td>
+</tr>
+<tr>
+<td>P0</td>
+<td>答辩材料：演示脚本、PPT、架构图</td>
+<td>1 天</td>
+</tr>
+<tr>
+<td>P1</td>
+<td>数据补量：长沙/株洲各补到 30+ 点（团队回填采集表）</td>
+<td>2–3 天</td>
+</tr>
+<tr>
+<td>P1</td>
+<td>6 家酒店补图；图片素材逐步替换为自有拍摄</td>
+<td>1 天</td>
+</tr>
+<tr>
+<td>P2</td>
+<td>「我的」页：足迹地图、按城市/分类完成度</td>
+<td>1 天</td>
+</tr>
+<tr>
+<td>P2</td>
+<td>路线页支持自定义路线（从行程一键生成精选路线）</td>
+<td>1 天</td>
+</tr>
+<tr>
+<td>P3</td>
+<td>云开发续费或迁移方案确定</td>
+<td>到期前</td>
+</tr>
+<tr>
+<td>P3</td>
+<td>后台加登录口令 + 局域网访问（便于多人协作）</td>
+<td>1 天</td>
+</tr>
+</tbody></table>
+<hr>
+<h2>9. 附录</h2>
+<h3>9.1 文件结构</h3>
+<pre><code>微信小程序/
+├── project.config.json      开发者工具配置（appid、cloudfunctionRoot）
+├── miniprogram/             小程序源码（41 文件 1293 KB）
+├── cloudfunctions/          云函数 initEnv / ping
+├── admin/                   本地内容后台（11 文件 122 KB）
+├── scripts/                 数据管线（15 个脚本）
+├── docs/                    采集表、方案、截图、本报告
+└── assets/photos-src/       照片原图（不打包、gitignore）
+</code></pre>
+<h3>9.2 命令速查</h3>
+<pre><code class="language-powershell"># 小程序编译 / 上传
+cli open --project &quot;C:\微信小程序&quot;
+cli upload --project &quot;C:\微信小程序&quot; -v 0.8.9 -d &quot;说明&quot;
+
+# 内容后台
+node admin/server.js                 # http://127.0.0.1:8787
+node admin/export.js                 # JSON → 小程序数据
+
+# 数据管线（需要 $env:AMAP_KEY）
+python scripts/fetch_real_legs.py
+python scripts/fetch_pair_paths.py
+python scripts/fetch_photos.py
+python scripts/make_photo_markers.py
+python scripts/build_pinyin.py
+
+# 检查 &amp; 部署云函数
+node scripts/check_pages.js
+cli cloud functions deploy --env cloud1-d5ghzdcqba4c291f8 --names initEnv ping -r --project &quot;C:\微信小程序&quot;
+</code></pre>
+<h3>9.3 版本记录</h3>
+<table>
+<thead>
+<tr>
+<th>版本</th>
+<th>内容</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>0.1.0–0.1.1</td>
+<td>骨架：地图 + 21 点 + 筛选 + 卡片 + 详情 + 打卡降级</td>
+</tr>
+<tr>
+<td>0.2.x</td>
+<td>卡片交互重做、打卡半径按分类、路线页 3 条</td>
+</tr>
+<tr>
+<td>0.3.0–0.3.2</td>
+<td>城市切换；坐标校准（湘大偏 6.2km）；补 18 个知名点至 45 个</td>
+</tr>
+<tr>
+<td>0.4.0–0.4.9</td>
+<td>路线按城市拆分、真实交通、真实折线、路段点击与命中优化</td>
+</tr>
+<tr>
+<td>0.5.0–0.5.11</td>
+<td>卡片互斥、上滑详情面板、分类色点、实景图 marker→气泡、气泡点击</td>
+</tr>
+<tr>
+<td>0.6.0–0.8.0</td>
+<td>合入合作方版本：我的行程、点位搜索、酒店分类（51 点）</td>
+</tr>
+<tr>
+<td>0.8.1–0.8.6</td>
+<td>真实交通预计算、拼音搜索、打卡进度、行程真实路径、分段卡片、跨城修正</td>
+</tr>
+<tr>
+<td>0.8.7</td>
+<td>本地内容后台扩展：增删点位/路线、一键重算、用户反馈</td>
+</tr>
+<tr>
+<td>0.8.8</td>
+<td>微信云开发接通：反馈写云数据库（真机可用）</td>
+</tr>
+</tbody></table>
+<h3>9.4 术语</h3>
+<table>
+<thead>
+<tr>
+<th>术语</th>
+<th>含义</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>GCJ-02</td>
+<td>国测局坐标系，微信小程序地图与高德接口同一套</td>
+</tr>
+<tr>
+<td>customCallout</td>
+<td>地图 marker 的自定义气泡槽（cover-view）</td>
+</tr>
+<tr>
+<td>legs</td>
+<td>路线中相邻两站的交通段（方式/距离/时间/路径）</td>
+</tr>
+<tr>
+<td>pairPaths</td>
+<td>任意两点之间的真实路径（用于行程折线）</td>
+</tr>
+<tr>
+<td>实测 / 估算</td>
+<td>实测=高德路线规划返回；估算=距离×系数折算</td>
+</tr>
+</tbody></table>
+
+</div></body></html>
