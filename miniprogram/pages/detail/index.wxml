@@ -53,6 +53,8 @@
       <view class="tip-title">备注或补充</view>
       <view class="tip-text">{{poi.note}}</view>
     </view>
+
+    <view class="feedback-link" bindtap="onFeedback">发现信息有误？点这里反馈 ›</view>
   </view>
 
   <view class="footer">

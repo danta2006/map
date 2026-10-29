@@ -3,7 +3,8 @@
     "pages/map/index",
     "pages/trip/index",
     "pages/routes/index",
-    "pages/detail/index"
+    "pages/detail/index",
+    "pages/feedback/index"
   ],
   "window": {
     "backgroundColor": "#fbf8f2",

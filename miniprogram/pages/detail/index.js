@@ -197,6 +197,15 @@ Page({
     wx.showToast({ title: manual ? '已手动打卡' : '打卡成功', icon: 'success' });
   },
 
+  /** 去反馈页（带上当前点位信息） */
+  onFeedback() {
+    const poi = this.data.poi;
+    if (!poi) return;
+    wx.navigateTo({
+      url: `/pages/feedback/index?id=${poi.id}&name=${encodeURIComponent(poi.name)}`
+    });
+  },
+
   onNavigate() {
     const poi = this.data.poi;
     wx.openLocation({

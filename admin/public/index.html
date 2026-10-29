@@ -10,6 +10,7 @@
     <h1>标点地图 · 内容后台</h1>
     <div class="actions">
       <span id="status" class="status">加载中…</span>
+      <button id="refreshBtn" class="ghost">重算交通/路径</button>
       <button id="exportBtn" class="primary">导出到小程序</button>
     </div>
   </header>
@@ -18,11 +19,16 @@
     <button class="tab active" data-tab="routes">精选路线</button>
     <button class="tab" data-tab="places">点位</button>
     <button class="tab" data-tab="cities">城市</button>
+    <button class="tab" data-tab="feedback">用户反馈</button>
   </nav>
 
   <main>
     <!-- 路线 -->
     <section id="tab-routes" class="panel">
+      <div class="toolbar">
+        <button id="newRouteBtn">＋ 新增路线</button>
+        <span class="hint">改完点保存，再点右上「导出到小程序」</span>
+      </div>
       <div class="split">
         <ul id="routeList" class="list"></ul>
         <div id="routeEditor" class="editor">
@@ -34,6 +40,7 @@
     <!-- 点位 -->
     <section id="tab-places" class="panel hidden">
       <div class="toolbar">
+        <button id="newPlaceBtn">＋ 新增点位</button>
         <input id="placeSearch" placeholder="搜索名称 / id / 城市" />
         <span id="placeCount" class="hint"></span>
       </div>
@@ -43,6 +50,15 @@
           <p class="hint">← 从左边选一个点位</p>
         </div>
       </div>
+    </section>
+
+    <!-- 用户反馈 -->
+    <section id="tab-feedback" class="panel hidden">
+      <div class="toolbar">
+        <span class="hint">小程序里提交的反馈会出现在这里（本地演示环境）</span>
+        <button id="reloadFeedbackBtn">刷新</button>
+      </div>
+      <div id="feedbackList" class="feedback-list"></div>
     </section>
 
     <!-- 城市 -->

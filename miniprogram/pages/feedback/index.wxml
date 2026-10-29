@@ -1,0 +1,37 @@
+<view class="page">
+  <view class="head">
+    <view class="head-title">反馈问题</view>
+    <view class="head-sub" wx:if="{{placeName}}">关于：{{placeName}}</view>
+    <view class="head-sub" wx:else>发现信息有误、或者想补充内容，都可以写在这里</view>
+  </view>
+
+  <view class="body">
+    <view class="field">
+      <view class="label">问题描述（至少 5 个字）</view>
+      <textarea
+        class="input area"
+        placeholder="比如：开放时间写错了，实际是 09:00-17:30；或者这里已经关门了"
+        maxlength="{{maxLen}}"
+        value="{{text}}"
+        bindinput="onTextInput"
+      ></textarea>
+      <view class="counter">{{text.length}}/{{maxLen}}</view>
+    </view>
+
+    <view class="field">
+      <view class="label">联系方式（选填）</view>
+      <input
+        class="input"
+        placeholder="微信 / 手机号，方便我们跟你确认"
+        value="{{contact}}"
+        bindinput="onContactInput"
+      />
+    </view>
+
+    <button class="submit {{submitting ? 'disabled' : ''}}" bindtap="onSubmit">
+      {{submitting ? '提交中…' : '提交反馈'}}
+    </button>
+
+    <view class="tip">反馈会进入项目组的后台（本地演示环境）。如果连不上后台，会先存在这台手机的本地记录里。</view>
+  </view>
+</view>

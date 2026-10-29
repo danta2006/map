@@ -237,3 +237,11 @@
 .hero.has-photo .hero-emoji {
   display: none;
 }
+
+.feedback-link {
+  margin: 36rpx 0 10rpx;
+  text-align: center;
+  font-size: 22rpx;
+  color: var(--muted);
+  text-decoration: underline;
+}

@@ -39,6 +39,7 @@ function renderAll() {
   renderRoutes();
   renderPlaces();
   renderCities();
+  renderFeedback();
 }
 
 /* ---------------- 路线 ---------------- */
@@ -113,6 +114,14 @@ function renderRouteEditor() {
   const save = el('button', 'primary', '保存路线');
   save.onclick = () => saveRoutes(route);
   actions.appendChild(save);
+  addDeleteButton(actions, '删除路线', async () => {
+    if (!confirm(`确定删除路线「${route.name}」？`)) return;
+    state.data.routes.routes = state.data.routes.routes.filter((r) => r.id !== route.id);
+    state.routeId = '';
+    await saveData('routes', { routes: state.data.routes.routes }, '删除路线');
+    renderRoutes();
+    renderRouteEditor();
+  });
   form.appendChild(actions);
 
   box.appendChild(form);
@@ -197,6 +206,14 @@ function renderPlaceEditor() {
   const save = el('button', 'primary', '保存点位');
   save.onclick = () => savePlaces(p);
   actions.appendChild(save);
+  addDeleteButton(actions, '删除点位', async () => {
+    if (!confirm(`确定删除点位「${p.name}」？`)) return;
+    state.data.places.places = state.data.places.places.filter((x) => x.id !== p.id);
+    state.placeId = '';
+    await saveData('places', { places: state.data.places.places }, '删除点位');
+    renderPlaces();
+    renderPlaceEditor();
+  });
   form.appendChild(actions);
   box.appendChild(form);
 }
@@ -292,7 +309,7 @@ document.querySelectorAll('.tab').forEach((btn) => {
     btn.classList.add('active');
     const tab = btn.dataset.tab;
     state.tab = tab;
-    ['routes', 'places', 'cities'].forEach((t) => {
+    ['routes', 'places', 'cities', 'feedback'].forEach((t) => {
       $('#tab-' + t).classList.toggle('hidden', t !== tab);
     });
   };
@@ -301,6 +318,141 @@ document.querySelectorAll('.tab').forEach((btn) => {
 $('#placeSearch').oninput = (e) => {
   state.placeFilter = e.target.value;
   renderPlaces();
+};
+
+/* ---------------- 新增 / 删除 ---------------- */
+$('#newPlaceBtn').onclick = async () => {
+  const id = prompt('新点位 id（英文，唯一，比如 wanda-plaza）');
+  if (!id) return;
+  if (state.data.places.places.some((p) => p.id === id)) return alert('id 已存在');
+  const cityId = prompt('城市：xiangtan / changsha / zhuzhou', 'xiangtan') || 'xiangtan';
+  const cat = prompt('分类：scenic / oldtown / red / school / food / hotel', 'scenic') || 'scenic';
+  state.data.places.places.push({
+    id,
+    name: '新点位',
+    city: cityId,
+    category: cat,
+    emoji: '📍',
+    tags: [],
+    latitude: 27.85,
+    longitude: 112.92,
+    summary: '一句话介绍',
+    intro: '详细介绍……',
+    note: '',
+    address: '',
+    openTime: '全天',
+    durationMin: 60
+  });
+  state.placeId = id;
+  await saveData('places', { places: state.data.places.places }, '新增点位');
+  renderPlaces();
+  renderPlaceEditor();
+};
+
+$('#newRouteBtn').onclick = async () => {
+  const id = prompt('新路线 id（英文，唯一，比如 riverside）');
+  if (!id) return;
+  if (state.data.routes.routes.some((r) => r.id === id)) return alert('id 已存在');
+  const cityId = prompt('城市：xiangtan / changsha / zhuzhou', 'xiangtan') || 'xiangtan';
+  const ids = (prompt('站点 id（逗号分隔，顺序即站点顺序）') || '')
+    .split(/[,，\s]+/)
+    .map((s) => s.trim())
+    .filter(Boolean);
+  state.data.routes.routes.push({
+    id,
+    city: cityId,
+    name: '新路线',
+    desc: '路线简介',
+    color: '#b0392e',
+    stops: ids,
+    legs: [],
+    path: []
+  });
+  state.routeId = id;
+  await saveData('routes', { routes: state.data.routes.routes }, '新增路线');
+  renderRoutes();
+  renderRouteEditor();
+};
+
+function addDeleteButton(box, label, onClick) {
+  const btn = el('button', 'danger', label);
+  btn.onclick = onClick;
+  box.appendChild(btn);
+}
+
+async function saveData(name, data, label) {
+  try {
+    await api('/api/save', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, data })
+    });
+    setStatus(`已保存${label}（还没导出到小程序）`);
+  } catch (e) {
+    setStatus('保存失败：' + e.message, false);
+  }
+}
+
+/* ---------------- 用户反馈 ---------------- */
+let feedbackStore = { feedback: [] };
+
+async function renderFeedback() {
+  const box = $('#feedbackList');
+  try {
+    feedbackStore = await api('/api/feedback');
+  } catch (e) {
+    box.innerHTML = '<p class="hint">读取反馈失败：' + e.message + '</p>';
+    return;
+  }
+  const list = (feedbackStore.feedback || []).slice().sort((x, y) => y.at - x.at);
+  if (!list.length) {
+    box.innerHTML = '<p class="hint">还没有反馈。小程序里「详情页 → 反馈问题」提交后会出现在这里。</p>';
+    return;
+  }
+  box.innerHTML = '';
+  list.forEach((f) => {
+    const card = el('div', 'fb-card' + (f.status === 'done' ? ' done' : ''));
+    const head = el('div', 'fb-head');
+    head.appendChild(el('span', 'fb-time', new Date(f.at).toLocaleString('zh-CN')));
+    head.appendChild(el('span', 'fb-where', [f.placeName || f.placeId, f.page].filter(Boolean).join(' · ')));
+    card.appendChild(head);
+    card.appendChild(el('div', 'fb-text', f.text));
+    if (f.contact) card.appendChild(el('div', 'fb-contact', '联系方式：' + f.contact));
+    const ops = el('div', 'fb-ops');
+    const toggle = el('button', f.status === 'done' ? '还原' : '标记已处理');
+    toggle.onclick = async () => {
+      f.status = f.status === 'done' ? 'new' : 'done';
+      await api('/api/save', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: 'feedback', data: { feedback: feedbackStore.feedback } })
+      });
+      renderFeedback();
+    };
+    ops.appendChild(toggle);
+    card.appendChild(ops);
+    box.appendChild(card);
+  });
+}
+
+$('#reloadFeedbackBtn').onclick = () => renderFeedback();
+
+/* ---------------- 重算交通/路径 ---------------- */
+$('#refreshBtn').onclick = async () => {
+  const what = prompt('重算什么？legs（路线交通）/ paths（两点路径）/ photos（照片）/ all', 'legs');
+  if (!what) return;
+  setStatus('重算中，可能要几分钟…');
+  try {
+    const res = await api('/api/refresh', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ what })
+    });
+    const tail = res.results.map((r) => `${r.script}: ${r.result.code === 0 ? '完成' : '失败'}`).join('；');
+    setStatus('重算结束 —— ' + tail);
+  } catch (e) {
+    setStatus('重算失败：' + e.message, false);
+  }
 };
 
 $('#exportBtn').onclick = async () => {
