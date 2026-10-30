@@ -1,4 +1,5 @@
 const { reportFeedback } = require('../../utils/api');
+const theme = require('../../utils/theme');
 
 const LOCAL_KEY = 'local_feedback_v1';
 const MAX_LEN = 500;
@@ -11,7 +12,9 @@ Page({
     contact: '',
     submitting: false,
     maxLen: MAX_LEN,
-    savedLocal: false
+    savedLocal: false,
+    theme: 'light',
+    themeMode: 'auto'
   },
 
   onLoad(options) {
@@ -23,7 +26,12 @@ Page({
       text: '',
       contact: wx.getStorageSync('feedback_contact') || ''
     });
+    theme.apply(this, { nav: true });
     if (id) wx.setNavigationBarTitle({ title: '反馈问题' });
+  },
+
+  onShow() {
+    theme.apply(this, { nav: true });
   },
 
   onTextInput(e) {

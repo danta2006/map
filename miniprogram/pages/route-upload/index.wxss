@@ -184,3 +184,16 @@
   font-size: 21rpx;
   line-height: 1.6;
 }
+
+/* ---------- 夜间模式 ---------- */
+.page.dark .back,
+.page.dark .block,
+.page.dark .input {
+  background: #211d17;
+  border-color: var(--line);
+  color: var(--ink);
+}
+
+.page.dark .cross-tip {
+  background: #2a241b;
+}

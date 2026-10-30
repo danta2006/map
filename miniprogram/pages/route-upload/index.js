@@ -1,6 +1,7 @@
 const { PLACES } = require('../../data/places');
 const { CITIES } = require('../../data/cities');
 const trip = require('../../utils/trip');
+const theme = require('../../utils/theme');
 
 const PLACE_MAP = {};
 PLACES.forEach((p) => {
@@ -25,16 +26,20 @@ Page({
     error: '',
     // 这条线涉及哪些城市（跨城时会显示在「跨城」分类里）
     cityText: '',
-    crossCity: false
+    crossCity: false,
+    theme: 'light',
+    themeMode: 'auto'
   },
 
   onLoad() {
     const app = getApp();
     this.setData({ statusBarHeight: (app.globalData && app.globalData.statusBarHeight) || 20 });
+    theme.apply(this, { nav: true });
     this.refresh();
   },
 
   onShow() {
+    theme.apply(this, { nav: true });
     this.refresh();
   },
 

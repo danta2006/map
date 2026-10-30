@@ -82,3 +82,10 @@
   color: #a49c8c;
   line-height: 1.6;
 }
+
+/* ---------- 夜间模式 ---------- */
+.page.dark .input {
+  background: #211d17;
+  border-color: var(--line);
+  color: var(--ink);
+}

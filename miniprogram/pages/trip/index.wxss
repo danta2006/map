@@ -162,6 +162,33 @@
   color: var(--ink-2);
 }
 
+/* 别的日期上有点位时，空态里给一句提示 + 一键切过去 */
+.empty-other {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 22rpx;
+  padding: 14rpx 22rpx;
+  border: 1rpx dashed var(--line);
+  border-radius: 16rpx;
+}
+
+.empty-other-text {
+  font-size: 22rpx;
+  color: var(--ink-2);
+  line-height: 1.5;
+}
+
+.empty-other-btn {
+  margin-top: 10rpx;
+  padding: 7rpx 22rpx;
+  border-radius: 999rpx;
+  background: #f2ece0;
+  font-size: 21rpx;
+  font-weight: 600;
+  color: var(--ink-2);
+}
+
 /* ---------- 搜索加点 ---------- */
 .search-wrap {
   padding: 12rpx 28rpx 0;
@@ -758,4 +785,159 @@
   color: #fff;
   font-size: 20rpx;
   flex-shrink: 0;
+}
+
+/* ---------- 日期条：今天 / 明天 / 自己挑的日期 ---------- */
+.day-strip {
+  margin-top: 12rpx;
+  width: 100%;
+}
+
+.day-row {
+  display: inline-flex;
+  align-items: stretch;
+  /* 上下留一点，给日期右上角的 ✕ 让位，不然会被 scroll-view 裁掉 */
+  padding: 14rpx 24rpx 4rpx;
+}
+
+.day-chip {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 128rpx;
+  margin-right: 14rpx;
+  padding: 8rpx 18rpx;
+  background: #fffdf8;
+  border: 1rpx solid var(--line);
+  border-radius: 16rpx;
+}
+
+/* 右上角小 ✕：删掉这一天，只有一天时不显示 */
+.day-x {
+  position: absolute;
+  top: -10rpx;
+  right: -10rpx;
+  width: 30rpx;
+  height: 30rpx;
+  border-radius: 999rpx;
+  background: var(--muted);
+  color: #fffdf8;
+  font-size: 18rpx;
+  line-height: 30rpx;
+  text-align: center;
+}
+
+.day-chip.on .day-x {
+  background: #fff;
+  color: var(--red);
+}
+
+.day-chip.on {
+  background: var(--red);
+  border-color: var(--red);
+}
+
+.day-title {
+  font-size: 23rpx;
+  font-weight: 700;
+  color: var(--ink);
+  line-height: 1.35;
+}
+
+.day-count {
+  font-size: 18rpx;
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+.day-chip.on .day-title,
+.day-chip.on .day-count {
+  color: #fff;
+}
+
+.day-add {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  margin-right: 14rpx;
+  padding: 8rpx 22rpx;
+  border: 1rpx dashed var(--line);
+  border-radius: 16rpx;
+  font-size: 22rpx;
+  color: var(--ink-2);
+  background: transparent;
+}
+
+/* ---------- 夜间模式：行程页硬编码浅色面覆盖 ---------- */
+.page.dark .top {
+  background: rgba(20, 18, 14, 0.97);
+  box-shadow: 0 6rpx 24rpx rgba(0, 0, 0, 0.4);
+}
+
+.page.dark .back,
+.page.dark .day-chip,
+.page.dark .summary-row,
+.page.dark .stop-row,
+.page.dark .empty,
+.page.dark .empty-btn,
+.page.dark .seg-card,
+.page.dark .hide-bar,
+.page.dark .panel-action,
+.page.dark .op,
+.page.dark .leg-mode,
+.page.dark .seg-mode {
+  background: #211d17;
+  border-color: var(--line);
+  color: var(--ink-2);
+}
+
+.page.dark .day-chip.on,
+.page.dark .stop-row.active {
+  background: rgba(207, 97, 85, 0.22);
+  border-color: var(--red);
+}
+
+.page.dark .day-chip.on .day-title,
+.page.dark .day-chip.on .day-count {
+  color: var(--ink);
+}
+
+.page.dark .day-add {
+  color: var(--ink-2);
+  background: transparent;
+}
+
+.page.dark .empty-other-btn {
+  background: #262119;
+  color: var(--ink-2);
+}
+
+.page.dark .stop-row.dragging {
+  background: #2a241b;
+}
+
+.page.dark .leg-card {
+  background: #1b1813;
+  border-color: var(--line);
+}
+
+.page.dark .leg-mode.on {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.page.dark .empty-title,
+.page.dark .panel-title,
+.page.dark .stop-name {
+  color: var(--ink);
+}
+
+.page.dark .hide-bar {
+  border-color: var(--line);
+}
+
+.page.dark .drag-handle {
+  color: #6d6557;
 }

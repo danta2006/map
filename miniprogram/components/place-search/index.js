@@ -14,7 +14,9 @@ Component({
   properties: {
     placeholder: { type: String, value: '搜索景点、美食、酒店…' },
     autoFocus: { type: Boolean, value: false },
-    limit: { type: Number, value: 20 }
+    limit: { type: Number, value: 20 },
+    // 夜间模式：'light' | 'dark'，组件样式隔离，必须单独传进来
+    theme: { type: String, value: 'light' }
   },
 
   data: {

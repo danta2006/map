@@ -3,7 +3,9 @@ const { CATEGORIES, PLACES, CATEGORY_MAP, CATEGORY_RADIUS } = require('../../dat
 const { CITIES, CITY_MAP } = require('../../data/cities');
 const { HEROES } = require('../../data/photos');
 const { distance, formatDistance } = require('../../utils/geo');
-const { getTrip, toggle: toggleTrip, MAX_STOPS } = require('../../utils/trip');
+const { getTrip, toggle: toggleTrip, MAX_STOPS, activeLabel } = require('../../utils/trip');
+const theme = require('../../utils/theme');
+const weather = require('../../utils/weather');
 
 const MARKER_SIZE = { width: 30, height: 38 };
 const DEFAULT_CITY = 'xiangtan';
@@ -32,6 +34,27 @@ Page({
     empty: false,
     // 我的行程：已选点位数量（角标和入口按钮用）
     tripCount: 0,
+    dayLabel: '今天',
+    // 夜间模式：'light' | 'dark'（根节点 class）
+    theme: 'light',
+    themeMode: 'auto',
+    // 天气：近三天 + 地图上的天气形态
+    weather: {
+      kind: '',
+      label: '',
+      emoji: '',
+      tMax: '',
+      tMin: '',
+      tempText: '--',
+      cityName: '',
+      days: [],
+      loading: true,
+      error: ''
+    },
+    showWeather: false,
+    weatherTop: 160,
+    // 雨滴 / 雪花（一次性生成，避免每帧重排）
+    drops: [],
     // 搜索浮层
     showSearch: false,
     // 底部详情面板（可上滑展开，小红书那种）
@@ -75,17 +98,36 @@ Page({
       // 老基础库没有这个接口，用默认值
     }
 
+    // 雨滴 / 雪花的初始位置，只算一次
+    const drops = [];
+    for (let i = 0; i < 28; i++) {
+      drops.push({
+        left: Math.round(Math.random() * 100),
+        delay: (-Math.random() * 2.4).toFixed(2),
+        dur: (0.9 + Math.random() * 0.8).toFixed(2),
+        opacity: (0.35 + Math.random() * 0.4).toFixed(2)
+      });
+    }
+
     this.setData({
       statusBarHeight: app.globalData.statusBarHeight,
       cities,
       sheetH: this.sheetH,
       sheetY: this.closedY,
-      menuRight
+      menuRight,
+      weatherTop: (app.globalData.statusBarHeight || 20) + 124,
+      drops,
+      theme: theme.currentTheme(),
+      themeMode: theme.getMode()
     });
+
+    theme.apply(this);
 
     const cityId = options && CITY_MAP[options.city] ? options.city : DEFAULT_CITY;
     this.switchCity(cityId);
     setTimeout(() => this.syncView(true), 900);
+
+    // 自动定位 → 查未来三天天气（switchCity 里会按选中的城市触发，这里不再重复请求）
 
     // ?focus=<id> 直接打开某个点位的卡片（分享 / 路线跳转用）
     if (options && options.focus) {
@@ -100,7 +142,106 @@ Page({
 
   /** 每次回到地图都同步一次行程状态（可能在详情页加过点位） */
   onShow() {
+    theme.apply(this);
     this.refreshTrip();
+    // 天气有 2 小时缓存，这里再取一次几乎都是读缓存，很便宜
+    this.loadWeather();
+  },
+
+  // ---------- 天气：自动定位 → 近三天 → 地图上的天气形态 ----------
+
+  /** 定位（失败退到当前城市中心）后拉天气；传 cityId 就按那座城市查 */
+  loadWeather(force, cityId) {
+    const id = cityId || this.data.activeCity;
+    const city = CITY_MAP[id] || CITY_MAP[DEFAULT_CITY];
+    const center = city.center;
+    // 快速连切城市时只认最后一次请求，避免旧城市的结果盖掉新城市
+    const seq = (this._weatherSeq = (this._weatherSeq || 0) + 1);
+    const go = (lat, lng) => {
+      weather
+        .load(lat, lng, { force: !!force })
+        .then((res) => {
+          if (seq !== this._weatherSeq) return;
+          this.applyWeatherView(res, id);
+        })
+        .catch(() => {
+          if (seq !== this._weatherSeq) return;
+          this.applyWeatherView({ days: [], error: 'error' }, id);
+        });
+    };
+
+    this.setData({ 'weather.loading': true });
+    if (typeof wx === 'undefined' || !wx.getLocation) {
+      go(center.latitude, center.longitude);
+      return;
+    }
+    wx.getLocation({
+      type: 'gcj02',
+      success: (r) => {
+        // 人就在选中的这座城市附近才用精确定位；切到别的城市就按那座城市的中心查
+        const near = this.meterGap(r.latitude, r.longitude, center.latitude, center.longitude) <= 20000;
+        if (near) go(r.latitude, r.longitude);
+        else go(center.latitude, center.longitude);
+      },
+      fail: () => go(center.latitude, center.longitude)
+    });
+  },
+
+  /** 两点间距离（米），只用来判断「人在不在当前城市」 */
+  meterGap(lat1, lng1, lat2, lng2) {
+    const rad = Math.PI / 180;
+    const dLat = (lat2 - lat1) * rad;
+    const dLng = (lng2 - lng1) * rad;
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(lat1 * rad) * Math.cos(lat2 * rad) * Math.sin(dLng / 2) * Math.sin(dLng / 2);
+    return 6371000 * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  },
+
+  /** 把天气结果转成页面要的形态（地图背景用 kind，面板标题带城市名） */
+  applyWeatherView(res, cityId) {
+    const id = cityId || this.data.activeCity;
+    const city = CITY_MAP[id] || CITY_MAP[DEFAULT_CITY];
+    const today = (res && res.today) || null;
+    const days = (res && res.days) || [];
+    const data = {
+      weather: {
+        kind: today ? today.kind : '',
+        label: today ? today.label : '天气暂不可用',
+        emoji: today ? today.emoji : '🌡',
+        tMax: today ? today.tMax : '',
+        tMin: today ? today.tMin : '',
+        tempText: today ? `${today.tMax}°` : '--',
+        cityName: city.name,
+        days,
+        loading: false,
+        error: (res && res.error) || ''
+      }
+    };
+    this.setData(data);
+  },
+
+  /** 点天气小胶囊：展开近三天 + 夜间模式开关 */
+  toggleWeather() {
+    this.setData({ showWeather: !this.data.showWeather, showCityPicker: false });
+  },
+
+  closeWeather() {
+    this.setData({ showWeather: false });
+  },
+
+  /** 刷新天气（忽略缓存） */
+  onWeatherRefresh() {
+    this.loadWeather(true);
+    wx.showToast({ title: '正在更新天气', icon: 'none' });
+  },
+
+  /** 手动切夜间模式：自动 / 白天 / 夜间 */
+  onThemeMode(e) {
+    const mode = (e && e.currentTarget && e.currentTarget.dataset.mode) || 'auto';
+    theme.setMode(mode);
+    theme.apply(this);
+    wx.showToast({ title: '已切换为' + theme.modeLabel(mode) + '模式', icon: 'none' });
   },
 
   /** 把「是否已加入行程 / 第几站」挂到点位对象上，列表和卡片共用 */
@@ -117,7 +258,7 @@ Page({
   /** 行程数量、底部列表角标、当前卡片按钮一起刷新 */
   refreshTrip() {
     const t = getTrip();
-    const data = { tripCount: t.ids.length };
+    const data = { tripCount: t.ids.length, dayLabel: activeLabel() };
     if (this.data.places.length) {
       data.places = this.withTripFlags(this.data.places);
     }
@@ -142,7 +283,10 @@ Page({
       return;
     }
     this.refreshTrip();
-    wx.showToast({ title: r.added ? '已加入行程' : '已移出行程', icon: 'none' });
+    wx.showToast({
+      title: r.added ? `已加入 · ${this.data.dayLabel}` : '已移出行程',
+      icon: 'none'
+    });
   },
 
   /** 打开排序 / 行程地图页 */
@@ -187,7 +331,7 @@ Page({
     return PLACES.filter((p) => p.city === this.data.activeCity);
   },
 
-  /** 切城市：换中心点、缩放、清空分类和卡片 */
+  /** 切城市：换中心点、缩放、清空分类和卡片，天气跟着换到这座城市 */
   switchCity(cityId) {
     const city = CITY_MAP[cityId];
     if (!city) return;
@@ -206,6 +350,8 @@ Page({
     const list = this.cityPlaces();
     this.visiblePlaces = list;
     this.renderMarkers('');
+    // 天气跟着地区走：切到长沙就查长沙的近三天，不再用上一座城市的定位
+    this.loadWeather(true, cityId);
   },
 
   /** 按分类生成 marker（数据量小，直接全量重算） */

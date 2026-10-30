@@ -1,4 +1,4 @@
-<view class="page">
+<view class="page {{theme}}">
   <map
     id="map"
     class="map"
@@ -29,6 +29,45 @@
     </cover-view>
   </map>
 
+  <!-- 夜间：地图压暗一层（不影响点击） -->
+  <view class="map-tint" wx:if="{{theme === 'dark'}}"></view>
+
+  <!-- 天气形态：半透明覆盖在地图上，pointer-events:none 不影响任何操作 -->
+  <view class="weather-layer {{weather.kind}}" wx:if="{{weather.kind && !weather.error}}">
+    <block wx:if="{{weather.kind === 'rain' || weather.kind === 'thunder'}}">
+      <view
+        class="rain-drop"
+        wx:for="{{drops}}"
+        wx:key="index"
+        style="left: {{item.left}}%; animation-delay: {{item.delay}}s; animation-duration: {{item.dur}}s; opacity: {{item.opacity}}"
+      ></view>
+    </block>
+
+    <block wx:if="{{weather.kind === 'snow'}}">
+      <view
+        class="snow-flake"
+        wx:for="{{drops}}"
+        wx:key="index"
+        style="left: {{item.left}}%; animation-delay: {{item.delay}}s; animation-duration: {{item.dur + 3}}s; opacity: {{item.opacity}}"
+      ></view>
+    </block>
+
+    <block wx:if="{{weather.kind === 'clear' || weather.kind === 'partly'}}">
+      <view class="sun-glow"></view>
+      <view class="sun-core"></view>
+      <view class="sun-ray r1"></view>
+      <view class="sun-ray r2"></view>
+    </block>
+
+    <block wx:if="{{weather.kind === 'overcast' || weather.kind === 'partly' || weather.kind === 'fog'}}">
+      <view class="cloud c1"></view>
+      <view class="cloud c2"></view>
+      <view class="cloud c3"></view>
+    </block>
+
+    <view class="weather-flash" wx:if="{{weather.kind === 'thunder'}}"></view>
+  </view>
+
   <!-- 顶部：城市切换 + 标题 + 分类筛选 -->
   <view class="header" style="padding-top: {{statusBarHeight}}px">
     <!-- 右侧留出微信胶囊按钮的宽度，避免搜索按钮被胶囊（…⊙）压住 -->
@@ -40,6 +79,12 @@
       <view class="brand">
         <text class="brand-name">标点地图</text>
         <text class="brand-sub">{{activeName}} · {{markerCount}} 个点</text>
+      </view>
+      <!-- 天气 + 夜间模式入口：点开看近三天 -->
+      <view class="weather-chip {{weather.kind}}" bindtap="toggleWeather">
+        <text class="weather-emoji">{{weather.loading ? '🌡' : weather.emoji}}</text>
+        <text class="weather-temp">{{weather.loading ? '…' : weather.tempText}}</text>
+        <text class="weather-moon" wx:if="{{theme === 'dark'}}">🌙</text>
       </view>
       <view class="search-btn" bindtap="openSearch">🔍</view>
     </view>
@@ -81,6 +126,39 @@
     </scroll-view>
   </view>
 
+  <!-- 近三天天气 + 夜间模式（点顶部的天气小胶囊打开） -->
+  <view class="weather-panel" wx:if="{{showWeather}}" style="top: {{weatherTop}}px">
+    <view class="wp-head">
+      <text class="wp-title">近三天天气{{weather.cityName ? ' · ' + weather.cityName : ''}}</text>
+      <text class="wp-close" catchtap="closeWeather">×</text>
+    </view>
+
+    <view class="wp-body" wx:if="{{weather.days.length}}">
+      <view class="wp-row {{item.title === '今天' ? 'today' : ''}}" wx:for="{{weather.days}}" wx:key="date">
+        <view class="wp-day">
+          <text class="wp-day-title">{{item.title}}</text>
+          <text class="wp-day-date">{{item.dateText}}</text>
+        </view>
+        <view class="wp-wx">
+          <text class="wp-emoji">{{item.emoji}}</text>
+          <text class="wp-label">{{item.label}}</text>
+        </view>
+        <view class="wp-temp">{{item.tMin}}° ~ {{item.tMax}}°</view>
+        <view class="wp-pop">降水 {{item.pop}}%</view>
+      </view>
+    </view>
+    <view class="wp-empty" wx:else>{{weather.loading ? '正在获取天气…' : '天气暂时取不到，点「刷新」再试'}}</view>
+
+    <view class="wp-foot">
+      <text class="wp-foot-k">夜间模式</text>
+      <view class="wp-mode {{themeMode === 'auto' ? 'on' : ''}}" data-mode="auto" bindtap="onThemeMode">自动</view>
+      <view class="wp-mode {{themeMode === 'day' ? 'on' : ''}}" data-mode="day" bindtap="onThemeMode">白天</view>
+      <view class="wp-mode {{themeMode === 'night' ? 'on' : ''}}" data-mode="night" bindtap="onThemeMode">夜间</view>
+      <text class="wp-refresh" bindtap="onWeatherRefresh">{{weather.loading ? '更新中…' : '刷新'}}</text>
+    </view>
+    <view class="wp-tip">「自动」= 19:00–06:00 自动进入夜间；天气 2 小时更新一次</view>
+  </view>
+
   <!-- 搜索浮层：可跨城市搜点位，点结果直接加进行程 -->
   <view class="search-layer" wx:if="{{showSearch}}">
     <view class="search-backdrop" bindtap="closeSearch"></view>
@@ -89,11 +167,12 @@
         id="mapSearch"
         placeholder="搜索景点、美食、酒店…"
         auto-focus="{{true}}"
+        theme="{{theme}}"
         bind:change="onSearchChange"
         bind:focus="onSearchFocus"
       />
       <view class="search-foot">
-        <text class="search-foot-text">我的行程已选 {{tripCount}} 个点位</text>
+        <text class="search-foot-text">{{dayLabel}}已选 {{tripCount}} 个点位</text>
         <view class="search-foot-btn {{tripCount ? 'on' : ''}}" bindtap="onGoTrip">查看行程 ›</view>
       </view>
     </view>

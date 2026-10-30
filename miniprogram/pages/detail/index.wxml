@@ -1,4 +1,4 @@
-<view class="page" wx:if="{{poi}}">
+<view class="page {{theme}}" wx:if="{{poi}}">
   <!-- 头图：有实景图就用图，没有再退化成分类色 + emoji -->
   <view class="hero {{photo ? 'has-photo' : ''}}" style="{{heroStyle}}">
     <image wx:if="{{photo}}" class="hero-photo" src="/assets/{{photo}}" mode="aspectFill"></image>

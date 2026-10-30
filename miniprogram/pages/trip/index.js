@@ -4,6 +4,7 @@ const { CITY_MAP } = require('../../data/cities');
 const { formatDistance } = require('../../utils/geo');
 const trip = require('../../utils/trip');
 const travel = require('../../utils/travel');
+const theme = require('../../utils/theme');
 
 const MARKER_SIZE = { width: 30, height: 38 };
 const LEG_MARKER_SIZE = { width: 22, height: 22 };
@@ -37,7 +38,15 @@ Page({
     scrollTo: '',
     // 点路线弹出的分段卡片
     legCard: null,
-    cardBottom: 0
+    cardBottom: 0,
+    // 多天行程
+    theme: 'light',
+    themeMode: 'auto',
+    days: [],
+    dayId: '',
+    dayLabel: '今天',
+    dayTitle: '今天',
+    todayStr: ''
   },
 
   onLoad() {
@@ -59,11 +68,13 @@ Page({
     });
 
     this.mapCtx = wx.createMapContext('trip-map', this);
+    theme.apply(this);
     this.refresh({ fit: true });
     this.loaded = true;
   },
 
   onShow() {
+    theme.apply(this);
     // 从地图页/详情页返回时，点位可能变了
     if (!this.loaded) return;
     this.refresh({ fit: true });
@@ -247,6 +258,12 @@ Page({
       offset: 0
     }));
 
+    // 空态时告诉游客：点位可能在别的日期上（很常见的误会）
+    const dayViews = trip.daysView();
+    const others = dayViews.filter((d) => !d.active && d.count);
+    const otherDay = others[0] || null;
+    const otherCount = others.reduce((n, d) => n + d.count, 0);
+
     const next = {
       stops,
       rows,
@@ -257,8 +274,18 @@ Page({
       summary,
       progress,
       empty: stops.length === 0,
+      otherCount,
+      otherId: otherDay ? otherDay.id : '',
+      otherLabel: otherDay ? otherDay.title : '',
       panel,
-      panelY: this.panelYFor(panel)
+      panelY: this.panelYFor(panel),
+      days: dayViews,
+      dayId: data.activeId,
+      dayLabel: trip.activeLabel(),
+      dayTitle: (data.day && data.day.title) || '今天',
+      todayStr: trip.todayStr(),
+      theme: theme.currentTheme(),
+      themeMode: theme.getMode()
     };
 
     // 操作后把列表滚动到刚动过的那一行
@@ -427,14 +454,14 @@ Page({
   onClear() {
     if (!this.data.stops.length) return;
     wx.showModal({
-      title: '清空行程？',
-      content: '点位和排序都会被清掉，重新选一遍就好。',
+      title: `清空「${this.data.dayLabel}」的行程？`,
+      content: '这一天的点位和排序会被清掉，其他日期不受影响。',
       confirmText: '清空',
       cancelText: '再想想',
       success: (r) => {
         if (!r.confirm) return;
         trip.clear();
-        this.refresh({ fit: false });
+        this.refresh({ fit: true });
       }
     });
   },
@@ -704,5 +731,81 @@ Page({
       const comp = this.selectComponent ? this.selectComponent('#placeSearch') : null;
       if (comp && comp.focus) comp.focus();
     }, 340);
+  },
+
+  // ---------- 多天行程：今天 / 明天 / 自己挑一个日期 ----------
+
+  /** 点日期条上的某一天：切换当前规划的这一天 */
+  onDayTap(e) {
+    const id = e.currentTarget.dataset.id;
+    if (!id || id === this.data.dayId) return;
+    const r = trip.setActiveDay(id);
+    if (!r) return;
+    this.refresh({ fit: true });
+    const day = (this.data.days || []).filter((d) => d.id === id)[0];
+    wx.showToast({ title: (day ? day.title : '已切换') + ' 的行程', icon: 'none' });
+  },
+
+  /** 日期条上的「＋」：picker 选日期后加一天并切过去 */
+  onDayPick(e) {
+    const date = e.detail && e.detail.value;
+    if (!date) return;
+    const r = trip.addDay(date);
+    if (r.reason === 'full') {
+      wx.showToast({ title: `最多规划 ${trip.MAX_DAYS} 天`, icon: 'none' });
+      return;
+    }
+    trip.setActiveDay(r.day.id);
+    this.refresh({ fit: true });
+    wx.showToast({
+      title: r.created ? `已添加 ${r.day.title} 的行程` : `切到 ${r.day.title}`,
+      icon: 'none'
+    });
+  },
+
+  /** 点日期右上角的 ✕：删掉这一天（最后一天不能删） */
+  onDayDelete(e) {
+    const id = e.currentTarget.dataset.id;
+    this.deleteDay(id);
+  },
+
+  /** 长按某个日期：删掉这一天（最后一天不能删） */
+  onDayLong(e) {
+    const id = e.currentTarget.dataset.id;
+    this.deleteDay(id);
+  },
+
+  /** 删掉某一天：先确认，删完切到剩下的第一天 */
+  deleteDay(id) {
+    const days = this.data.days || [];
+    if (days.length <= 1) {
+      wx.showToast({ title: '至少要留一天', icon: 'none' });
+      return;
+    }
+    const day = days.filter((d) => d.id === id)[0];
+    if (!day) return;
+    wx.showModal({
+      title: `删除「${day.title}」的行程？`,
+      content: day.count
+        ? `这一天的 ${day.count} 个点位会被清掉，其他日期不受影响。`
+        : '这一天还没有点位，删除后日期条就少一格。',
+      confirmText: '删除',
+      cancelText: '算了',
+      success: (r) => {
+        if (!r.confirm) return;
+        const res = trip.removeDay(id);
+        if (res && res.reason === 'last') {
+          wx.showToast({ title: '至少要留一天', icon: 'none' });
+          return;
+        }
+        this.refresh({ fit: true });
+        wx.showToast({ title: `已删除 ${day.title}`, icon: 'none' });
+      }
+    });
+  },
+
+  /** 顶部标题的日期点一下 → 展开面板（方便直接看到日期条） */
+  onDayTitleTap() {
+    if (this.data.panel === 'hidden') this.setPanel('half');
   }
 });

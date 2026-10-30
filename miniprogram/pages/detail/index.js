@@ -2,6 +2,7 @@ const { PLACES, CATEGORY_MAP, CATEGORY_RADIUS } = require('../../data/places');
 const { distance, formatDistance } = require('../../utils/geo');
 const { HEROES } = require('../../data/photos');
 const { getTrip, toggle: toggleTrip } = require('../../utils/trip');
+const theme = require('../../utils/theme');
 
 const DEFAULT_RADIUS = 500; // 兜底：点位没配、分类也没配时用
 const keyOf = (id) => 'checkin_' + id;
@@ -22,7 +23,10 @@ Page({
     radiusText: '',
     // 我的行程：这个点位是否已加入、排第几站
     inTrip: false,
-    tripNo: 0
+    tripNo: 0,
+    // 夜间模式
+    theme: 'light',
+    themeMode: 'auto'
   },
 
   onLoad(options) {
@@ -44,6 +48,7 @@ Page({
       radiusText: formatDistance(this.radius)
     });
     wx.setNavigationBarTitle({ title: poi.name });
+    theme.apply(this, { nav: true });
     this.restoreRecord();
     this.refreshTrip();
     this.locate();
@@ -51,6 +56,7 @@ Page({
 
   /** 从行程页/地图页回来时同步「加入行程」按钮状态 */
   onShow() {
+    theme.apply(this, { nav: true });
     this.refreshTrip();
   },
 

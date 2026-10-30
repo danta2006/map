@@ -279,3 +279,42 @@
 .ps-btn.primary.on {
   background: var(--teal);
 }
+
+/* ---------- 夜间模式（组件样式隔离，用 .ps.dark 单独覆盖） ---------- */
+.ps.dark .ps-ph {
+  color: #8c8375;
+}
+
+.ps.dark .ps-row.on {
+  background: rgba(207, 97, 85, 0.16);
+}
+
+.ps.dark .ps-sum,
+.ps.dark .ps-cardintro {
+  color: var(--muted);
+}
+
+.ps.dark .ps-arrow {
+  color: #6d6557;
+}
+
+.ps.dark .ps-clear {
+  background: #37322a;
+  color: var(--muted);
+}
+
+.ps.dark .ps-cardfoot {
+  background: #1b1813;
+}
+
+.ps.dark .ps-btn.ghost {
+  background: #262119;
+  border-color: var(--line);
+  color: var(--ink-2);
+}
+
+.ps.dark .ps-panel,
+.ps.dark .ps-box {
+  background: #211d17;
+  border-color: var(--line);
+}

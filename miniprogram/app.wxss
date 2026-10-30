@@ -45,3 +45,31 @@ scroll-view {
   color: var(--ink);
   border: 1rpx solid var(--line);
 }
+
+/* ---------- 夜间模式 ----------
+ * 页面根节点挂 .dark（<view class="page {{theme}}">），变量整体反转，
+ * 所有用 var(--paper/--card/--ink/--line) 的地方会自动变深。
+ */
+.page.dark {
+  --paper: #14120e;
+  --card: #211d17;
+  --ink: #f2ece0;
+  --ink-2: #d8d0c2;
+  --muted: #9c9384;
+  --line: #37322a;
+  --red: #cf6155;
+
+  background: var(--paper);
+  color: var(--ink);
+}
+
+.page.dark .btn.primary {
+  background: var(--red);
+  color: #fff;
+}
+
+.page.dark .btn.ghost {
+  background: #262119;
+  border-color: var(--line);
+  color: var(--ink);
+}

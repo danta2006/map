@@ -245,3 +245,41 @@
   color: var(--muted);
   text-decoration: underline;
 }
+
+/* ---------- 夜间模式 ---------- */
+.page.dark .checkin-banner {
+  background: rgba(44, 107, 99, 0.26);
+  color: var(--ink-2);
+}
+
+.page.dark .tip {
+  background: #211d17;
+}
+
+.page.dark .footer {
+  background: rgba(20, 18, 14, 0.96);
+  border-color: var(--line);
+}
+
+.page.dark .hero-trip {
+  background: rgba(20, 18, 14, 0.72);
+  color: var(--red);
+}
+
+.page.dark .hero-trip.on {
+  background: var(--red);
+  color: #fff;
+}
+
+.page.dark .hero-tag {
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.page.dark .fact-v {
+  color: var(--ink-2);
+}
+
+.page.dark .section-text,
+.page.dark .tip-text {
+  color: var(--ink-2);
+}

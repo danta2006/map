@@ -554,3 +554,45 @@
 .stop-card {
   bottom: calc(56vh + 90rpx);
 }
+
+/* ---------- 夜间模式 ---------- */
+.page.dark .top {
+  background: rgba(20, 18, 14, 0.97);
+}
+
+.page.dark .city-tab,
+.page.dark .like,
+.page.dark .tab,
+.page.dark .totals-item,
+.page.dark .mode,
+.page.dark .foot-ghost,
+.page.dark .detail-like {
+  background: #211d17;
+  border-color: var(--line);
+  color: var(--ink-2);
+}
+
+.page.dark .city-tab.on,
+.page.dark .tab.on {
+  background: var(--red);
+  border-color: var(--red);
+  color: #fff;
+}
+
+.page.dark .route.active {
+  background: rgba(207, 97, 85, 0.18);
+}
+
+.page.dark .like.on,
+.page.dark .detail-like.on {
+  background: rgba(207, 97, 85, 0.22);
+  color: var(--red);
+}
+
+.page.dark .active-like {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.page.dark .mode.on {
+  background: rgba(255, 255, 255, 0.06);
+}

@@ -3,6 +3,7 @@ const { PLACES } = require('../../data/places');
 const { CITIES } = require('../../data/cities');
 const travel = require('../../utils/travel');
 const trip = require('../../utils/trip');
+const theme = require('../../utils/theme');
 
 const PLACE_MAP = {};
 PLACES.forEach((p) => {
@@ -39,7 +40,10 @@ Page({
     tab: 'legs',
     legs: [],
     totals: { walk: 0, transit: 0, taxi: 0 },
-    chosenTotal: 0
+    chosenTotal: 0,
+    // 夜间模式
+    theme: 'light',
+    themeMode: 'auto'
   },
 
   onLoad() {
@@ -50,11 +54,13 @@ Page({
       if (menu && menu.left) menuRight = Math.max(48, Math.round(sys.windowWidth - menu.left + 8));
     } catch (e) { /* 老基础库用默认值 */ }
     this.setData({ statusBarHeight: app.globalData.statusBarHeight || 20, menuRight });
+    theme.apply(this, { nav: true });
     this.mapCtx = wx.createMapContext('route-map', this);
     this.loadRoutes();
   },
 
   onShow() {
+    theme.apply(this, { nav: true });
     if (this.loadedOnce) this.loadRoutes();
   },
 

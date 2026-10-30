@@ -1,4 +1,4 @@
-<view class="ps">
+<view class="ps {{theme}}">
   <view class="ps-box">
     <text class="ps-icon">🔍</text>
     <input

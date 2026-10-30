@@ -1,4 +1,4 @@
-<view class="page">
+<view class="page {{theme}}">
   <!-- 行程地图：编号图钉 + 按交通方式上色的连线 -->
   <map
     id="trip-map"
@@ -23,11 +23,37 @@
     <view class="top-row">
       <view class="back" bindtap="onBack">‹</view>
       <view class="top-main">
-        <view class="top-title">我的行程</view>
+        <view class="top-title" bindtap="onDayTitleTap">{{dayLabel}} 的行程</view>
         <view class="top-sub" wx:if="{{summary}}">{{summary.count}} 个点 · 全程约 {{summary.totalText}}</view>
-        <view class="top-sub" wx:else>还没有选点位</view>
+        <view class="top-sub" wx:else>{{dayLabel}}还没有选点位</view>
       </view>
     </view>
+
+    <!-- 日期条：今天 / 明天 / 自己挑的日期；右上角 ✕ 或长按可以删掉某一天 -->
+    <scroll-view class="day-strip" scroll-x enhanced show-scrollbar="{{false}}">
+      <view class="day-row">
+        <view
+          class="day-chip {{item.active ? 'on' : ''}}"
+          wx:for="{{days}}"
+          wx:key="id"
+          data-id="{{item.id}}"
+          bindtap="onDayTap"
+          bindlongpress="onDayLong"
+        >
+          <text class="day-title">{{item.title}}</text>
+          <text class="day-count">{{item.count ? item.count + ' 个点' : '空'}}</text>
+          <view
+            class="day-x"
+            wx:if="{{days.length > 1}}"
+            data-id="{{item.id}}"
+            catchtap="onDayDelete"
+          >✕</view>
+        </view>
+        <picker mode="date" value="{{todayStr}}" start="{{todayStr}}" bindchange="onDayPick">
+          <view class="day-add">＋ 加一天</view>
+        </picker>
+      </view>
+    </scroll-view>
 
     <!-- 打卡进度：走完几个点一目了然 -->
     <view class="progress" wx:if="{{progress && progress.total}}">
@@ -60,8 +86,13 @@
   <!-- 空行程：直接引导回地图挑点位 -->
   <view class="empty" wx:if="{{empty}}">
     <view class="empty-emoji">🧺</view>
-    <view class="empty-title">行程还是空的</view>
+    <view class="empty-title">{{dayLabel}}还没有安排</view>
     <view class="empty-sub">搜索景点、美食、酒店，点开介绍卡片就能加入</view>
+    <!-- 点位可能加在别的日期上，给个一键切过去的入口 -->
+    <view class="empty-other" wx:if="{{otherCount}}">
+      <text class="empty-other-text">{{otherLabel}}有 {{otherCount}} 个点位</text>
+      <view class="empty-other-btn" data-id="{{otherId}}" bindtap="onDayTap">切到{{otherLabel}}</view>
+    </view>
     <view class="empty-btn" bindtap="onSearchEmpty">🔍 搜索点位</view>
     <view class="empty-btn ghost" bindtap="onGoMap">去地图挑点位</view>
   </view>
@@ -91,7 +122,7 @@
 
   <!-- 面板隐藏时露一条底栏，随时可以再展开 -->
   <view class="hide-bar" wx:if="{{panel === 'hidden' && !empty}}">
-    <text class="hide-text" bindtap="togglePanel">📋 {{summary.count}} 个点 · 在途 {{summary.travelText}}</text>
+    <text class="hide-text" bindtap="togglePanel">📋 {{dayLabel}} {{summary.count}} 个点 · 在途 {{summary.travelText}}</text>
     <view class="hide-save" catchtap="onSaveRoute">↑ 存为路线</view>
     <text class="hide-btn" bindtap="togglePanel">显示排序列表</text>
   </view>
@@ -112,7 +143,7 @@
     </view>
 
     <view class="panel-head">
-      <view class="panel-title">行程排序</view>
+      <view class="panel-title">{{dayLabel}} 排序</view>
       <view class="panel-actions">
         <view class="panel-action" bindtap="onSaveRoute">↑ 存为路线</view>
         <view class="panel-action" bindtap="onGoMap">＋ 加点</view>
@@ -123,12 +154,13 @@
       <place-search
         id="placeSearch"
         placeholder="搜索景点、美食、酒店…"
+        theme="{{theme}}"
         bind:change="onSearchChange"
         bind:focus="onSearchFocus"
       />
     </view>
 
-    <view class="panel-hint">上面可搜索景点 / 美食 / 酒店，点开介绍卡片再加；按住 ⠿ 拖动排序，也可以点 ▲ ▼；每段都能切换交通方式</view>
+    <view class="panel-hint">上面可搜索景点 / 美食 / 酒店，点开介绍卡片再加；按住 ⠿ 拖动排序，也可以点 ▲ ▼；每段都能切换交通方式；顶部日期条切到别的天，行程互不影响；日期右上角 ✕ 可以删掉那一天</view>
 
     <view class="drag-hint" wx:if="{{draggingId}}">{{dragHint}}</view>
 
