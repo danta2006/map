@@ -144,8 +144,11 @@ Page({
   onShow() {
     theme.apply(this);
     this.refreshTrip();
+    setTimeout(() => this.measureHeader(), 100);
     // 天气有 2 小时缓存，这里再取一次几乎都是读缓存，很便宜
     this.loadWeather();
+    // 头部高度可能因机型/胶囊位置变化，量一次给天气面板定位
+    setTimeout(() => this.measureHeader(), 200);
   },
 
   // ---------- 天气：自动定位 → 近三天 → 地图上的天气形态 ----------
@@ -223,11 +226,46 @@ Page({
 
   /** 点天气小胶囊：展开近三天 + 夜间模式开关 */
   toggleWeather() {
-    this.setData({ showWeather: !this.data.showWeather, showCityPicker: false });
+    const open = !this.data.showWeather;
+    if (!open) {
+      this.setData({ showWeather: false });
+      return;
+    }
+    // 天气面板打开时，收起其它浮层；面板位置按当前头部高度重新算，避免压到 UI
+    this.setData(
+      {
+        showWeather: true,
+        showCityPicker: false,
+        showSearch: false,
+        current: null,
+        expanded: false,
+        sheetY: this.closedY
+      },
+      () => {
+        this.lastBubbleKey = '';
+        this.applyBubbles();
+        this.measureHeader();
+      }
+    );
   },
 
   closeWeather() {
     this.setData({ showWeather: false });
+  },
+
+  /** 量一下顶部面板的真实底边，天气面板贴着它下面放（会自动避让头部高度变化） */
+  measureHeader(cb) {
+    wx.createSelectorQuery()
+      .in(this)
+      .select('.header')
+      .boundingClientRect((rect) => {
+        if (rect && rect.height) {
+          this.setData({ weatherTop: Math.round(rect.bottom + 8) }, cb);
+        } else if (cb) {
+          cb();
+        }
+      })
+      .exec();
   },
 
   /** 刷新天气（忽略缓存） */
@@ -304,6 +342,7 @@ Page({
       {
         showSearch: true,
         showCityPicker: false,
+        showWeather: false,
         current: null,
         expanded: false,
         sheetY: this.closedY
@@ -426,8 +465,12 @@ Page({
   /** 城市切换面板 */
   toggleCityPicker() {
     const open = !this.data.showCityPicker;
-    // 打开城市面板时先收起点位卡片，避免两层弹层叠在一起
-    this.setData({ showCityPicker: open, current: open ? null : this.data.current });
+    // 打开城市面板时先收起天气/点位卡片，避免多层弹层叠在一起
+    this.setData({
+      showCityPicker: open,
+      showWeather: false,
+      current: open ? null : this.data.current
+    });
   },
 
   onCityTap(e) {
@@ -481,8 +524,9 @@ Page({
     const tripNo = getTrip().ids.indexOf(place.id) + 1;
     this.lastMarkerTapAt = Date.now();
     this.setData({
-      // 卡片和城市面板互斥，避免两层弹层叠住
+      // 卡片和城市面板/天气面板互斥，避免多层弹层叠住
       showCityPicker: false,
+      showWeather: false,
       expanded: false,
       sheetY: this.collapsedY,
       current: {
@@ -608,6 +652,7 @@ Page({
     }
     const expand = !this.data.expanded;
     this.setData({
+      showWeather: false,
       expanded: expand,
       sheetY: expand ? this.expandedY : this.collapsedY
     });
@@ -657,6 +702,10 @@ Page({
   onMapTap() {
     if (this.data.showCityPicker) {
       this.setData({ showCityPicker: false });
+      return;
+    }
+    if (this.data.showWeather) {
+      this.setData({ showWeather: false });
       return;
     }
     // 有的机型点 marker 会同时触发 map 的 tap，加个时间窗避免"闪一下就关"

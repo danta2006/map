@@ -17,7 +17,8 @@
   top: 0;
   left: 0;
   right: 0;
-  z-index: 10;
+  /* 比天气面板（18）高：城市下拉在头部里，要能压在天气面板上面 */
+  z-index: 30;
   padding-bottom: 16rpx;
   background: rgba(251, 248, 242, 0.97);
   border-radius: 0 0 28rpx 28rpx;
@@ -228,9 +229,10 @@
 
 .brand {
   display: flex;
-  flex: 1;
+  flex: 1 1 auto;
   flex-direction: column;
   min-width: 0;
+  overflow: hidden;
 }
 
 .brand-name {
@@ -916,7 +918,8 @@
   position: absolute;
   left: 24rpx;
   right: 24rpx;
-  z-index: 30;
+  /* 层级：地图(1) < 天气面板(18) < 底部卡片/面板(20) < 头部(30) < 搜索(40) */
+  z-index: 18;
   padding: 22rpx 24rpx 18rpx;
   background: var(--card);
   border: 1rpx solid var(--line);
@@ -1185,4 +1188,17 @@
   background: var(--red);
   border-color: var(--red);
   color: #fff;
+}
+
+/* 窄屏：标题只显示一行，天气胶囊/搜索按钮永远完整 */
+.brand-name,
+.brand-sub {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.weather-chip,
+.search-btn {
+  flex-shrink: 0;
 }
