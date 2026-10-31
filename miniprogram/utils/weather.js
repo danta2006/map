@@ -130,26 +130,49 @@ function request(url, timeout) {
   });
 }
 
+function mapDays(daily) {
+  if (!daily || !daily.time || !daily.time.length) throw new Error('bad-payload');
+  return daily.time.slice(0, 3).map((date, i) =>
+    buildDay(
+      date,
+      daily.weather_code ? daily.weather_code[i] : 2,
+      daily.temperature_2m_max ? daily.temperature_2m_max[i] : 0,
+      daily.temperature_2m_min ? daily.temperature_2m_min[i] : 0,
+      daily.precipitation_probability_max ? daily.precipitation_probability_max[i] : 0,
+      i
+    )
+  );
+}
+
+/** 走云函数代理：真机/体验版不受 request 合法域名限制 */
+function fetchViaCloud(lat, lng) {
+  return new Promise((resolve, reject) => {
+    const app = typeof getApp === 'function' ? getApp() : null;
+    if (!app || !app.globalData || !app.globalData.cloudReady || !wx.cloud) {
+      reject(new Error('no-cloud'));
+      return;
+    }
+    wx.cloud
+      .callFunction({ name: 'weather', data: { lat, lng }, timeout: 8000 })
+      .then((res) => {
+        const r = (res && res.result) || {};
+        if (!r.ok || !r.daily) reject(new Error(r.error || 'bad-payload'));
+        else resolve(r.daily);
+      })
+      .catch(reject);
+  });
+}
+
 function fetchDays(lat, lng) {
   const url =
     `${API}?latitude=${Number(lat).toFixed(4)}&longitude=${Number(lng).toFixed(4)}` +
     '&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max' +
     '&forecast_days=3&timezone=Asia%2FShanghai';
-  return request(url).then((data) => {
-    const daily = data && data.daily;
-    if (!daily || !daily.time || !daily.time.length) throw new Error('bad-payload');
-    const days = daily.time.slice(0, 3).map((date, i) =>
-      buildDay(
-        date,
-        daily.weather_code ? daily.weather_code[i] : 2,
-        daily.temperature_2m_max ? daily.temperature_2m_max[i] : 0,
-        daily.temperature_2m_min ? daily.temperature_2m_min[i] : 0,
-        daily.precipitation_probability_max ? daily.precipitation_probability_max[i] : 0,
-        i
-      )
-    );
-    return days;
-  });
+
+  // 优先云函数（真机可用）；云函数不可用再退回直连（开发者工具里一般可直连）
+  return fetchViaCloud(lat, lng)
+    .catch(() => request(url).then((data) => data && data.daily))
+    .then((daily) => mapDays(daily));
 }
 
 /** 读本地缓存：按城市存多份（切地区来回切不用重复请求） */
