@@ -339,6 +339,40 @@
   margin-right: 8rpx;
 }
 
+/* 个人主页入口：显示累计积分小角标 */
+.mine-fab {
+  display: flex;
+  align-items: center;
+  margin-top: 14rpx;
+  padding: 14rpx 26rpx;
+  border-radius: 999rpx;
+  background: #fffdf8;
+  border: 1rpx solid var(--line);
+  color: var(--ink-2);
+  font-size: 23rpx;
+  font-weight: 600;
+  box-shadow: 0 8rpx 20rpx rgba(29, 28, 25, 0.12);
+}
+
+.mine-badge {
+  margin-left: 10rpx;
+  min-width: 36rpx;
+  padding: 0 10rpx;
+  height: 36rpx;
+  line-height: 36rpx;
+  border-radius: 999rpx;
+  background: var(--red);
+  color: #fff;
+  font-size: 20rpx;
+  text-align: center;
+}
+
+.page.dark .mine-fab {
+  background: #262119;
+  border-color: var(--line);
+  color: var(--ink);
+}
+
 /* ---------- 底部点位列表 ---------- */
 .poi-strip {
   position: absolute;

@@ -3,6 +3,7 @@ const { distance, formatDistance } = require('../../utils/geo');
 const { HEROES } = require('../../data/photos');
 const { getTrip, toggle: toggleTrip } = require('../../utils/trip');
 const theme = require('../../utils/theme');
+const points = require('../../utils/points');
 
 const DEFAULT_RADIUS = 500; // 兜底：点位没配、分类也没配时用
 const keyOf = (id) => 'checkin_' + id;
@@ -200,7 +201,28 @@ Page({
     };
     wx.setStorageSync(keyOf(poi.id), rec);
     this.setData({ checked: true, checkinText: this.formatTime(rec.at) });
-    wx.showToast({ title: manual ? '已手动打卡' : '打卡成功', icon: 'success' });
+
+    // 手动打卡不算「定位核验」，不给积分
+    if (manual) {
+      wx.showToast({ title: '已打卡 · 定位核验才有积分', icon: 'none' });
+      return;
+    }
+
+    // 定位核验通过：+8（同一点位每天一次），顺手看有没有走完整条路线
+    const got = points.checkin(poi.id, poi.name);
+    const fresh = points.scanRoutes();
+    if (fresh.length) points.notifyRouteDone();
+
+    const parts = ['打卡成功'];
+    if (got.ok) parts.push('+' + got.amount);
+    if (fresh.length) {
+      const sum = fresh.reduce((n, r) => n + r.amount, 0);
+      parts.push('完成「' + fresh[0].name + '」+' + sum);
+    }
+    wx.showToast({
+      title: parts.join(' '),
+      icon: parts.length > 2 ? 'none' : 'success'
+    });
   },
 
   /** 去反馈页（带上当前点位信息） */

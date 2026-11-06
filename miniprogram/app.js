@@ -1,4 +1,5 @@
 const config = require('./config');
+const points = require('./utils/points');
 
 App({
   globalData: {
@@ -8,7 +9,7 @@ App({
     cloudEnv: ''
   },
 
-  onLaunch() {
+  onLaunch(options) {
     try {
       const info = wx.getWindowInfo();
       this.globalData.statusBarHeight = info.statusBarHeight || 20;
@@ -29,6 +30,22 @@ App({
       } catch (e) {
         console.warn('wx.cloud.init 失败', e);
       }
+    }
+
+    this.captureInvite(options);
+  },
+
+  /** 从分享路径里带过来的邀请码（?inviter=u_xxx） */
+  onShow(options) {
+    this.captureInvite(options);
+  },
+
+  captureInvite(options) {
+    const q = (options && options.query) || {};
+    if (!q.inviter) return;
+    const r = points.setInviter(q.inviter);
+    if (r && r.ok) {
+      wx.showToast({ title: '已接受好友邀请，完成首条路线双方得分', icon: 'none' });
     }
   }
 });

@@ -1,5 +1,6 @@
 const { reportFeedback } = require('../../utils/api');
 const theme = require('../../utils/theme');
+const points = require('../../utils/points');
 
 const LOCAL_KEY = 'local_feedback_v1';
 const MAX_LEN = 500;
@@ -62,12 +63,18 @@ Page({
 
     const done = (ok, msg) => {
       this.setData({ submitting: false, savedLocal: !ok });
-      wx.showToast({ title: msg, icon: 'none' });
+      let title = msg;
+      // 真实提交成功才给积分（本地兜底存下来的也算提交，只是没送达后台）
+      if (ok) {
+        const got = points.feedback(payload.placeName);
+        if (got.ok) title = msg + ' +' + got.amount + ' 积分';
+      }
+      wx.showToast({ title, icon: 'none' });
       setTimeout(() => {
         const pages = getCurrentPages();
         if (pages.length > 1) wx.navigateBack();
         else wx.reLaunch({ url: '/pages/map/index' });
-      }, 1200);
+      }, 1400);
     };
 
     reportFeedback(payload)

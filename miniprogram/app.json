@@ -5,7 +5,8 @@
     "pages/routes/index",
     "pages/detail/index",
     "pages/feedback/index",
-    "pages/route-upload/index"
+    "pages/route-upload/index",
+    "pages/mine/index"
   ],
   "window": {
     "backgroundColor": "#fbf8f2",

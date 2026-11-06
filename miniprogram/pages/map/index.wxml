@@ -194,6 +194,10 @@
       <text>我的行程{{tripCount ? ' ' + tripCount : ''}}</text>
     </view>
     <view class="route-fab" bindtap="onGoRoutes">🧭 社区路线</view>
+    <view class="mine-fab" bindtap="onGoMine">
+      <text>👤 我的积分</text>
+      <text class="mine-badge" wx:if="{{pointsTotal}}">{{pointsTotal}}</text>
+    </view>
   </view>
 
   <!-- 底部点位列表：主要入口，比点地图上的小图钉好点 -->

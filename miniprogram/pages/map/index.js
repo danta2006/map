@@ -6,6 +6,7 @@ const { distance, formatDistance } = require('../../utils/geo');
 const { getTrip, toggle: toggleTrip, MAX_STOPS, activeLabel } = require('../../utils/trip');
 const theme = require('../../utils/theme');
 const weather = require('../../utils/weather');
+const points = require('../../utils/points');
 
 const MARKER_SIZE = { width: 30, height: 38 };
 const DEFAULT_CITY = 'xiangtan';
@@ -34,6 +35,7 @@ Page({
     empty: false,
     // 我的行程：已选点位数量（角标和入口按钮用）
     tripCount: 0,
+    pointsTotal: 0,
     dayLabel: '今天',
     // 夜间模式：'light' | 'dark'（根节点 class）
     theme: 'light',
@@ -144,6 +146,7 @@ Page({
   onShow() {
     theme.apply(this);
     this.refreshTrip();
+    this.refreshPoints();
     setTimeout(() => this.measureHeader(), 100);
     // 天气有 2 小时缓存，这里再取一次几乎都是读缓存，很便宜
     this.loadWeather();
@@ -724,6 +727,15 @@ Page({
 
   onGoRoutes() {
     wx.navigateTo({ url: `/pages/routes/index?city=${this.data.activeCity}` });
+  },
+
+  /** 个人主页入口上的小角标：累计积分 */
+  refreshPoints() {
+    this.setData({ pointsTotal: points.summary().total });
+  },
+
+  onGoMine() {
+    wx.navigateTo({ url: '/pages/mine/index' });
   },
 
   onNavigate() {

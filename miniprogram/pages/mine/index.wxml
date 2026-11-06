@@ -1,0 +1,81 @@
+<view class="page {{theme}}">
+  <view class="hero">
+    <view class="avatar">🧭</view>
+    <view class="hero-main">
+      <input
+        class="nick"
+        value="{{nick}}"
+        placeholder="点这里取个昵称"
+        placeholder-class="nick-ph"
+        maxlength="12"
+        bindblur="onNickBlur"
+        bindconfirm="onNickBlur"
+      />
+      <view class="uid">ID {{uidText}} · {{cloud ? '云同步已连接' : '本机记录'}}</view>
+    </view>
+  </view>
+
+  <!-- 累计积分 -->
+  <view class="points-card">
+    <view class="points-label">累计积分</view>
+    <view class="points-num">{{total}}</view>
+    <view class="points-sub">今天 +{{todayGain}}<text wx:if="{{stats.sharedToday}}"> · 今天的分享分已领</text></view>
+    <view class="points-chips">
+      <view class="pchip">路线 {{stats.routes}}</view>
+      <view class="pchip">打卡 {{stats.checkins}}</view>
+      <view class="pchip">反馈 {{stats.feedbacks}}</view>
+      <view class="pchip">邀请 {{stats.invites}}</view>
+    </view>
+  </view>
+
+  <view class="actions">
+    <view class="btn primary card-btn" bindtap="onMakeCard">{{cardPath ? '重新生成记忆卡' : '生成漫游记忆卡'}}</view>
+    <button
+      wx:if="{{cardPath}}"
+      class="btn ghost"
+      open-type="share"
+      data-kind="card"
+    >分享记忆卡 +10</button>
+    <button class="btn ghost" open-type="share" data-kind="invite">邀请好友 · 每人 +25</button>
+  </view>
+
+  <view class="card-preview" wx:if="{{cardPath}}">
+    <image class="card-img" src="{{cardPath}}" mode="widthFix" bindtap="preview"></image>
+    <view class="card-tip">点图片可放大预览 · 用上面的「分享记忆卡」发出去</view>
+  </view>
+  <canvas type="2d" id="card" class="card-canvas"></canvas>
+
+  <!-- 规则 -->
+  <view class="section">
+    <view class="sec-title">积分怎么赚</view>
+    <view class="rule" wx:for="{{rules}}" wx:key="key">
+      <view class="rule-head">
+        <text class="rule-name">{{item.name}}</text>
+        <text class="rule-amount">+{{item.amount}}</text>
+      </view>
+      <view class="rule-desc">{{item.desc}}</view>
+    </view>
+  </view>
+
+  <!-- 明细 -->
+  <view class="section">
+    <view class="sec-title">
+      积分明细
+      <text class="sec-sub" wx:if="{{logCount}}">最近 30 条</text>
+    </view>
+    <view class="log-empty" wx:if="{{!log.length}}">
+      还没有积分。去地图上打卡、走完一条路线，或者提交一条反馈吧。
+    </view>
+    <view class="log-row" wx:for="{{log}}" wx:key="id">
+      <view class="log-main">
+        <text class="log-note">{{item.note}}</text>
+        <text class="log-time">{{item.timeText}}</text>
+      </view>
+      <text class="log-amount">+{{item.amount}}</text>
+    </view>
+  </view>
+
+  <view class="foot">
+    <view class="foot-link" bindtap="onBack">回到地图</view>
+  </view>
+</view>

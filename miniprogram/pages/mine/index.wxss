@@ -1,0 +1,270 @@
+.page {
+  min-height: 100vh;
+  padding: 0 28rpx 60rpx;
+}
+
+/* 头部 */
+.hero {
+  display: flex;
+  align-items: center;
+  padding: 36rpx 4rpx 28rpx;
+}
+
+.avatar {
+  width: 112rpx;
+  height: 112rpx;
+  border-radius: 56rpx;
+  background: var(--card);
+  border: 1rpx solid var(--line);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 52rpx;
+  flex-shrink: 0;
+}
+
+.hero-main {
+  margin-left: 24rpx;
+  flex: 1;
+  min-width: 0;
+}
+
+.nick {
+  font-size: 38rpx;
+  font-weight: 700;
+  color: var(--ink);
+  height: 56rpx;
+  line-height: 56rpx;
+}
+
+.nick-ph {
+  color: var(--muted);
+  font-weight: 400;
+}
+
+.uid {
+  margin-top: 6rpx;
+  font-size: 22rpx;
+  color: var(--muted);
+}
+
+/* 积分卡 */
+.points-card {
+  background: var(--card);
+  border: 1rpx solid var(--line);
+  border-radius: 28rpx;
+  padding: 32rpx 32rpx 26rpx;
+  position: relative;
+  overflow: hidden;
+}
+
+.points-card::after {
+  content: '';
+  position: absolute;
+  right: -60rpx;
+  top: -60rpx;
+  width: 220rpx;
+  height: 220rpx;
+  border-radius: 50%;
+  background: rgba(176, 57, 46, 0.06);
+}
+
+.points-label {
+  font-size: 24rpx;
+  color: var(--muted);
+  letter-spacing: 2rpx;
+}
+
+.points-num {
+  font-size: 96rpx;
+  line-height: 1.1;
+  font-weight: 700;
+  color: var(--red);
+  margin: 8rpx 0 4rpx;
+}
+
+.points-sub {
+  font-size: 24rpx;
+  color: var(--ink-2);
+}
+
+.points-chips {
+  display: flex;
+  flex-wrap: wrap;
+  margin-top: 22rpx;
+}
+
+.pchip {
+  font-size: 22rpx;
+  color: var(--ink-2);
+  background: rgba(176, 57, 46, 0.07);
+  border-radius: 999rpx;
+  padding: 6rpx 18rpx;
+  margin: 0 12rpx 12rpx 0;
+}
+
+/* 操作 */
+.actions {
+  margin: 28rpx 0 8rpx;
+}
+
+.actions .btn {
+  margin-bottom: 18rpx;
+}
+
+.card-btn {
+  box-shadow: 0 8rpx 24rpx rgba(176, 57, 46, 0.18);
+}
+
+/* 记忆卡 */
+.card-preview {
+  margin-top: 8rpx;
+}
+
+.card-img {
+  width: 100%;
+  border-radius: 24rpx;
+  border: 1rpx solid var(--line);
+  display: block;
+}
+
+.card-tip {
+  margin-top: 12rpx;
+  font-size: 22rpx;
+  color: var(--muted);
+  text-align: center;
+}
+
+.card-canvas {
+  position: fixed;
+  left: -9999px;
+  top: 0;
+  width: 600rpx;
+  height: 900rpx;
+}
+
+/* 规则与明细 */
+.section {
+  margin-top: 40rpx;
+}
+
+.sec-title {
+  font-size: 30rpx;
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: 18rpx;
+}
+
+.sec-sub {
+  font-size: 22rpx;
+  color: var(--muted);
+  font-weight: 400;
+  margin-left: 12rpx;
+}
+
+.rule {
+  background: var(--card);
+  border: 1rpx solid var(--line);
+  border-radius: 20rpx;
+  padding: 22rpx 24rpx;
+  margin-bottom: 14rpx;
+}
+
+.rule-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.rule-name {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.rule-amount {
+  font-size: 26rpx;
+  font-weight: 700;
+  color: var(--red);
+}
+
+.rule-desc {
+  margin-top: 8rpx;
+  font-size: 23rpx;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.log-empty {
+  font-size: 24rpx;
+  color: var(--muted);
+  background: var(--card);
+  border: 1rpx dashed var(--line);
+  border-radius: 20rpx;
+  padding: 30rpx 24rpx;
+  line-height: 1.7;
+}
+
+.log-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20rpx 4rpx;
+  border-bottom: 1rpx solid var(--line);
+}
+
+.log-main {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.log-note {
+  font-size: 27rpx;
+  color: var(--ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 480rpx;
+}
+
+.log-time {
+  font-size: 21rpx;
+  color: var(--muted);
+  margin-top: 2rpx;
+}
+
+.log-amount {
+  font-size: 30rpx;
+  font-weight: 700;
+  color: var(--red);
+  flex-shrink: 0;
+  margin-left: 16rpx;
+}
+
+.foot {
+  margin-top: 48rpx;
+  text-align: center;
+}
+
+.foot-link {
+  display: inline-block;
+  font-size: 24rpx;
+  color: var(--muted);
+  padding: 12rpx 28rpx;
+  border: 1rpx solid var(--line);
+  border-radius: 999rpx;
+}
+
+/* 夜间 */
+.page.dark .points-card::after {
+  background: rgba(207, 97, 85, 0.14);
+}
+
+.page.dark .pchip {
+  background: rgba(207, 97, 85, 0.14);
+}
+
+.page.dark .avatar {
+  background: #262119;
+}
